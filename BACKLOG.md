@@ -1,6 +1,6 @@
 # TrailStories — BACKLOG.md
 ## Bijgewerkt: 17-06-2026
-> Versie: v1.1.1 · MVP backlog structure
+> Versie: v1.2.0 · MVP backlog structure
 
 ---
 
@@ -13,10 +13,10 @@
 | ID | Tags | Taak | Omschrijving | Type | Prioriteit | Status |
 |----|------|------|--------------|------|-----------|--------|
 | T0-001 | architecture | Project setup | Basis projectstructuur opzetten (HTML/CSS/JS + folders data/assets/js/css) | Feature | 🔴 High | 📋 Open |
-| T0-002 | architecture | JSON data model | Definitief routes.json schema implementeren | Feature | 🔴 High | 🔄 Heropend — i18n bestandsnaam-conventie verwerken (`<route-id>.<taal>.json`) |
+| T0-002 | architecture | JSON data model | Definitief routes.json schema implementeren | Feature | 🔴 High | 🔄 Heropend — i18n mapstructuur verwerken (`data/i18n/<taal>/<route-id>.json`) |
 | T0-003 | architecture | Route template | Standaard routepagina template (hero, stats, map, story) bouwen | Feature | 🔴 High | 🔄 Heropend — hardcoded tekst vervangen door `data-i18n` attributen |
 | T0-004 | architecture | Design system | Basis UI design rules (typografie, spacing, kleuren outdoor theme) | Improvement | 🟡 Medium | ✅ Done |
-| T0-005 | architecture, i18n | I18n systeem | Taal-loader bouwen in app.js: detecteert/zet actieve taal, laadt juiste JSON-bestanden, vult `data-i18n` elementen. Eerste taal: NL. `ui-strings.nl.json` aanmaken. | Feature | 🔴 High | 📋 Open |
+| T0-005 | architecture, i18n | I18n systeem | Taal-loader bouwen in app.js: detecteert/zet actieve taal, laadt bestanden uit `data/i18n/<taal>/`, vult `data-i18n` elementen. Eerste taal: NL. `data/i18n/nl/ui-strings.json` aanmaken. | Feature | 🔴 High | 📋 Open |
 
 ---
 
@@ -28,7 +28,7 @@
 | T1-002 | routes | Route detail page | Dynamische routepagina rendering via JSON | Feature | 🔴 High | 📋 Open |
 | T1-003 | routes | JSON loader | routes.json inladen en renderen in UI | Feature | 🔴 High | 📋 Open |
 | T1-004 | routes | Routing logic | Navigatie tussen homepage en route detail pages | Feature | 🔴 High | 📋 Open |
-| T1-005 | routes | Ninglinspo route entry | Eerste route toevoegen: Ninglinspo (`ninglinspo.nl.json`, placeholder data, later aanvullen met GPX/foto's/stats) | Feature | 🔴 High | 📋 Open |
+| T1-005 | routes | Ninglinspo route entry | Eerste route toevoegen: Ninglinspo (`data/i18n/nl/ninglinspo.json`, placeholder data, later aanvullen met GPX/foto's/stats) | Feature | 🔴 High | 📋 Open |
 
 ---
 
