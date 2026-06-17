@@ -1,15 +1,13 @@
 {
-  "id": "ninglinspo",
+  "_meta": {
+    "_comment": "ninglinspo.json (NL) — v1.0.0 — TrailStories route content, taal: Nederlands. Pad: data/i18n/nl/ninglinspo.json. Taal-onafhankelijke velden (afstand, duur, etc.) staan in data/routes.json — dit bestand bevat alleen taal-specifieke content (story, tips, bronvermeldingen).",
+    "version": "1.0.0",
+    "language": "nl",
+    "route_id": "ninglinspo"
+  },
+
   "name": "Ninglinspo",
   "region": "Aywaille, Liège, België",
-  "date_walked": "",
-
-  "distance_km": 0,
-  "duration_hours": 0,
-  "elevation_m": 0,
-  "difficulty": "medium",
-
-  "tags": ["waterval", "bos", "ardennen"],
 
   "source": {
     "gpx_tool": "GPX Viewer",
