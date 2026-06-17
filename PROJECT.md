@@ -1,6 +1,6 @@
 # TrailStories — PROJECT.md
 ## Bijgewerkt: 17-06-2026
-> Versie: v1.2.0 · Project: TrailStories · Stack: Vanilla HTML/CSS/JS (MVP, JSON-based)
+> Versie: v2.0.0 · Project: TrailStories · Stack: Vanilla HTML/CSS/JS + i18next (MVP, JSON-based)
 
 ---
 
@@ -26,8 +26,7 @@ Het systeem is **frontend-first (static web app)** en draait zonder backend in d
 - 📱 **Mobile-first UX**
 - 💾 **Offline-first** — basisfunctionaliteit werkt zonder internet/backend
 - 🌍 **Open data** — eigen export mogelijk (JSON/GPX), geen lock-in
-- 🌐 **Meertalig vanaf de basis** — alleen NL actief in MVP, architectuur is uitbreidbaar naar een volgende taal (nog te bepalen) zonder herontwerp (zie CLAUDE.md, sectie I18N & MEERTALIGHEID)
-- 🌐 **Meertalig (i18n) vanaf de basis** — content en UI-teksten lopen via taalbestanden, nooit hardcoded in HTML. Nederlands is de eerste/standaardtaal; andere talen kunnen later toegevoegd worden zonder architectuurwijziging.
+- 🌐 **Meertalig vanaf de basis** — UI-onderdelen vertaald via i18next (NL nu, uitbreidbaar). **Toekomstvisie (Fase 6+)**: mensen maken zelf wandelverhalen aan in hun eigen taal — dit is user-generated content, los van de ondersteunde UI-talen. Wanneer de taal van een verhaal niet voorkomt in de ondersteunde UI-talen, valt alleen de UI-laag terug op Engels; de content zelf wordt nooit vertaald of aangepast. Zie CLAUDE.md, sectie I18N & MEERTALIGHEID, voor de volledige technische uitwerking.
 
 ## Databronnen (workflow van de gebruiker)
 
@@ -43,18 +42,9 @@ Eerste route die wordt toegevoegd: **Ninglinspo** (data volgt later — GPX, fot
 
 Het schrijven van de `story`-tekst en `tips` per route gebeurt in samenwerking met AI (Claude), in de chat: de gebruiker levert ruwe input (GPX, foto's, steekwoorden/ervaringen over de wandeling) en samen wordt dit omgezet naar het juiste JSON-formaat. Dit is geen geautomatiseerde site-feature in de MVP — een AI-gedreven generatie-feature binnen de site zelf staat als mogelijke latere uitbreiding in BACKLOG.md (Fase 8, "AI route suggestions").
 
-## Meertaligheid (i18n)
+## Meertaligheid (i18n) — korte samenvatting
 
-De site is vanaf de basis voorbereid op meerdere talen, ook al wordt in de MVP alleen Nederlands gebruikt.
-
-**Aanpak:**
-- **Eén URL per route, taal wisselt via JavaScript** (geen apart URL-pad per taal zoals `/en/...`)
-- **Apart JSON-bestand per taal per route**: bv. `data/ninglinspo.nl.json`, later `data/ninglinspo.en.json`
-- **Vaste UI-teksten** (sectiekoppen, labels, knoppen) staan in een apart taalbestand: `data/ui-strings.nl.json`, later `data/ui-strings.en.json` — nooit hardcoded in HTML
-- HTML-elementen met vertaalbare tekst krijgen een `data-i18n="key"` attribuut; JS vult de tekst in op basis van de actieve taal
-- Standaardtaal: Nederlands (`nl`). Taalkeuze (later) opslaan in `localStorage` zodra er meer dan 1 taal is.
-
-Deze aanpak houdt de optie open om later, indien gewenst (bv. voor SEO of een breder publiek), over te stappen naar taal-specifieke URL's zonder de databestand-structuur te moeten herzien.
+Volledige architectuur: zie DATA STRUCTUUR-sectie hieronder en CLAUDE.md, sectie I18N & MEERTALIGHEID. Kern: UI-onderdelen via i18next (`data/i18n/<taal>/`), route-verhalen als user-generated content met eigen `language`-veld (`data/content/`), fallback van de UI naar Engels wanneer een verhaal-taal niet ondersteund wordt.
 
 ## Toekomstige uitbreidingen (post-MVP)
 
@@ -85,15 +75,19 @@ Deze aanpak houdt de optie open om later, indien gewenst (bv. voor SEO of een br
 
 # ======================= DATA STRUCTUUR =======================
 
-## Taal-conventie
+## Twee gescheiden lagen: UI-vertalingen vs. route-content
 
-Route-content is taal-specifiek en staat per taal in een eigen map: `data/i18n/<taal>/<route-id>.json` (bv. `data/i18n/nl/ninglinspo.json`). De velden hieronder horen dus bij één taalversie van een route. Taal-onafhankelijke velden (id, afstand, duur, hoogtemeters, GPX-pad) staan los in `routes.json` als overzicht. Vaste UI-teksten (sectiekoppen, labels) staan apart in `data/i18n/<taal>/ui-strings.json`. Volledige i18n-regels: zie CLAUDE.md, sectie I18N & MEERTALIGHEID.
+- **`data/i18n/<taal>/`** — i18next-beheerde UI-vertalingen (sectiekoppen, labels, knoppen). Beperkt tot ondersteunde "standaardtalen" (nu: NL). Fallback naar Engels wanneer een route-taal niet matcht (zie CLAUDE.md voor de volledige regel).
+- **`data/content/`** — route-verhalen zelf, user-generated, in willekeurige taal. Elk route-bestand heeft een eigen `language`-veld. Dit is **niet** i18next-beheerd en wordt nooit automatisch vertaald.
 
-## Schema: `data/i18n/<taal>/<route-id>.json` (bv. `data/i18n/nl/ninglinspo.json`)
+Volledige technische i18n-regels: zie CLAUDE.md, sectie I18N & MEERTALIGHEID.
+
+## Schema: `data/content/<route-id>.json` (bv. `data/content/ninglinspo.json`)
 
 ```json
 {
   "id": "ninglinspo",
+  "language": "nl",
   "name": "Ninglinspo",
   "region": "Aywaille, Liège, België",
   "date_walked": "",
@@ -125,6 +119,8 @@ Route-content is taal-specifiek en staat per taal in een eigen map: `data/i18n/<
 }
 ```
 
+Het `language`-veld is verplicht en bepaalt — onafhankelijk van de browser- of UI-taal van de bezoeker — in welke taal dit specifieke verhaal getoond wordt (altijd ongewijzigd) en of de omringende UI terugvalt op Engels.
+
 ---
 
 # ======================= UI STRUCTUUR ROUTEPAGINA =======================
@@ -147,6 +143,7 @@ Route-content is taal-specifiek en staat per taal in een eigen map: `data/i18n/<
 - OpenStreetMap (tiles)
 - GPX parser (client-side)
 - JSON data layer (single source of truth)
+- **i18next** (+ i18next-http-backend, i18next-browser-languagedetector) — enige toegestane externe library, uitsluitend voor het i18n-systeem. Zie CLAUDE.md, sectie CODE PRINCIPES, voor de motivatie van deze uitzondering op de vanilla-aanpak.
 
 **Hosting:** GitHub Pages (primair), later uitbreidbaar naar Netlify/Vercel
 **Cloud (post-MVP):** Supabase — https://supabase.com/dashboard
@@ -169,8 +166,18 @@ Route-content is taal-specifiek en staat per taal in een eigen map: `data/i18n/<
 │   ├── routes.json
 │   ├── i18n/
 │   │   ├── nl/
-│   │   │   ├── ninglinspo.json
-│   │   │   └── ui-strings.json
+│   │   │   ├── ninglinspo.json        (UI-namespace voor deze route-pagina)
+│   │   │   └── common.json            (gedeelde UI-teksten: nav, footer, knoppen)
+│   │   └── en/                        (fallback-taal)
+│   │       ├── ninglinspo.json
+│   │       └── common.json
+│   ├── content/
+│   │   ├── ninglinspo.json            (route-verhaal, user-generated, eigen taal)
+│
+├── components/
+│   ├── topbar.html
+│   ├── navbar.html
+│   ├── footer.html
 │
 ├── assets/
 │   ├── images/
@@ -183,6 +190,7 @@ Route-content is taal-specifiek en staat per taal in een eigen map: `data/i18n/<
 │
 ├── js/
 │   ├── app.js
+│   ├── i18n.js
 │   ├── routes.js
 │   ├── map.js
 │   ├── gpx.js
@@ -215,8 +223,8 @@ Route-content is taal-specifiek en staat per taal in een eigen map: `data/i18n/<
 # ======================= TECHNISCHE INFORMATIE =======================
 
 **Live:** nog niet live (placeholder)
-**Broncode:** nog niet aangemaakt (placeholder)
-**Stack:** Vanilla HTML + CSS + JavaScript (no frameworks)
+**Broncode:** github.com/vorilo2000-source/trailstories
+**Stack:** Vanilla HTML + CSS + JavaScript + i18next (enige externe dependency, zie CODE PRINCIPES in CLAUDE.md)
 **Cloud (post-MVP):** Supabase — https://supabase.com/dashboard
 
 ---
