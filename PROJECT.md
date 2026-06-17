@@ -1,6 +1,6 @@
 # TrailStories — PROJECT.md
 ## Bijgewerkt: 17-06-2026
-> Versie: v1.1.1 · Project: TrailStories · Stack: Vanilla HTML/CSS/JS (MVP, JSON-based)
+> Versie: v1.2.0 · Project: TrailStories · Stack: Vanilla HTML/CSS/JS (MVP, JSON-based)
 
 ---
 
@@ -87,9 +87,9 @@ Deze aanpak houdt de optie open om later, indien gewenst (bv. voor SEO of een br
 
 ## Taal-conventie
 
-Route-content is taal-specifiek en staat per taal in een eigen bestand: `<route-id>.<taal>.json` (bv. `ninglinspo.nl.json`). De velden hieronder horen dus bij één taalversie van een route. Taal-onafhankelijke velden (id, afstand, duur, hoogtemeters, GPX-pad) staan los in `routes.json` als overzicht. Vaste UI-teksten (sectiekoppen, labels) staan apart in `ui-strings.<taal>.json`. Volledige i18n-regels: zie CLAUDE.md, sectie I18N & MEERTALIGHEID.
+Route-content is taal-specifiek en staat per taal in een eigen map: `data/i18n/<taal>/<route-id>.json` (bv. `data/i18n/nl/ninglinspo.json`). De velden hieronder horen dus bij één taalversie van een route. Taal-onafhankelijke velden (id, afstand, duur, hoogtemeters, GPX-pad) staan los in `routes.json` als overzicht. Vaste UI-teksten (sectiekoppen, labels) staan apart in `data/i18n/<taal>/ui-strings.json`. Volledige i18n-regels: zie CLAUDE.md, sectie I18N & MEERTALIGHEID.
 
-## Schema: `<route-id>.<taal>.json` (bv. `ninglinspo.nl.json`)
+## Schema: `data/i18n/<taal>/<route-id>.json` (bv. `data/i18n/nl/ninglinspo.json`)
 
 ```json
 {
@@ -167,8 +167,10 @@ Route-content is taal-specifiek en staat per taal in een eigen bestand: `<route-
 │
 ├── data/
 │   ├── routes.json
-│   ├── ninglinspo.nl.json
-│   ├── ui-strings.nl.json
+│   ├── i18n/
+│   │   ├── nl/
+│   │   │   ├── ninglinspo.json
+│   │   │   └── ui-strings.json
 │
 ├── assets/
 │   ├── images/
