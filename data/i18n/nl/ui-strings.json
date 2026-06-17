@@ -1,1 +1,52 @@
+{
+  "_meta": {
+    "_comment": "ui-strings.json (NL) — v1.0.0 — TrailStories vaste UI-teksten. Keys matchen de data-i18n attributen in routes/*.html. Wordt geladen door js/app.js (i18n-loader, zie T0-005).",
+    "version": "1.0.0",
+    "language": "nl"
+  },
 
+  "section": {
+    "map": "Route op kaart",
+    "story": "Het verhaal",
+    "gallery": "Foto's",
+    "practical_info": "Praktische info",
+    "tips": "Tips & aandachtspunten",
+    "rating": "Beoordeling"
+  },
+
+  "stat": {
+    "distance_label": "Afstand (km)",
+    "duration_label": "Duur (uur)",
+    "elevation_label": "Hoogtemeters",
+    "difficulty_label": "Moeilijkheid"
+  },
+
+  "difficulty": {
+    "easy": "Makkelijk",
+    "medium": "Gemiddeld",
+    "hard": "Moeilijk"
+  },
+
+  "practical_info": {
+    "starting_point": "Startpunt",
+    "parking": "Parking",
+    "terrain": "Terrein",
+    "best_season": "Beste seizoen"
+  },
+
+  "rating": {
+    "nature": "Natuur",
+    "difficulty": "Moeilijkheid",
+    "accessibility": "Toegankelijkheid"
+  },
+
+  "aria": {
+    "stats_dashboard": "Route statistieken",
+    "map_section": "Route kaart",
+    "story_section": "Verhaal",
+    "gallery_section": "Fotogalerij",
+    "practical_info_section": "Praktische informatie",
+    "tips_section": "Tips en waarschuwingen",
+    "rating_section": "Beoordeling"
+  }
+}
