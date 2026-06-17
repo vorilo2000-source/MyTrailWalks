@@ -1,6 +1,6 @@
 # TrailStories — PROJECT.md
 ## Bijgewerkt: 17-06-2026
-> Versie: v1.0.0 · Project: TrailStories · Stack: Vanilla HTML/CSS/JS (MVP, JSON-based)
+> Versie: v1.1.0 · Project: TrailStories · Stack: Vanilla HTML/CSS/JS (MVP, JSON-based)
 
 ---
 
@@ -26,6 +26,8 @@ Het systeem is **frontend-first (static web app)** en draait zonder backend in d
 - 📱 **Mobile-first UX**
 - 💾 **Offline-first** — basisfunctionaliteit werkt zonder internet/backend
 - 🌍 **Open data** — eigen export mogelijk (JSON/GPX), geen lock-in
+- 🌐 **Meertalig vanaf de basis** — alleen NL actief in MVP, architectuur is uitbreidbaar naar een volgende taal (nog te bepalen) zonder herontwerp (zie CLAUDE.md, sectie I18N & MEERTALIGHEID)
+- 🌐 **Meertalig (i18n) vanaf de basis** — content en UI-teksten lopen via taalbestanden, nooit hardcoded in HTML. Nederlands is de eerste/standaardtaal; andere talen kunnen later toegevoegd worden zonder architectuurwijziging.
 
 ## Databronnen (workflow van de gebruiker)
 
@@ -36,6 +38,19 @@ Het systeem is **frontend-first (static web app)** en draait zonder backend in d
 | **OpenStreetMap** ([voorbeeld](https://www.openstreetmap.org/way/581386904)) | Kaartlaag / referentie voor route-tracé |
 
 Eerste route die wordt toegevoegd: **Ninglinspo** (data volgt later — GPX, foto's, afstand/duur/hoogtemeters nog aan te leveren, voorlopig met placeholders).
+
+## Meertaligheid (i18n)
+
+De site is vanaf de basis voorbereid op meerdere talen, ook al wordt in de MVP alleen Nederlands gebruikt.
+
+**Aanpak:**
+- **Eén URL per route, taal wisselt via JavaScript** (geen apart URL-pad per taal zoals `/en/...`)
+- **Apart JSON-bestand per taal per route**: bv. `data/ninglinspo.nl.json`, later `data/ninglinspo.en.json`
+- **Vaste UI-teksten** (sectiekoppen, labels, knoppen) staan in een apart taalbestand: `data/ui-strings.nl.json`, later `data/ui-strings.en.json` — nooit hardcoded in HTML
+- HTML-elementen met vertaalbare tekst krijgen een `data-i18n="key"` attribuut; JS vult de tekst in op basis van de actieve taal
+- Standaardtaal: Nederlands (`nl`). Taalkeuze (later) opslaan in `localStorage` zodra er meer dan 1 taal is.
+
+Deze aanpak houdt de optie open om later, indien gewenst (bv. voor SEO of een breder publiek), over te stappen naar taal-specifieke URL's zonder de databestand-structuur te moeten herzien.
 
 ## Toekomstige uitbreidingen (post-MVP)
 
@@ -65,6 +80,12 @@ Eerste route die wordt toegevoegd: **Ninglinspo** (data volgt later — GPX, fot
 ---
 
 # ======================= DATA STRUCTUUR =======================
+
+## Taal-conventie
+
+Route-content is taal-specifiek en staat per taal in een eigen bestand: `<route-id>.<taal>.json` (bv. `ninglinspo.nl.json`). De velden hieronder horen dus bij één taalversie van een route. Taal-onafhankelijke velden (id, afstand, duur, hoogtemeters, GPX-pad) staan los in `routes.json` als overzicht. Vaste UI-teksten (sectiekoppen, labels) staan apart in `ui-strings.<taal>.json`. Volledige i18n-regels: zie CLAUDE.md, sectie I18N & MEERTALIGHEID.
+
+## Schema: `<route-id>.<taal>.json` (bv. `ninglinspo.nl.json`)
 
 ```json
 {
@@ -142,7 +163,8 @@ Eerste route die wordt toegevoegd: **Ninglinspo** (data volgt later — GPX, fot
 │
 ├── data/
 │   ├── routes.json
-│   ├── ninglinspo.json
+│   ├── ninglinspo.nl.json
+│   ├── ui-strings.nl.json
 │
 ├── assets/
 │   ├── images/
