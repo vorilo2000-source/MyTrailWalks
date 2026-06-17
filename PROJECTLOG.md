@@ -16,6 +16,9 @@
 - Tech stack bevestigd: vanilla HTML/CSS/JS, JSON als single source of truth, geen backend in MVP
 - Eerste route gedefinieerd: **Ninglinspo** — toegevoegd aan backlog (T1-005), data (GPX/foto's/stats) volgt later
 - Post-MVP richting vastgelegd: Supabase cloud sync, accounts en community features verplaatst naar Fase 6+
+- Repo aangemaakt: github.com/vorilo2000-source/trailstories — mapstructuur + PROJECT.md/CLAUDE.md/BACKLOG.md/PROJECTLOG.md/README.md/.gitignore gepusht naar main
+- **T0-002 (JSON data model) — Done**: definitief schema uitgewerkt — `data/routes.json` als licht overzicht-schema voor de homepage grid, `data/ninglinspo.json` als volledig detail-schema (incl. bronverwijzingen GPX Viewer/AllTrails/OpenStreetMap en `practical_info` blok)
+- **T0-004 (Design system) — Done**: `css/main.css` opgezet met CSS-variabelen — kleurenpalet (bosgroen/aarde/gedempt waterblauw op warm crème), typografie (Fraunces display, Inter body, JetBrains Mono voor stats), spacing-schaal en basis componenten (difficulty badges, stat-labels)
 
 ---
 
