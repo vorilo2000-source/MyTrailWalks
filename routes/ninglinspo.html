@@ -1,1 +1,139 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ninglinspo — TrailStories</title>
+  <link rel="stylesheet" href="../css/main.css">
+  <link rel="stylesheet" href="../css/routes.css">
+  <!-- Leaflet CSS — nodig voor de interactieve kaart (T2-001) -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+</head>
+<body>
 
+  <!-- =====================================================
+       1. HERO BANNER
+       Full-width foto met route titel + regio overlay
+       ===================================================== -->
+  <header class="route-hero" id="route-hero">
+    <!-- Achtergrondafbeelding wordt via JS ingesteld op basis van JSON (data.media.hero) -->
+    <div class="route-hero__overlay">
+      <p class="route-hero__region" id="route-region"><!-- regio komt hier, bv. "Aywaille, Liège, België" --></p>
+      <h1 class="route-hero__title" id="route-title">Ninglinspo</h1>
+    </div>
+  </header>
+
+  <main class="container">
+
+    <!-- =====================================================
+         2. STATS DASHBOARD
+         Afstand, duur, hoogtemeters, moeilijkheid
+         ===================================================== -->
+    <section class="stats-dashboard" id="stats-dashboard" aria-label="Route statistieken">
+      <div class="stat-item">
+        <span class="stat-value" id="stat-distance">–</span>
+        <span class="stat-label">Afstand (km)</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-value" id="stat-duration">–</span>
+        <span class="stat-label">Duur (uur)</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-value" id="stat-elevation">–</span>
+        <span class="stat-label">Hoogtemeters</span>
+      </div>
+      <div class="stat-item">
+        <!-- Badge-kleur (easy/medium/hard) wordt via JS ingesteld op basis van data.difficulty -->
+        <span class="badge-difficulty" id="stat-difficulty">–</span>
+        <span class="stat-label">Moeilijkheid</span>
+      </div>
+    </section>
+
+    <hr class="divider">
+
+    <!-- =====================================================
+         3. INTERACTIVE MAP
+         GPX overlay via Leaflet + OpenStreetMap tiles (T2-001/T2-002/T2-003)
+         ===================================================== -->
+    <section class="section" aria-label="Route kaart">
+      <h2>Route op kaart</h2>
+      <div id="route-map" class="route-map"><!-- Leaflet map wordt hier async geïnitialiseerd door map.js --></div>
+      <!-- Hoogteprofiel placeholder (T2-004) -->
+      <div id="elevation-profile" class="elevation-profile"><!-- Hoogteprofiel grafiek volgt hier --></div>
+    </section>
+
+    <hr class="divider">
+
+    <!-- =====================================================
+         4. STORY SECTIONS
+         Tekst + foto's afwisselend, gevuld vanuit data.story (T3-002)
+         ===================================================== -->
+    <section class="section container--narrow" aria-label="Verhaal">
+      <h2>Het verhaal</h2>
+      <div id="story-content" class="story-content"><!-- Story blocks (tekst/afbeelding) worden hier gerenderd --></div>
+    </section>
+
+    <hr class="divider">
+
+    <!-- =====================================================
+         5. PHOTO GALLERY
+         Masonry grid, gevuld vanuit data.media.images (T3-003)
+         ===================================================== -->
+    <section class="section" aria-label="Fotogalerij">
+      <h2>Foto's</h2>
+      <div id="photo-gallery" class="photo-gallery"><!-- Foto's worden hier als masonry grid gerenderd --></div>
+    </section>
+
+    <hr class="divider">
+
+    <!-- =====================================================
+         6. PRAKTISCHE INFO
+         Startpunt, parking, terrein, beste seizoen (data.practical_info)
+         ===================================================== -->
+    <section class="section container--narrow" aria-label="Praktische informatie">
+      <h2>Praktische info</h2>
+      <dl class="practical-info" id="practical-info">
+        <!-- Wordt gevuld via JS: startpunt, parking, terrein, beste seizoen -->
+      </dl>
+    </section>
+
+    <hr class="divider">
+
+    <!-- =====================================================
+         7. TIPS & WAARSCHUWINGEN
+         Gevuld vanuit data.tips
+         ===================================================== -->
+    <section class="section container--narrow" aria-label="Tips en waarschuwingen">
+      <h2>Tips &amp; aandachtspunten</h2>
+      <ul class="tips-list" id="tips-list">
+        <!-- Tips worden hier als lijst gerenderd -->
+      </ul>
+    </section>
+
+    <hr class="divider">
+
+    <!-- =====================================================
+         8. RATING SAMENVATTING
+         Natuur, moeilijkheid, toegankelijkheid (data.rating)
+         ===================================================== -->
+    <section class="section container--narrow" aria-label="Beoordeling">
+      <h2>Beoordeling</h2>
+      <div class="rating-summary" id="rating-summary">
+        <!-- Rating-items worden hier gerenderd -->
+      </div>
+    </section>
+
+  </main>
+
+  <!-- =====================================================
+       SCRIPTS
+       Leaflet eerst (externe lib), dan eigen modules
+       ===================================================== -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="../js/app.js"></script>
+  <script src="../js/gpx.js"></script>
+  <script src="../js/map.js"></script>
+  <script src="../js/routes.js"></script>
+
+</body>
+</html>
