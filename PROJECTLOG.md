@@ -1,6 +1,7 @@
+
 # TrailStories — PROJECTLOG.md
 ## Bijgewerkt: 17-06-2026
-> Versie: v1.1.0 · Project: TrailStories
+> Versie: v1.2.0 · Project: TrailStories
 
 ---
 
@@ -28,6 +29,14 @@
 - **PROJECT.md → v1.1.0**: i18n-principe toegevoegd aan kernprincipes; datastructuur-sectie aangepast om taal-specifieke bestandsnaam-conventie te reflecteren; mapstructuur bijgewerkt (`ninglinspo.nl.json`, `ui-strings.nl.json`); nieuwe paragraaf "Story-content workflow" toegevoegd (story/tips worden samen met AI in de chat geschreven, geen geautomatiseerde site-feature in MVP)
 - **BACKLOG.md → v1.1.0**: T0-002 en T0-003 heropend (i18n-aanpassingen nodig in schema en route-template); nieuwe taak **T0-005** toegevoegd (i18n-loader bouwen in app.js + ui-strings.nl.json); T1-005 bijgewerkt met correcte bestandsnaam
 - Gevolg: `data/ninglinspo.json` (eerder als concept opgeleverd) moet herzien worden naar `data/ninglinspo.nl.json`; `routes/ninglinspo.html` moet hardcoded NL-tekst vervangen door `data-i18n` attributen — wordt opgepakt bij uitvoering van T0-002/T0-003/T0-005
+
+## 2026-06-17 — Correctie: i18n bestandsstructuur naar map-per-taal
+
+- Aanpassing: in plaats van bestandsnaam-suffix (`<route-id>.<taal>.json`) wordt gekozen voor een map-per-taal structuur: `data/i18n/<taal>/<route-id>.json` en `data/i18n/<taal>/ui-strings.json`. Schaalt beter bij meerdere talen/routes, bestandsnamen blijven kort.
+- **CLAUDE.md → v1.2.0**: bestandsconventie in sectie I18N & MEERTALIGHEID aangepast naar `data/i18n/<taal>/...`
+- **PROJECT.md → v1.2.0**: taal-conventie paragraaf, schema-titel en mapstructuur-boom aangepast naar `data/i18n/<taal>/...`
+- **BACKLOG.md → v1.2.0**: T0-002, T0-005 en T1-005 omschrijvingen bijgewerkt met de juiste paden
+- Vervolgstap: daadwerkelijke bestanden aanmaken — `data/i18n/nl/ninglinspo.json`, `data/i18n/nl/ui-strings.json`, `routes/ninglinspo.html` (data-i18n attributen), `js/app.js` (i18n-loader) — één voor één conform delivery-regels
 
 ---
 
