@@ -1,6 +1,6 @@
 # TrailStories — CLAUDE.md
 ## Bijgewerkt: 17-06-2026
-> Versie: v1.2.0 · Project: TrailStories · Doel: regels voor Claude Code bij dit project
+> Versie: v1.3.0 · Project: TrailStories · Doel: regels voor Claude Code bij dit project
 
 ---
 
@@ -137,6 +137,33 @@ data/
 <!-- Na i18n: data-i18n attribuut, tekst wordt door JS ingevuld -->
 <h2 data-i18n="section.story"></h2>
 ```
+
+## Attribuut-conventie: zichtbare tekst vs. toegankelijkheid
+
+Twee soorten i18n-attributen, met elk een eigen rol:
+
+- **`data-i18n="key"`** — voor zichtbare tekst. JS vult dit als `element.textContent`.
+- **`data-i18n-aria="key"`** — voor toegankelijkheidstekst die niet zichtbaar is maar wel door screenreaders wordt voorgelezen. JS vult dit als `element.setAttribute("aria-label", ...)`.
+
+Beide attributen wijzen naar dezelfde `ui-strings.json`, eventueel naar dezelfde of verschillende keys (bv. een `aria` namespace voor langere/beschrijvendere teksten dan de zichtbare labels).
+
+```html
+<!-- Zichtbare sectiekop + onzichtbare maar voorleesbare context -->
+<section data-i18n-aria="aria.story_section">
+  <h2 data-i18n="section.story"></h2>
+</section>
+```
+
+## I18n-loader (implementatie: app.js)
+
+De i18n-loader in `js/app.js` (T0-005) voert bij elke pageload:
+
+1. Bepaalt actieve taal (leest `lang`-attribuut van `<html>`, fallback op NL — geen automatische browserdetectie in MVP)
+2. Laadt `data/i18n/<taal>/ui-strings.json`
+3. Vult alle `[data-i18n]` en `[data-i18n-aria]` elementen in de DOM
+4. Zet een globale `window.TrailStories` namespace (actieve taal + `loadRouteData(routeId)` helper) zodat andere modules (routes.js, map.js) dezelfde taal-context herbruiken zonder duplicatie
+
+**Aandachtspunt voor vervolgmodules**: scripts laden zonder `defer`/module-systeem. Modules die afhankelijk zijn van `window.TrailStories` (zoals de toekomstige `routes.js`) moeten wachten tot de i18n-init is afgerond — los dit op met een event (bv. een custom `trailstories:i18n-ready` event) of door zelf op `DOMContentLoaded` + een check te wachten, niet door aan te nemen dat script-volgorde voldoende garandeert dat `window.TrailStories` al gevuld is.
 
 ---
 
