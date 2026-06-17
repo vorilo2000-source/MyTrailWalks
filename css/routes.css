@@ -1,1 +1,227 @@
+/* ===========================================================
+   TrailStories — routes.css
+   Styling specifiek voor de route detail pagina
+   Bouwt verder op de design tokens uit main.css
+   =========================================================== */
 
+/* -----------------------------------------------------------
+   1. HERO BANNER
+   ----------------------------------------------------------- */
+.route-hero {
+  position: relative;
+  height: 60vh;
+  min-height: 360px;
+  background-color: var(--color-forest-dark); /* fallback kleur vóór/zonder hero-foto */
+  background-size: cover;
+  background-position: center;
+  display: flex;
+  align-items: flex-end;
+}
+
+/* Donkere gradient onderin zodat titel-tekst leesbaar blijft op elke foto */
+.route-hero::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(28, 51, 40, 0.85) 0%, rgba(28, 51, 40, 0) 55%);
+}
+
+.route-hero__overlay {
+  position: relative;
+  z-index: 1;
+  padding: var(--space-xl) var(--space-md);
+  color: var(--color-white);
+}
+
+.route-hero__region {
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  opacity: 0.9;
+  margin-bottom: var(--space-sm);
+}
+
+.route-hero__title {
+  color: var(--color-white); /* overschrijft de standaard donkergroene h1-kleur op de donkere hero */
+  font-size: var(--text-2xl);
+}
+
+@media (min-width: 768px) {
+  .route-hero__title {
+    font-size: var(--text-3xl);
+  }
+  .route-hero__overlay {
+    padding: var(--space-2xl) var(--space-xl);
+  }
+}
+
+/* -----------------------------------------------------------
+   2. STATS DASHBOARD
+   ----------------------------------------------------------- */
+.stats-dashboard {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--space-lg);
+  padding: var(--space-xl) 0;
+  text-align: center;
+}
+
+@media (min-width: 600px) {
+  .stats-dashboard {
+    grid-template-columns: repeat(4, 1fr); /* desktop: alle 4 stats op één rij */
+  }
+}
+
+.stat-item {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}
+
+.stat-item .stat-value {
+  font-size: var(--text-xl);
+}
+
+/* Badge krijgt hier iets meer ruimte t.o.v. de losse stat-cijfers */
+.stat-item .badge-difficulty {
+  justify-self: center;
+  margin-bottom: var(--space-xs);
+}
+
+/* -----------------------------------------------------------
+   3. INTERACTIVE MAP
+   ----------------------------------------------------------- */
+.route-map {
+  width: 100%;
+  height: 400px;
+  border-radius: var(--radius-md);
+  background-color: var(--color-line); /* placeholder-kleur zolang Leaflet nog niet geladen is */
+  margin-top: var(--space-md);
+}
+
+.elevation-profile {
+  width: 100%;
+  height: 160px;
+  margin-top: var(--space-md);
+  border-radius: var(--radius-md);
+  background-color: var(--color-white);
+  box-shadow: var(--shadow-card);
+}
+
+/* -----------------------------------------------------------
+   4. STORY SECTIONS
+   Tekst/afbeelding blokken, afwisselend (magazine-gevoel)
+   ----------------------------------------------------------- */
+.story-content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xl);
+}
+
+.story-block--text {
+  font-size: var(--text-lg);
+  color: var(--color-charcoal);
+}
+
+.story-block--image img {
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-card);
+}
+
+.story-block--image figcaption {
+  margin-top: var(--space-sm);
+  font-size: var(--text-sm);
+  color: var(--color-charcoal-soft);
+  text-align: center;
+}
+
+/* -----------------------------------------------------------
+   5. PHOTO GALLERY (masonry via CSS columns)
+   ----------------------------------------------------------- */
+.photo-gallery {
+  column-count: 2;
+  column-gap: var(--space-md);
+}
+
+@media (min-width: 768px) {
+  .photo-gallery {
+    column-count: 3;
+  }
+}
+
+.photo-gallery img {
+  width: 100%;
+  margin-bottom: var(--space-md);
+  border-radius: var(--radius-md);
+  break-inside: avoid; /* voorkomt dat een foto over twee kolommen gesplitst wordt */
+}
+
+/* -----------------------------------------------------------
+   6. PRAKTISCHE INFO (definition list)
+   ----------------------------------------------------------- */
+.practical-info {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: var(--space-sm) var(--space-lg);
+}
+
+.practical-info dt {
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  color: var(--color-charcoal-soft);
+}
+
+.practical-info dd {
+  color: var(--color-charcoal);
+}
+
+/* -----------------------------------------------------------
+   7. TIPS LIST
+   ----------------------------------------------------------- */
+.tips-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.tips-list li {
+  padding-left: var(--space-lg);
+  position: relative;
+}
+
+/* Klein bladsymbool i.p.v. standaard bullet — past bij outdoor-thema */
+.tips-list li::before {
+  content: '\1F343'; /* 🍃 */
+  position: absolute;
+  left: 0;
+}
+
+/* -----------------------------------------------------------
+   8. RATING SUMMARY
+   ----------------------------------------------------------- */
+.rating-summary {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+.rating-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: var(--space-sm);
+  border-bottom: 1px solid var(--color-line);
+}
+
+.rating-item__label {
+  font-family: var(--font-body);
+  color: var(--color-charcoal);
+}
+
+.rating-item__value {
+  font-family: var(--font-mono);
+  color: var(--color-forest-dark);
+  font-weight: var(--weight-medium);
+}
