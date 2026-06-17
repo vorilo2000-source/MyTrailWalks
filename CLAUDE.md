@@ -1,6 +1,6 @@
 # TrailStories — CLAUDE.md
 ## Bijgewerkt: 17-06-2026
-> Versie: v1.1.0 · Project: TrailStories · Doel: regels voor Claude Code bij dit project
+> Versie: v1.2.0 · Project: TrailStories · Doel: regels voor Claude Code bij dit project
 
 ---
 
@@ -107,10 +107,10 @@ Gebruik HTML entities in JS-rendered HTML:
 
 ## Architectuurkeuzes (vastgelegd 17-06-2026)
 
-- **Talen**: alleen NL actief nu; structuur is klaar voor uitbreiding (EN, FR, ...) zonder herontwerp.
-- **Content per taal**: apart JSON-bestand per taal en per route, naamconventie `<route-id>.<taal>.json` (bv. `ninglinspo.nl.json`, later `ninglinspo.en.json`).
-- **Vaste UI-teksten** (sectiekoppen, labels, knoppen): apart van route-content, in `ui-strings.<taal>.json` (bv. `ui-strings.nl.json`).
-- **Taalkeuze-mechanisme**: JS taal-switcher, geen aparte URL per taal. Zelfde HTML-bestand voor alle talen; JS bepaalt actieve taal en laadt het juiste JSON-bestand.
+- **Talen**: alleen NL actief nu; structuur is klaar voor uitbreiding naar een volgende taal (nog te bepalen) zonder herontwerp.
+- **Content per taal**: route-content en UI-teksten staan per taal in een eigen map onder `data/i18n/<taal>/`, naast elkaar als losse bestanden per route (bv. `data/i18n/nl/ninglinspo.json`).
+- **Vaste UI-teksten** (sectiekoppen, labels, knoppen): apart van route-content, in `data/i18n/<taal>/ui-strings.json`.
+- **Taalkeuze-mechanisme**: JS taal-switcher, geen aparte URL per taal. Zelfde HTML-bestand voor alle talen; JS bepaalt actieve taal en laadt de juiste bestanden uit `data/i18n/<taal>/`.
 - **HTML bevat geen hardcoded tekst**: alle user-facing tekst-elementen krijgen een `data-i18n="key"` attribuut; JS vult de tekst na het laden van de juiste taalbestanden.
 - **Geen automatische taalherkenning verplicht in MVP** — standaardtaal NL, latere uitbreiding kan browser-taal of een keuze-knop toevoegen.
 
@@ -118,11 +118,14 @@ Gebruik HTML entities in JS-rendered HTML:
 
 ```
 data/
-├── routes.json                    # overzicht (taal-onafhankelijke velden: id, distance_km, etc.)
-├── ninglinspo.nl.json              # route content NL
-├── ninglinspo.en.json              # route content EN (later)
-├── ui-strings.nl.json              # vaste UI-teksten NL
-├── ui-strings.en.json              # vaste UI-teksten EN (later)
+├── routes.json                       # overzicht (taal-onafhankelijke velden: id, distance_km, etc.)
+├── i18n/
+│   ├── nl/
+│   │   ├── ninglinspo.json            # route content NL
+│   │   └── ui-strings.json            # vaste UI-teksten NL
+│   └── <taal>/                        # later, structuur al klaar (taal nog te bepalen)
+│       ├── ninglinspo.json
+│       └── ui-strings.json
 ```
 
 ## HTML conventie
