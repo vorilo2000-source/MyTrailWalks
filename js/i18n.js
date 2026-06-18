@@ -1,5 +1,5 @@
 // =======================================================
-// i18n.js — v1.0.0
+// i18n.js — v1.1.0
 // MyTrailWalks — wrapper rond i18next (T0-005)
 // Verantwoordelijk voor: i18next initialiseren, namespaces laden,
 // vertalingen toepassen op [data-i18n]/[data-i18n-aria] elementen,
@@ -156,6 +156,95 @@ function applyTranslations(root) {
 }
 
 // ---------------------------------------------------------
+// 6a. TAAL WISSELEN
+// Schakelt de actieve UI-taal via i18next.changeLanguage() en
+// past daarna alle [data-i18n]/[data-i18n-aria] elementen opnieuw
+// toe. Wordt aangeroepen vanuit de taalwisselaar in topbar.html.
+// Slaat de gekozen taal op in localStorage zodat de keuze
+// bewaard blijft bij een volgende paginalaad — uitzondering op
+// de "geen caches" regel in init(), die alleen voor automatische
+// browser-detectie geldt, niet voor een expliciete gebruikerskeuze.
+// ---------------------------------------------------------
+function changeLanguage(lang) {
+  // Valideer dat de gekozen taal ondersteund wordt —
+  // voorkomt dat een onbekende taalcode een lege UI oplevert
+  if (!SUPPORTED_LANGUAGES.includes(lang)) {
+    console.error(`i18n.js: taal "${lang}" wordt niet ondersteund`);
+    return Promise.reject(new Error(`Unsupported language: ${lang}`));
+  }
+
+  return new Promise((resolve, reject) => {
+    i18next.changeLanguage(lang, (error) => {
+      if (error) {
+        console.error(`i18n.js: taalwissel naar "${lang}" mislukt`, error);
+        reject(error);
+        return;
+      }
+
+      // Sla keuze op zodat volgende paginalaad dezelfde taal gebruikt
+      try {
+        localStorage.setItem("mtw_language", lang);
+      } catch (e) {
+        // localStorage niet beschikbaar (bv. private mode) — geen crash
+        console.warn("i18n.js: kon taalvoorkeur niet opslaan in localStorage", e);
+      }
+
+      // Pas alle vertalingen opnieuw toe op de volledige pagina
+      applyTranslations();
+      resolve(lang);
+    });
+  });
+}
+
+// ---------------------------------------------------------
+// 6b. TAALWISSELAAR BOUWEN
+// Vult een bestaand <select>-element met opties voor alle
+// ondersteunde UI-talen en koppelt een change-handler die
+// changeLanguage() aanroept. Het <select>-element zelf staat
+// in components/topbar.html — deze functie is puur logica,
+// geen markup-generatie (conform CLAUDE.md HTML WERKWIJZE).
+// Labels zijn bewust in de eigen taal ("Nederlands", "English")
+// zodat een anderstalige gebruiker zijn eigen taal herkent.
+// ---------------------------------------------------------
+const LANGUAGE_LABELS = {
+  nl: "Nederlands",
+  en: "English",
+};
+
+function buildLanguageSwitcher(selectEl) {
+  if (!selectEl) {
+    console.error("i18n.js: buildLanguageSwitcher — geen <select> element meegegeven");
+    return;
+  }
+
+  // Huidige actieve taal — gebruikt voor de geselecteerde optie
+  const activeLang = i18next.language || DEFAULT_LANGUAGE;
+
+  // Bestaande opties wissen (safe om meerdere keren aan te roepen)
+  selectEl.innerHTML = "";
+
+  SUPPORTED_LANGUAGES.forEach((lang) => {
+    const option = document.createElement("option");
+    option.value = lang;
+    option.textContent = LANGUAGE_LABELS[lang] || lang.toUpperCase();
+
+    // Markeer de actieve taal als geselecteerd
+    if (lang === activeLang || activeLang.startsWith(lang)) {
+      option.selected = true;
+    }
+
+    selectEl.appendChild(option);
+  });
+
+  // Change-handler: wisselt taal bij selectie
+  selectEl.addEventListener("change", (event) => {
+    changeLanguage(event.target.value).catch(() => {
+      // Fout al gelogd in changeLanguage() — geen dubbele melding nodig
+    });
+  });
+}
+
+// ---------------------------------------------------------
 // 7. PUBLIEKE API
 // Eén globaal object, vergelijkbaar met het i18nModule-patroon
 // uit het referentievoorbeeld (MyFamTreeCollab). app.js roept
@@ -169,6 +258,8 @@ window.i18nModule = {
   applyTranslations,
   t,
   loadScript,
+  changeLanguage,
+  buildLanguageSwitcher,
   SUPPORTED_LANGUAGES,
   FALLBACK_LANGUAGE,
   DEFAULT_LANGUAGE,
