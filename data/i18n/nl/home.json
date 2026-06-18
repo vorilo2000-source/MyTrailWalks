@@ -1,0 +1,40 @@
+{
+  "_meta": {
+    "language": "nl",
+    "namespace": "common",
+    "version": "1.0.0",
+    "note": "Gedeelde UI-teksten voor alle pagina's. Navigatie-labels hier zijn gereserveerd voor T0-006 (topbar/navbar/footer componenten) — data-i18n='common:nav.*' / 'common:footer.*'."
+  },
+
+  "nav": {
+    "home": "Home",
+    "routes": "Wandelingen",
+    "about": "Over",
+    "skip_to_content": "Sla navigatie over"
+  },
+
+  "footer": {
+    "tagline": "Persoonlijke wandelverhalen uit het veld.",
+    "copyright": "MyTrailWalks"
+  },
+
+  "route": {
+    "distance": "Afstand",
+    "duration": "Duur",
+    "elevation": "Hoogtemeters",
+    "difficulty": "Moeilijkheid",
+    "distance_unit": "km",
+    "duration_unit": "u",
+    "elevation_unit": "m",
+    "view_route": "Bekijk wandeling",
+    "difficulty_easy": "Gemakkelijk",
+    "difficulty_medium": "Gemiddeld",
+    "difficulty_hard": "Zwaar"
+  },
+
+  "a11y": {
+    "open_menu": "Menu openen",
+    "close_menu": "Menu sluiten",
+    "hero_image": "Héroafbeelding van route"
+  }
+}
