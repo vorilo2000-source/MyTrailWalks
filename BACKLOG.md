@@ -1,6 +1,6 @@
 # MyTrailWalks — BACKLOG.md
-## Bijgewerkt: 17-06-2026
-> Versie: v2.0.0 · MVP backlog structure
+## Bijgewerkt: 18-06-2026
+> Versie: v2.1.0 · MVP backlog structure
 
 ---
 
@@ -13,11 +13,11 @@
 | ID | Tags | Taak | Omschrijving | Type | Prioriteit | Status |
 |----|------|------|--------------|------|-----------|--------|
 | T0-001 | architecture | Project setup | Basis projectstructuur opzetten (HTML/CSS/JS + folders data/assets/js/css) | Feature | 🔴 High | 📋 Open |
-| T0-002 | architecture | JSON data model | Definitief routes.json schema implementeren | Feature | 🔴 High | 🔄 Heropend — UI/content-splitsing verwerken (`data/i18n/` vs `data/content/`, verplicht `language`-veld) |
+| T0-002 | architecture | JSON data model | Definitief routes.json schema implementeren | Feature | 🔴 High | ✅ Done — `language`-veld toegevoegd, `content_json` pad gecorrigeerd naar `data/content/`, `_meta`-velden toegevoegd. Sessie 01 (18-06-2026). |
 | T0-003 | architecture | Route template | Standaard routepagina template (hero, stats, map, story) bouwen | Feature | 🔴 High | 🔄 Heropend — data-i18n keys omzetten naar i18next namespace-notatie (`namespace:key`) |
 | T0-004 | architecture | Design system | Basis UI design rules (typografie, spacing, kleuren outdoor theme) | Improvement | 🟡 Medium | ✅ Done |
-| T0-005 | architecture, i18n | I18next systeem | `js/i18n.js` wrapper bouwen rond i18next (init, loadNamespace, t(), data-i18n/data-i18n-aria toepassen) + `js/app.js` aanpassen voor fallback-naar-Engels regel (checkt route `language`-veld tegen ondersteunde UI-talen). CDN-scripts (i18next, http-backend, language-detector) toevoegen. Vervangt eerdere eigen i18n-loader. | Feature | 🔴 High | 🔄 Heropend — herzien naar i18next |
-| T0-006 | architecture, components | Component-systeem | `loadScript()` Promise-helper bouwen; `components/topbar.html`, `navbar.html`, `footer.html` aanmaken; fetch+injectie logica in app.js; verplichte Promise-keten laadvolgorde conform CLAUDE.md | Feature | 🔴 High | 📋 Open |
+| T0-005 | architecture, i18n | I18next systeem | `js/i18n.js` wrapper bouwen rond i18next (init, loadNamespace, t(), applyTranslations(), changeLanguage(), buildLanguageSwitcher(), loadScript()) + `data/i18n/nl/` en `data/i18n/en/` JSON-bestanden (common + home namespace). `js/app.js` nog niet herzien — openstaand punt voor volgende sessie. | Feature | 🔴 High | ✅ Done — sessie 01 (18-06-2026). Zie PROJECTLOG.md sessie 01 voor details. |
+| T0-006 | architecture, components | Component-systeem | `loadScript()` Promise-helper ✅ (zit in i18n.js). Component-fragmenten ✅ (topbar/navbar/footer aangeleverd als losse HTML-bestanden). Nog open: fetch+injectie logica in app.js, hamburger-toggle JS (navbar.js), buildLanguageSwitcher()-aanroep na injectie, base-pad helper voor logo in submappen, aria-current="page" zetten op actieve nav-link. | Feature | 🔴 High | 🔄 Gedeeltelijk — fragmenten klaar, injectie-logica volgt |
 
 ---
 
@@ -25,9 +25,9 @@
 
 | ID | Tags | Taak | Omschrijving | Type | Prioriteit | Status |
 |----|------|------|--------------|------|-----------|--------|
-| T1-001 | routes | Homepage grid | Route-overzicht met tiles (foto + stats + titel) | Feature | 🔴 High | 📋 Open |
+| T1-001 | routes | Homepage grid | Route-overzicht met tiles (foto + stats + titel) | Feature | 🔴 High | 🔄 Gedeeltelijk — `index.html`, `css/home.css`, `js/home.js` aangeleverd. Grid rendert vanuit `routes.json` via i18next. Fetch-injectie componenten (topbar/navbar/footer) volgt in T0-006. Sessie 01 (18-06-2026). |
 | T1-002 | routes | Route detail page | Dynamische routepagina rendering via JSON | Feature | 🔴 High | 📋 Open |
-| T1-003 | routes | JSON loader | routes.json inladen en renderen in UI | Feature | 🔴 High | 📋 Open |
+| T1-003 | routes | JSON loader | routes.json inladen en renderen in UI | Feature | 🔴 High | ✅ Done — geïmplementeerd als onderdeel van T1-001 in `js/home.js`. |
 | T1-004 | routes | Routing logic | Navigatie tussen homepage en route detail pages | Feature | 🔴 High | 📋 Open |
 | T1-005 | routes | Ninglinspo route entry | Eerste route toevoegen: Ninglinspo (`data/content/ninglinspo.json` incl. verplicht `language`-veld, placeholder data, later aanvullen met GPX/foto's/stats) | Feature | 🔴 High | 📋 Open |
 
@@ -72,7 +72,7 @@
 
 | ID | Tags | Taak | Omschrijving | Type | Prioriteit | Status |
 |----|------|------|--------------|------|-----------|--------|
-| T5-001 | performance | Lazy loading | Lazy load images en media content | Improvement | 🔴 High | 📋 Open |
+| T5-001 | performance | Lazy loading | Lazy load images en media content | Improvement | 🔴 High | 🔄 Gedeeltelijk — `loading="lazy"` op tile hero-afbeeldingen in `js/home.js`. Volledige implementatie volgt. |
 | T5-002 | performance | Image optimization | WebP conversion + compressie pipeline | Improvement | 🔴 High | 📋 Open |
 | T5-003 | performance | Code splitting | Modulaire JS per feature (map, routes, ui) | Improvement | 🟡 Medium | 📋 Open |
 
@@ -116,6 +116,20 @@
 | TD-001 | cleanup | Legacy JS | Vermijden van globale variabelen in app.js | Tech Debt | 📋 Open |
 | TD-002 | cleanup | DOM coupling | HTML structuur te sterk gekoppeld aan JS selectors | Tech Debt | 📋 Open |
 | TD-003 | cleanup | Map logic | Leaflet logic nog niet modulair gescheiden | Tech Debt | 📋 Open |
+| TD-004 | cleanup | app.js herzien | `js/app.js` is nog de TrailStories-era versie met eigen i18n-loader. Moet herzien worden naar `i18nModule.init()` aanroep conform nieuwe i18next-architectuur. Aanbeveling: eerste stap in volgende sessie vóór T0-006. | Tech Debt | 📋 Open — toegevoegd sessie 01 (18-06-2026) |
+| TD-005 | cleanup | localStorage prefix | CLAUDE.md localStorage-prefixtabel vermeldt nog `ts_*` — bijwerken naar `mtw_*` (conform `mtw_language` key in `js/i18n.js`). | Tech Debt | 📋 Open — toegevoegd sessie 01 (18-06-2026) |
+
+---
+
+## AANBEVOLEN VOLGORDE VOLGENDE SESSIE
+
+Op basis van openstaande afhankelijkheden:
+
+1. **TD-004** — `js/app.js` herzien naar i18next-architectuur
+2. **T0-006** — fetch-injectie logica + hamburger-JS + buildLanguageSwitcher()-aanroep
+3. **T1-005** — `data/content/ninglinspo.json` aanmaken (placeholder data)
+4. **T0-003** — Route template herzien naar i18next namespace-notatie
+5. **T1-002** — Route detail pagina
 
 ---
 
