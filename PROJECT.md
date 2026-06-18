@@ -1,12 +1,12 @@
-# TrailStories — PROJECT.md
+# MyTrailWalks — PROJECT.md
 ## Bijgewerkt: 17-06-2026
-> Versie: v2.0.0 · Project: TrailStories · Stack: Vanilla HTML/CSS/JS + i18next (MVP, JSON-based)
+> Versie: v2.0.0 · Project: MyTrailWalks · Stack: Vanilla HTML/CSS/JS + i18next (MVP, JSON-based)
 
 ---
 
 # ======================= PROJECTVISIE =======================
 
-TrailStories is een **persoonlijk visueel outdoor storytelling platform** waarin eigen wandelingen worden vastgelegd met GPS-data, foto's en een persoonlijk verhaal.
+MyTrailWalks is een **persoonlijk visueel outdoor storytelling platform** waarin eigen wandelingen worden vastgelegd met GPS-data, foto's en een persoonlijk verhaal.
 
 Elke wandeling wordt een digitale "trail story" met:
 - GPS track (GPX)
@@ -153,7 +153,7 @@ Het `language`-veld is verplicht en bepaalt — onafhankelijk van de browser- of
 # ======================= PROJECT STRUCTUUR =======================
 
 ```
-/trailstories
+/MyTrailWalks
 │
 ├── index.html
 ├── routes.html
@@ -223,7 +223,7 @@ Het `language`-veld is verplicht en bepaalt — onafhankelijk van de browser- of
 # ======================= TECHNISCHE INFORMATIE =======================
 
 **Live:** nog niet live (placeholder)
-**Broncode:** github.com/vorilo2000-source/trailstories
+**Broncode:** github.com/vorilo2000-source/MyTrailWalks
 **Stack:** Vanilla HTML + CSS + JavaScript + i18next (enige externe dependency, zie CODE PRINCIPES in CLAUDE.md)
 **Cloud (post-MVP):** Supabase — https://supabase.com/dashboard
 
