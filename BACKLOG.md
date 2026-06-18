@@ -1,6 +1,6 @@
 # TrailStories — BACKLOG.md
 ## Bijgewerkt: 17-06-2026
-> Versie: v1.2.0 · MVP backlog structure
+> Versie: v2.0.0 · MVP backlog structure
 
 ---
 
@@ -13,10 +13,11 @@
 | ID | Tags | Taak | Omschrijving | Type | Prioriteit | Status |
 |----|------|------|--------------|------|-----------|--------|
 | T0-001 | architecture | Project setup | Basis projectstructuur opzetten (HTML/CSS/JS + folders data/assets/js/css) | Feature | 🔴 High | 📋 Open |
-| T0-002 | architecture | JSON data model | Definitief routes.json schema implementeren | Feature | 🔴 High | 🔄 Heropend — i18n mapstructuur verwerken (`data/i18n/<taal>/<route-id>.json`) |
-| T0-003 | architecture | Route template | Standaard routepagina template (hero, stats, map, story) bouwen | Feature | 🔴 High | 🔄 Heropend — hardcoded tekst vervangen door `data-i18n` attributen |
+| T0-002 | architecture | JSON data model | Definitief routes.json schema implementeren | Feature | 🔴 High | 🔄 Heropend — UI/content-splitsing verwerken (`data/i18n/` vs `data/content/`, verplicht `language`-veld) |
+| T0-003 | architecture | Route template | Standaard routepagina template (hero, stats, map, story) bouwen | Feature | 🔴 High | 🔄 Heropend — data-i18n keys omzetten naar i18next namespace-notatie (`namespace:key`) |
 | T0-004 | architecture | Design system | Basis UI design rules (typografie, spacing, kleuren outdoor theme) | Improvement | 🟡 Medium | ✅ Done |
-| T0-005 | architecture, i18n | I18n systeem | Taal-loader bouwen in app.js: detecteert/zet actieve taal, laadt bestanden uit `data/i18n/<taal>/`, vult `data-i18n` elementen. Eerste taal: NL. `data/i18n/nl/ui-strings.json` aanmaken. | Feature | 🔴 High | 📋 Open |
+| T0-005 | architecture, i18n | I18next systeem | `js/i18n.js` wrapper bouwen rond i18next (init, loadNamespace, t(), data-i18n/data-i18n-aria toepassen) + `js/app.js` aanpassen voor fallback-naar-Engels regel (checkt route `language`-veld tegen ondersteunde UI-talen). CDN-scripts (i18next, http-backend, language-detector) toevoegen. Vervangt eerdere eigen i18n-loader. | Feature | 🔴 High | 🔄 Heropend — herzien naar i18next |
+| T0-006 | architecture, components | Component-systeem | `loadScript()` Promise-helper bouwen; `components/topbar.html`, `navbar.html`, `footer.html` aanmaken; fetch+injectie logica in app.js; verplichte Promise-keten laadvolgorde conform CLAUDE.md | Feature | 🔴 High | 📋 Open |
 
 ---
 
@@ -28,7 +29,7 @@
 | T1-002 | routes | Route detail page | Dynamische routepagina rendering via JSON | Feature | 🔴 High | 📋 Open |
 | T1-003 | routes | JSON loader | routes.json inladen en renderen in UI | Feature | 🔴 High | 📋 Open |
 | T1-004 | routes | Routing logic | Navigatie tussen homepage en route detail pages | Feature | 🔴 High | 📋 Open |
-| T1-005 | routes | Ninglinspo route entry | Eerste route toevoegen: Ninglinspo (`data/i18n/nl/ninglinspo.json`, placeholder data, later aanvullen met GPX/foto's/stats) | Feature | 🔴 High | 📋 Open |
+| T1-005 | routes | Ninglinspo route entry | Eerste route toevoegen: Ninglinspo (`data/content/ninglinspo.json` incl. verplicht `language`-veld, placeholder data, later aanvullen met GPX/foto's/stats) | Feature | 🔴 High | 📋 Open |
 
 ---
 
@@ -84,6 +85,7 @@
 | T6-001 | cloud | Supabase auth | Auth systeem implementeren | Feature | 🟡 Medium | 🔮 Future |
 | T6-002 | cloud | Sync | Offline → cloud sync engine | Feature | 🟡 Medium | 🔮 Future |
 | T6-003 | cloud | Sharing | Shareable trail links | Feature | 🟡 Medium | 🔮 Future |
+| T6-004 | i18n, community | User-generated taal-content | Mensen kunnen zelf wandelverhalen aanmaken in hun eigen taal (`language`-veld vrij invulbaar, niet beperkt tot ondersteunde UI-talen). Vereist: content-invoerformulier, taal-detectie of -keuze bij aanmaken, validatie dat UI-fallback-regel (zie CLAUDE.md) correct toegepast wordt bij weergave. Vereist waarschijnlijk accounts (T6-001) als voorwaarde. | Feature | 🟡 Medium | 🔮 Future |
 
 ---
 
