@@ -1,0 +1,241 @@
+/* =======================================================
+   home.css — v1.0.0
+   MyTrailWalks — homepage grid + tile component
+   Uitsluitend tokens uit main.css — geen nieuwe kleuren/fonts.
+   Sticky nav-spacing: CSS-variabelen zodat T0-006 de hoogte
+   kan overschrijven zonder dit bestand aan te hoeven raken.
+   ======================================================= */
+
+/* -------------------------------------------------------
+   1. STICKY NAV SPACING
+   Reserveert ruimte voor topbar + navbar zodat de page-content
+   er niet achter verdwijnt wanneer T0-006 de componenten sticky
+   maakt. Hoogte-waarden zijn placeholders — T0-006 overschrijft
+   deze variabelen in de component-CSS met de werkelijke hoogtes.
+   Gebruik van CSS-variabelen hier (i.p.v. hardcoded px) zodat
+   de homepage-layout automatisch mee-aanpast zonder dat dit
+   bestand opnieuw aangepast moet worden.
+   ------------------------------------------------------- */
+:root {
+  --topbar-height: 0px;    /* T0-006: overschrijven met werkelijke topbar-hoogte */
+  --navbar-height: 0px;    /* T0-006: overschrijven met werkelijke navbar-hoogte */
+  --nav-total-height: calc(var(--topbar-height) + var(--navbar-height));
+}
+
+/* Lege placeholder-divs: geen hoogte nu, geen layout-impact.
+   T0-006 maakt ze sticky via position: sticky + top: 0 op de
+   geïnjecteerde component-markup zelf, niet op deze wrappers. */
+.topbar-placeholder,
+.navbar-placeholder,
+.footer-placeholder {
+  /* Bewust leeg: T0-006 injecteert hier de echte componenten.
+     Geen min-height of display:none — de div is zichtbaar maar
+     neemt geen ruimte in totdat er inhoud in zit. */
+}
+
+/* -------------------------------------------------------
+   2. SKIP-LINK (toegankelijkheid)
+   Verborgen totdat de gebruiker Tab indrukt. Springt naar
+   #main-content voorbij de (straks gevulde) navigatie.
+   ------------------------------------------------------- */
+.skip-link {
+  position: absolute;
+  top: -100%;               /* buiten scherm, onzichtbaar */
+  left: var(--space-md);
+  z-index: 9999;
+  padding: var(--space-sm) var(--space-md);
+  background-color: var(--color-forest);
+  color: var(--color-white);
+  font-family: var(--font-body);
+  font-size: var(--text-sm);
+  border-radius: var(--radius-md);
+  text-decoration: none;
+  transition: top 0.15s ease;
+}
+
+.skip-link:focus {
+  top: var(--space-sm);     /* springt in beeld wanneer gefocust via Tab */
+}
+
+/* -------------------------------------------------------
+   3. MAIN CONTENT
+   Voegt padding-top toe gelijk aan de totale nav-hoogte zodat
+   de eerste sectie niet achter een sticky nav verdwijnt.
+   Zodra T0-006 --topbar-height en --navbar-height instelt,
+   past deze padding zich automatisch aan.
+   ------------------------------------------------------- */
+.main-content {
+  padding-top: calc(var(--nav-total-height) + var(--space-xl));
+  padding-bottom: var(--space-3xl);
+  min-height: 100vh;         /* voorkomt een te korte pagina bij weinig routes */
+}
+
+/* -------------------------------------------------------
+   4. PAGE HEADER
+   Paginatitel + intro-zin boven de route-grid.
+   ------------------------------------------------------- */
+.page-header {
+  padding-top: var(--space-xl);
+  padding-bottom: var(--space-xl);
+  border-bottom: 1px solid var(--color-line);
+  margin-bottom: var(--space-xl);
+}
+
+.page-header__title {
+  /* h1 krijgt display-font via main.css; hier alleen spacing */
+  margin-bottom: var(--space-sm);
+}
+
+.page-header__intro {
+  font-size: var(--text-lg);
+  color: var(--color-charcoal-soft);
+  max-width: var(--content-narrow-width);  /* leesbare regellengte */
+  line-height: 1.5;
+}
+
+/* -------------------------------------------------------
+   5. ROUTES SECTIE
+   ------------------------------------------------------- */
+.routes-section__heading {
+  margin-bottom: var(--space-xl);
+}
+
+/* -------------------------------------------------------
+   6. ROUTE GRID
+   Mobile-first: 1 kolom op smal scherm, meer op breed scherm.
+   CSS Grid met auto-fill zodat de grid zichzelf aanpast aan
+   het aantal routes zonder JS-logica voor kolom-berekening.
+   ------------------------------------------------------- */
+.routes-grid {
+  display: grid;
+  grid-template-columns: 1fr;              /* mobile: 1 kolom */
+  gap: var(--space-xl);
+}
+
+/* Tablet: 2 kolommen */
+@media (min-width: 640px) {
+  .routes-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* Desktop: 3 kolommen */
+@media (min-width: 1024px) {
+  .routes-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+/* -------------------------------------------------------
+   7. ROUTE TILE
+   Elke tile is een klikbare kaart: hero-foto + stats + titel.
+   De hele tile is klikbaar via een <a> wrapper (geen JS-click
+   handler op de div) voor semantiek en toegankelijkheid.
+   ------------------------------------------------------- */
+.route-tile {
+  display: flex;
+  flex-direction: column;
+  background-color: var(--color-white);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-card);
+  overflow: hidden;                        /* hero-foto hoeken afkappen */
+  text-decoration: none;
+  color: inherit;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.route-tile:hover {
+  transform: translateY(-3px);             /* subtiele lift, outdoor-magazine gevoel */
+  box-shadow: 0 8px 24px rgba(43, 41, 38, 0.14);
+  text-decoration: none;
+}
+
+/* -------------------------------------------------------
+   7a. TILE — HERO FOTO
+   Vaste hoogte met object-fit: cover zodat elke foto goed
+   past ongeacht de originele beeldverhouding.
+   ------------------------------------------------------- */
+.route-tile__hero {
+  width: 100%;
+  height: 220px;
+  object-fit: cover;
+  object-position: center;
+  display: block;
+  background-color: var(--color-line);     /* placeholder kleur terwijl foto laadt */
+}
+
+/* -------------------------------------------------------
+   7b. TILE — CONTENT WRAPPER
+   Flex-column zodat de difficulty-badge altijd onderaan zit
+   ongeacht de hoeveelheid tekst erboven (stretch cards).
+   ------------------------------------------------------- */
+.route-tile__content {
+  display: flex;
+  flex-direction: column;
+  flex: 1;                                 /* neemt resterende hoogte in grid-rij */
+  padding: var(--space-lg);
+  gap: var(--space-sm);
+}
+
+/* -------------------------------------------------------
+   7c. TILE — NAAM + REGIO
+   ------------------------------------------------------- */
+.route-tile__name {
+  font-family: var(--font-display);
+  font-size: var(--text-lg);
+  font-weight: var(--weight-semibold);
+  color: var(--color-forest-dark);
+  line-height: 1.2;
+  margin: 0;
+}
+
+.route-tile__region {
+  font-size: var(--text-sm);
+  color: var(--color-charcoal-soft);
+  margin: 0;
+}
+
+/* -------------------------------------------------------
+   7d. TILE — STATS ROW
+   Drie stat-blokjes naast elkaar: afstand / duur / hoogtemeters.
+   Mono-font voor de cijfers (stat-value), body-font voor labels
+   (stat-label) — beide gedefinieerd in main.css utility-klassen.
+   ------------------------------------------------------- */
+.route-tile__stats {
+  display: flex;
+  gap: var(--space-lg);
+  margin-top: var(--space-sm);
+}
+
+.route-tile__stat {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}
+
+/* -------------------------------------------------------
+   7e. TILE — DIFFICULTY BADGE
+   Pushed naar de onderkant van de tile via margin-top: auto.
+   badge-difficulty klassen zijn gedefinieerd in main.css.
+   ------------------------------------------------------- */
+.route-tile__badge {
+  margin-top: auto;                        /* duwt badge naar onderkant van content */
+  align-self: flex-start;                  /* badge breedte = inhoud, niet full-width */
+}
+
+/* -------------------------------------------------------
+   8. GRID STATUS BERICHTEN
+   Getoond door home.js tijdens laden, bij lege staat of fout.
+   Gecentreerd in de grid, subtiele styling.
+   ------------------------------------------------------- */
+.routes-grid__status {
+  grid-column: 1 / -1;                     /* volle breedte over alle kolommen */
+  text-align: center;
+  padding: var(--space-2xl) 0;
+  color: var(--color-charcoal-soft);
+  font-size: var(--text-base);
+}
+
+.routes-grid__status--error {
+  color: var(--color-hard);               /* roodtint voor foutmelding, uit main.css */
+}
