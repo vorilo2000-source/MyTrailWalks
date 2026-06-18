@@ -1,0 +1,78 @@
+/* =======================================================
+   footer.css — v1.0.0
+   MyTrailWalks — footer component stijlen
+   Uitsluitend tokens uit main.css — geen nieuwe kleuren/fonts.
+   ======================================================= */
+
+/* -------------------------------------------------------
+   1. FOOTER WRAPPER
+   Donkere achtergrond (forest-dark) geeft het footer-gebied
+   een duidelijke visuele afsluiting van de pagina-inhoud,
+   passend bij de outdoor-magazine aesthetic.
+   ------------------------------------------------------- */
+.site-footer {
+  background-color: var(--color-forest-dark);
+  color: var(--color-white);
+  padding: var(--space-lg) var(--space-xl);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-xl);
+  flex-wrap: wrap;             /* netjes op smalle schermen */
+}
+
+/* -------------------------------------------------------
+   2. LOGO
+   ------------------------------------------------------- */
+.site-footer__logo {
+  flex: 0 0 auto;
+}
+
+.site-footer__logo-img {
+  height: 50px;
+  width: auto;
+  display: block;
+}
+
+/* -------------------------------------------------------
+   3. COPYRIGHT + LINKS (MIDDEN)
+   flex: 1 zodat dit blok de beschikbare ruimte opvult
+   en gecentreerd blijft tussen logo en eventuele toekomstige
+   rechter-elementen (bv. social links in latere fase).
+   ------------------------------------------------------- */
+.site-footer__center {
+  flex: 1 1 auto;
+  text-align: center;
+}
+
+.site-footer__copyright {
+  margin: 0;
+  font-family: var(--font-body);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+  color: var(--color-white);
+}
+
+.site-footer__links {
+  margin: var(--space-xs) 0 0 0;
+  font-size: var(--text-xs);
+}
+
+.site-footer__link {
+  color: var(--color-white);
+  text-decoration: underline;
+  opacity: 0.8;                /* subtiel — links zijn aanwezig maar niet dominant */
+  transition: opacity 0.15s ease;
+}
+
+.site-footer__link:hover {
+  opacity: 1;
+  text-decoration: underline;
+}
+
+/* Scheidingsteken tussen links — aria-hidden in HTML,
+   dus puur visueel, geen screenreader-ruis */
+.site-footer__link-divider {
+  margin: 0 var(--space-sm);
+  opacity: 0.4;
+}
