@@ -1,0 +1,40 @@
+{
+  "_meta": {
+    "language": "en",
+    "namespace": "common",
+    "version": "1.0.0",
+    "note": "English fallback for shared UI texts. Structure mirrors nl/common.json exactly — any key added to NL must be added here too."
+  },
+
+  "nav": {
+    "home": "Home",
+    "routes": "Walks",
+    "about": "About",
+    "skip_to_content": "Skip navigation"
+  },
+
+  "footer": {
+    "tagline": "Personal hiking stories from the trail.",
+    "copyright": "MyTrailWalks"
+  },
+
+  "route": {
+    "distance": "Distance",
+    "duration": "Duration",
+    "elevation": "Elevation",
+    "difficulty": "Difficulty",
+    "distance_unit": "km",
+    "duration_unit": "h",
+    "elevation_unit": "m",
+    "view_route": "View walk",
+    "difficulty_easy": "Easy",
+    "difficulty_medium": "Moderate",
+    "difficulty_hard": "Hard"
+  },
+
+  "a11y": {
+    "open_menu": "Open menu",
+    "close_menu": "Close menu",
+    "hero_image": "Hero image for route"
+  }
+}
