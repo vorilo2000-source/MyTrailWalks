@@ -1,0 +1,118 @@
+/* =======================================================
+   topbar.css — v1.0.0
+   MyTrailWalks — topbar component stijlen
+   Uitsluitend tokens uit main.css — geen nieuwe kleuren/fonts.
+   Hoogte wordt via --topbar-height (in home.css :root) doorgegeven
+   aan de sticky nav-spacing logica — pas die variabele aan als
+   de topbar-hoogte wijzigt, niet de padding-top in main-content.
+   ======================================================= */
+
+/* -------------------------------------------------------
+   1. TOPBAR HOOGTE — CSS VARIABELE OVERSCHRIJVEN
+   Overschrijft de placeholder --topbar-height uit home.css
+   met de werkelijke hoogte. Alle pagina's die home.css laden
+   passen hun main-content padding-top automatisch aan.
+   Waarde: 44px = padding (10px top + bottom) + regel tekst (~24px)
+   ------------------------------------------------------- */
+:root {
+  --topbar-height: 44px;
+}
+
+/* -------------------------------------------------------
+   2. TOPBAR WRAPPER
+   Lichte achtergrond (cream) — bewuste keuze: topbar is
+   functioneel (auth + taal), niet visueel dominant. De navbar
+   (T0-006) krijgt de forest-kleur en is het visuele ankerpunt.
+   full-width, sticky bovenaan zodat topbar altijd zichtbaar is.
+   ------------------------------------------------------- */
+.topbar-wrapper {
+  position: sticky;
+  top: 0;
+  z-index: 100;               /* boven pagina-inhoud, onder modals */
+  width: 100%;
+  background-color: var(--color-cream);
+  border-bottom: 1px solid var(--color-line);
+}
+
+/* -------------------------------------------------------
+   3. TOPBAR INNER
+   Flex-rij met drie zones (links / midden / rechts).
+   De merknaam in het midden staat absoluut gepositioneerd
+   zodat hij altijd exact gecentreerd blijft, ongeacht de
+   breedte van de linker- en rechterblokken.
+   ------------------------------------------------------- */
+.topbar {
+  position: relative;          /* anker voor .topbar__center (absolute) */
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-sm) var(--space-xl);
+  max-width: var(--content-max-width);
+  margin: 0 auto;
+  min-height: var(--topbar-height);
+  box-sizing: border-box;
+}
+
+/* -------------------------------------------------------
+   4. LINKS — AUTH SLOT
+   Lege placeholder nu, gevuld door T0-006/T6-001.
+   min-width zorgt dat het midden-blok niet verschuift
+   wanneer de auth-knop straks verschijnt.
+   ------------------------------------------------------- */
+.topbar__left {
+  flex: 0 0 auto;
+  min-width: 80px;             /* symmetrie met rechterblok */
+}
+
+/* -------------------------------------------------------
+   5. MIDDEN — MERKNAAM
+   Absoluut gecentreerd t.o.v. .topbar (position: relative).
+   Pointer-events none zodat klikken op de merknaam niet
+   geblokkeerd wordt door het absolute element.
+   ------------------------------------------------------- */
+.topbar__center {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  pointer-events: none;        /* klik gaat door naar elementen eronder */
+}
+
+.topbar__brand {
+  font-family: var(--font-display);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+  color: var(--color-forest-dark);
+  letter-spacing: 0.03em;
+  pointer-events: auto;        /* merknaam zelf wel klikbaar (toekomstige home-link) */
+}
+
+/* -------------------------------------------------------
+   6. RECHTS — TAALWISSELAAR
+   ------------------------------------------------------- */
+.topbar__right {
+  flex: 0 0 auto;
+  min-width: 80px;             /* symmetrie met linkerblok */
+  display: flex;
+  justify-content: flex-end;
+}
+
+.topbar__lang-switcher {
+  padding: var(--space-xs) var(--space-sm);
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-sm);
+  font-family: var(--font-body);
+  font-size: var(--text-xs);
+  color: var(--color-charcoal);
+  background-color: var(--color-white);
+  cursor: pointer;
+  appearance: auto;            /* browser-native dropdown pijltje behouden */
+}
+
+.topbar__lang-switcher:hover {
+  border-color: var(--color-earth);
+}
+
+.topbar__lang-switcher:focus {
+  outline: 2px solid var(--color-water);
+  outline-offset: 2px;
+}
