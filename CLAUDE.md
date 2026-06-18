@@ -1,6 +1,6 @@
-# TrailStories — CLAUDE.md
+# MyTrailWalks — CLAUDE.md
 ## Bijgewerkt: 17-06-2026
-> Versie: v2.0.0 · Project: TrailStories · Doel: regels voor Claude Code bij dit project
+> Versie: v2.1.0 · Project:  MyTrailWalks · Doel: regels voor Claude Code bij dit project
 
 ---
 
@@ -26,7 +26,7 @@
 
 ## Referentievoorbeelden uit andere projecten
 
-Soms wordt een bestand uit een ander project (bv. MyFamTreeCollab) als voorbeeld gedeeld om een patroon te illustreren (zie `develop/standaardpagina.html`, gedeeld 17-06-2026 — bron voor i18next-architectuur en component-injectie). Dit is **inspiratie/referentie**, geen letterlijk te kopiëren code. Patronen worden bewust overgenomen (met motivatie in CLAUDE.md/PROJECT.md vastgelegd), niet klakkeloos geplakt — TrailStories heeft een eigen scope (geen auth/analytics in MVP) en eigen vanilla-principes die alleen voor i18next bewust doorbroken worden.
+Soms wordt een bestand uit een ander project (bv. MyFamTreeCollab) als voorbeeld gedeeld om een patroon te illustreren (zie `develop/standaardpagina.html`, gedeeld 17-06-2026 — bron voor i18next-architectuur en component-injectie). Dit is **inspiratie/referentie**, geen letterlijk te kopiëren code. Patronen worden bewust overgenomen (met motivatie in CLAUDE.md/PROJECT.md vastgelegd), niet klakkeloos geplakt — MyTrailWalks heeft een eigen scope (geen auth/analytics in MVP) en eigen vanilla-principes die alleen voor i18next bewust doorbroken worden.
 
 
 ---
@@ -52,7 +52,7 @@ Soms wordt een bestand uit een ander project (bv. MyFamTreeCollab) als voorbeeld
 # ======================= CODE PRINCIPES =======================
 
 - Geen frameworks voor UI-rendering (NO React/Vue/etc.)
-- **Bewuste uitzondering (vastgelegd 17-06-2026)**: i18next is toegestaan als enige externe dependency, specifiek voor het i18n-systeem. Motivatie: TrailStories' visie omvat user-generated content in meerdere talen (zie PROJECT.md, Fase 6+) — een handgeschreven i18n-loader schaalt niet naar namespace-beheer, fallback-talen en taal-detectie die dit vereist. Dit is de enige toegestane library-uitzondering; alle overige UI/logica blijft vanilla.
+- **Bewuste uitzondering (vastgelegd 17-06-2026)**: i18next is toegestaan als enige externe dependency, specifiek voor het i18n-systeem. Motivatie: MyTrailWalks' visie omvat user-generated content in meerdere talen (zie PROJECT.md, Fase 6+) — een handgeschreven i18n-loader schaalt niet naar namespace-beheer, fallback-talen en taal-detectie die dit vereist. Dit is de enige toegestane library-uitzondering; alle overige UI/logica blijft vanilla.
 - Geen backend in MVP
 - Alles client-side
 - JSON is single source of truth
@@ -113,7 +113,7 @@ Gebruik HTML entities in JS-rendered HTML:
 
 ## Architectuurkeuzes (vastgelegd 17-06-2026, herzien naar i18next op 17-06-2026)
 
-TrailStories gebruikt **i18next** voor het vertalen van vaste UI-onderdelen (navigatie, knoppen, sectiekoppen, labels). Dit is de enige toegestane externe library in het project (zie CODE PRINCIPES). Reden: de visie van TrailStories omvat user-generated content waarbij mensen wandelverhalen aanmaken in hun eigen taal — dit vereist een volwaardig namespace/fallback-systeem dat een handgeschreven loader niet duurzaam kan bieden.
+MyTrailWalks gebruikt **i18next** voor het vertalen van vaste UI-onderdelen (navigatie, knoppen, sectiekoppen, labels). Dit is de enige toegestane externe library in het project (zie CODE PRINCIPES). Reden: de visie van MyTrailWalks omvat user-generated content waarbij mensen wandelverhalen aanmaken in hun eigen taal — dit vereist een volwaardig namespace/fallback-systeem dat een handgeschreven loader niet duurzaam kan bieden.
 
 ## Twee gescheiden lagen — UI-taal vs. content-taal
 
@@ -274,21 +274,21 @@ Een taak is klaar als:
 ```js
 // =======================================================
 // app.js — v1.1.0
-// TrailStories — i18n loader + app init
+// MyTrailWalks — i18n loader + app init
 // =======================================================
 ```
 
 ```css
 /* =======================================================
    main.css — v1.1.0
-   TrailStories — design system
+   MyTrailWalks — design system
    ======================================================= */
 ```
 
 ```html
 <!-- =======================================================
      ninglinspo.html — v1.1.0
-     TrailStories — route detail template
+     MyTrailWalks — route detail template
      ======================================================= -->
 ```
 
