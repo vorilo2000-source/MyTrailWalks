@@ -1,0 +1,186 @@
+/* =======================================================
+   navbar.css — v1.0.0
+   MyTrailWalks — navbar component stijlen
+   Uitsluitend tokens uit main.css — geen nieuwe kleuren/fonts.
+   Sticky onder topbar via top: var(--topbar-height).
+   --navbar-height wordt hier gezet zodat home.css de
+   main-content padding-top automatisch aanpast.
+   ======================================================= */
+
+/* -------------------------------------------------------
+   1. NAVBAR HOOGTE — CSS VARIABELE OVERSCHRIJVEN
+   Overschrijft de placeholder --navbar-height uit home.css.
+   Waarde: 60px = padding (12px top + bottom) + logo (~36px).
+   Pas deze waarde aan als de navbar-hoogte wijzigt.
+   ------------------------------------------------------- */
+:root {
+  --navbar-height: 60px;
+}
+
+/* -------------------------------------------------------
+   2. SITE HEADER WRAPPER
+   Forest-dark achtergrond — visueel ankerpunt van de pagina,
+   contrasteert met de lichte topbar erboven.
+   Sticky direct onder de topbar via top: var(--topbar-height).
+   z-index 99: onder topbar (100), boven pagina-inhoud.
+   ------------------------------------------------------- */
+.site-header {
+  position: sticky;
+  top: var(--topbar-height);   /* sluit naadloos aan onder sticky topbar */
+  z-index: 99;
+  width: 100%;
+  background-color: var(--color-forest);
+  border-bottom: 2px solid var(--color-forest-dark);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 var(--space-xl);
+  min-height: var(--navbar-height);
+  box-sizing: border-box;
+}
+
+/* -------------------------------------------------------
+   3. LOGO
+   ------------------------------------------------------- */
+.site-header__logo-link {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  text-decoration: none;
+}
+
+.site-header__logo-img {
+  height: 36px;
+  width: auto;
+  display: block;
+}
+
+/* -------------------------------------------------------
+   4. NAVIGATIE — DESKTOP
+   Horizontale lijst met directe links.
+   Verborgen op mobile, zichtbaar via .site-nav--open.
+   ------------------------------------------------------- */
+.site-nav__list {
+  display: flex;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  gap: var(--space-xl);
+  align-items: center;
+}
+
+.site-nav__link {
+  font-family: var(--font-body);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+  color: var(--color-white);
+  text-decoration: none;
+  padding: var(--space-sm) 0;
+  border-bottom: 2px solid transparent;  /* reserveert ruimte voor active-indicator */
+  transition: border-color 0.15s ease, opacity 0.15s ease;
+  opacity: 0.85;                          /* licht gedempt — actieve link is 100% */
+}
+
+.site-nav__link:hover {
+  opacity: 1;
+  text-decoration: none;
+  border-bottom-color: var(--color-earth); /* aarde-tint als hover-indicator */
+}
+
+/* Actieve pagina-link — gezet via aria-current="page" in T0-006/page-init */
+.site-nav__link[aria-current="page"] {
+  opacity: 1;
+  border-bottom-color: var(--color-white); /* witte lijn onder actieve link */
+  font-weight: var(--weight-semibold);
+}
+
+/* -------------------------------------------------------
+   5. HAMBURGER KNOP — MOBILE
+   Verborgen op desktop, zichtbaar onder 768px.
+   Drie streepjes via ::before/::after + span (geen SVG).
+   Animatie naar X bij open staat volgt wanneer T0-006
+   de .site-header__hamburger--open klasse toevoegt.
+   ------------------------------------------------------- */
+.site-header__hamburger {
+  display: none;               /* verborgen op desktop */
+  flex-direction: column;
+  justify-content: center;
+  gap: 5px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: var(--space-sm);
+  margin-right: calc(-1 * var(--space-sm)); /* optisch uitlijnen met rand */
+}
+
+.site-header__hamburger-bar {
+  display: block;
+  width: 24px;
+  height: 2px;
+  background-color: var(--color-white);
+  border-radius: 2px;
+  transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+/* X-animatie wanneer menu open is */
+.site-header__hamburger--open .site-header__hamburger-bar:nth-child(1) {
+  transform: translateY(7px) rotate(45deg);
+}
+.site-header__hamburger--open .site-header__hamburger-bar:nth-child(2) {
+  opacity: 0;
+}
+.site-header__hamburger--open .site-header__hamburger-bar:nth-child(3) {
+  transform: translateY(-7px) rotate(-45deg);
+}
+
+/* -------------------------------------------------------
+   6. MOBILE LAYOUT
+   Onder 768px: hamburger zichtbaar, nav verborgen totdat
+   .site-nav--open gezet wordt door navbar.js (T0-006).
+   Nav opent als verticale lijst onder de header.
+   ------------------------------------------------------- */
+@media (max-width: 767px) {
+
+  .site-header__hamburger {
+    display: flex;             /* zichtbaar op mobile */
+  }
+
+  .site-nav {
+    display: none;             /* verborgen totdat hamburger geklikt wordt */
+    position: absolute;
+    top: var(--navbar-height);
+    left: 0;
+    width: 100%;
+    background-color: var(--color-forest);
+    border-top: 1px solid var(--color-forest-dark);
+    z-index: 98;               /* onder navbar (99), boven pagina-inhoud */
+  }
+
+  /* T0-006: navbar.js voegt .site-nav--open toe bij hamburger-klik */
+  .site-nav--open {
+    display: block;
+  }
+
+  .site-nav__list {
+    flex-direction: column;
+    gap: 0;
+    padding: var(--space-sm) 0;
+  }
+
+  .site-nav__item {
+    width: 100%;
+  }
+
+  .site-nav__link {
+    display: block;
+    padding: var(--space-md) var(--space-xl);
+    border-bottom: 1px solid var(--color-forest-dark);
+    border-left: none;          /* geen verticale indicator op mobile */
+    opacity: 1;
+  }
+
+  .site-nav__link[aria-current="page"] {
+    background-color: var(--color-forest-dark);
+    border-bottom-color: var(--color-forest-dark);
+  }
+}
