@@ -1,0 +1,77 @@
+<!-- =======================================================
+     navbar.html — v1.0.0
+     MyTrailWalks — navbar component fragment
+     Structuur: logo links + drie directe links (Home / Wandelingen / Over)
+     Geen dropdowns in MVP — uitbreidbaar naar dropdown via
+     .dropdown CSS-klasse zodra meer pagina's beschikbaar zijn.
+     Sticky onder topbar via top: var(--topbar-height) in navbar.css.
+     Injectie via fetch() volgt in T0-006 (component-systeem).
+     Stijlen via css/navbar.css (design tokens uit main.css).
+     ======================================================= -->
+<header class="site-header">
+
+  <!-- -------------------------------------------------------
+       LOGO
+       Links naar homepage. Pad relatief aan root — zelfde
+       pad-opmerking als footer.html: T0-006 lost dit op
+       voor pagina's in submappen (routes/).
+       ------------------------------------------------------- -->
+  <a href="index.html" class="site-header__logo-link" aria-label="MyTrailWalks — naar homepage">
+    <img
+      src="assets/images/Logo1.png"
+      alt="MyTrailWalks"
+      class="site-header__logo-img" />
+  </a>
+
+  <!-- -------------------------------------------------------
+       NAVIGATIE
+       Drie directe links — geen dropdowns in MVP.
+       data-i18n keys uit common:nav.* (al aanwezig in
+       nl/common.json en en/common.json).
+       aria-current="page" wordt door T0-006 of page-init JS
+       gezet op de actieve link zodat screenreaders en CSS
+       de huidige pagina kunnen markeren.
+       ------------------------------------------------------- -->
+  <nav class="site-nav" aria-label="Hoofdnavigatie">
+    <ul class="site-nav__list">
+
+      <li class="site-nav__item">
+        <a href="index.html"
+           class="site-nav__link"
+           data-i18n="common:nav.home">Home</a>
+      </li>
+
+      <li class="site-nav__item">
+        <a href="routes.html"
+           class="site-nav__link"
+           data-i18n="common:nav.routes">Wandelingen</a>
+      </li>
+
+      <li class="site-nav__item">
+        <a href="about.html"
+           class="site-nav__link"
+           data-i18n="common:nav.about">Over</a>
+      </li>
+
+    </ul>
+  </nav>
+
+  <!-- -------------------------------------------------------
+       HAMBURGER KNOP (mobile)
+       Zichtbaar onder de mobile breakpoint, verborgen op desktop.
+       Toggled .site-nav--open op de <nav> via navbar.js (T0-006).
+       aria-expanded wordt door navbar.js bijgehouden.
+       ------------------------------------------------------- -->
+  <button
+    class="site-header__hamburger"
+    aria-label="Menu openen"
+    aria-expanded="false"
+    aria-controls="site-nav"
+    data-i18n-aria="common:a11y.open_menu">
+    <!-- Drie streepjes via CSS (geen SVG/emoji nodig) -->
+    <span class="site-header__hamburger-bar"></span>
+    <span class="site-header__hamburger-bar"></span>
+    <span class="site-header__hamburger-bar"></span>
+  </button>
+
+</header>
