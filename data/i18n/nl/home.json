@@ -1,40 +1,24 @@
 {
   "_meta": {
     "language": "nl",
-    "namespace": "common",
-    "version": "1.0.0",
-    "note": "Gedeelde UI-teksten voor alle pagina's. Navigatie-labels hier zijn gereserveerd voor T0-006 (topbar/navbar/footer componenten) — data-i18n='common:nav.*' / 'common:footer.*'."
+    "namespace": "home",
+    "version": "2.0.0",
+    "note": "Homepage UI-teksten. Structuur spiegelt en/home.json exact — elke key die hier toegevoegd wordt, ook daar toevoegen."
   },
-
-  "nav": {
-    "home": "Home",
-    "routes": "Wandelingen",
-    "about": "Over",
-    "skip_to_content": "Sla navigatie over"
+  "page": {
+    "title": "MyTrailWalks",
+    "intro": "Persoonlijke verhalen van wandelingen die ik gelopen heb — GPS-tracks, foto's en alles wat ik onderweg tegenkwam."
   },
-
-  "footer": {
-    "tagline": "Persoonlijke wandelverhalen uit het veld.",
-    "copyright": "MyTrailWalks"
+  "hero": {
+    "tagline": "Persoonlijke trail stories",
+    "title": "Elke wandeling heeft een verhaal",
+    "sub": "GPS-tracks, foto's en persoonlijke verhalen van wandelingen door de Ardennen en verder.",
+    "cta": "Ontdek de wandelingen"
   },
-
-  "route": {
-    "distance": "Afstand",
-    "duration": "Duur",
-    "elevation": "Hoogtemeters",
-    "difficulty": "Moeilijkheid",
-    "distance_unit": "km",
-    "duration_unit": "u",
-    "elevation_unit": "m",
-    "view_route": "Bekijk wandeling",
-    "difficulty_easy": "Gemakkelijk",
-    "difficulty_medium": "Gemiddeld",
-    "difficulty_hard": "Zwaar"
-  },
-
-  "a11y": {
-    "open_menu": "Menu openen",
-    "close_menu": "Menu sluiten",
-    "hero_image": "Héroafbeelding van route"
+  "grid": {
+    "heading": "Wandelingen",
+    "empty": "Nog geen wandelingen toegevoegd.",
+    "loading": "Wandelingen laden…",
+    "error": "Kon wandelingen niet laden. Probeer de pagina te vernieuwen."
   }
 }
