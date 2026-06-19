@@ -1,20 +1,46 @@
 <!-- =======================================================
-     index.html — v2.1.0
-     MyTrailWalks — homepage
-     Structuur: topbar → hero → route-grid → footer
+     index.html — v1.1.0
+     MyTrailWalks — homepage route-grid
+     T1-001: route-overzicht met tiles (foto + stats + titel)
+     Afhankelijkheden: css/main.css, js/i18n.js, js/home.js
+     i18next CDN (zie CLAUDE.md CODE PRINCIPES)
+     Component-placeholders: T0-006 (topbar/navbar/footer)
      ======================================================= -->
 <!DOCTYPE html>
 <html lang="nl" id="html-root">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <!-- Paginatitel wordt ook via JS gezet via i18next (home:page.title),
+         maar een statische fallback hier voorkomt een lege tab tijdens laden -->
     <title>MyTrailWalks</title>
 
+    <!-- Design system: kleuren, typografie, spacing tokens -->
     <link rel="stylesheet" href="css/main.css" />
+
+    <!-- Homepage-specifieke stijlen: grid layout + tile component +
+         sticky nav spacing. Los van main.css om het design system
+         niet te vervuilen met pagina-specifieke regels. -->
     <link rel="stylesheet" href="css/home.css" />
+
+    <!-- Component-stijlen: topbar, navbar, footer.
+         Volgorde is verplicht: topbar eerst (zet --topbar-height),
+         dan navbar (gebruikt --topbar-height voor sticky positioning),
+         dan footer. home.css gebruikt beide variabelen voor
+         de main-content padding-top berekening. -->
     <link rel="stylesheet" href="css/topbar.css" />
+    <link rel="stylesheet" href="css/navbar.css" />
     <link rel="stylesheet" href="css/footer.css" />
 
+    <!-- -------------------------------------------------------
+         i18next CDN-scripts (enige toegestane externe libraries,
+         zie CLAUDE.md CODE PRINCIPES). Volgorde is verplicht:
+         1. i18next core
+         2. http-backend plugin (laadt JSON-bestanden)
+         3. language-detector plugin (detecteert browsertaal)
+         4. Onze eigen wrapper (js/i18n.js) — ná de drie CDN-scripts
+         ------------------------------------------------------- -->
     <script src="https://cdn.jsdelivr.net/npm/i18next@23/i18next.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/i18next-http-backend@2/i18nextHttpBackend.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/i18next-browser-languagedetector@7/i18nextBrowserLanguageDetector.min.js"></script>
@@ -23,37 +49,69 @@
 
   <body>
 
-    <div id="topbar-placeholder" aria-hidden="true"></div>
+    <!-- -------------------------------------------------------
+         COMPONENT PLACEHOLDERS (T0-006)
+         Topbar en navbar zijn nog lege divs. T0-006 implementeert
+         de fetch+injectie van components/topbar.html en
+         components/navbar.html in deze placeholders.
+         De CSS-klasse .nav-placeholder reserveert alvast de
+         hoogte voor de sticky navigatie zodat de grid-content
+         er niet achter verdwijnt wanneer de componenten geladen
+         zijn — ook als de divs nu nog leeg zijn.
+         ------------------------------------------------------- -->
+    <div id="topbar-placeholder" class="topbar-placeholder" aria-hidden="true"></div>
+    <div id="navbar-placeholder" class="navbar-placeholder" aria-hidden="true"></div>
 
-    <a href="#main-content" class="skip-link">
+    <!-- -------------------------------------------------------
+         SKIP-LINK (toegankelijkheid)
+         Screenreader- en toetsenbordgebruikers kunnen direct naar
+         de hoofdinhoud springen, voorbij de (straks gevulde) nav.
+         ------------------------------------------------------- -->
+    <a href="#main-content" class="skip-link" data-i18n-aria="common:nav.skip_to_content">
       <span data-i18n="common:nav.skip_to_content"></span>
     </a>
 
+    <!-- -------------------------------------------------------
+         HOOFDINHOUD
+         ------------------------------------------------------- -->
     <main id="main-content" class="main-content">
 
-      <section class="hero" aria-label="Intro">
-        <div class="hero__bg"></div>
-        <div class="hero__overlay"></div>
-        <div class="hero__content">
-          <p class="hero__eyebrow" data-i18n="home:hero.tagline"></p>
-          <h1 class="hero__title" data-i18n="home:hero.title"></h1>
-          <p class="hero__subtitle" data-i18n="home:hero.sub"></p>
-          <a href="#routes-grid" class="hero__cta" data-i18n="home:hero.cta"></a>
-        </div>
-      </section>
+      <!-- Pagina-header: titel + intro -->
+      <header class="page-header container">
+        <h1 class="page-header__title" data-i18n="home:page.title"></h1>
+        <p class="page-header__intro" data-i18n="home:page.intro"></p>
+      </header>
 
+      <!-- Route-grid sectie -->
       <section class="routes-section container" aria-labelledby="routes-heading">
         <h2 id="routes-heading" class="routes-section__heading" data-i18n="home:grid.heading"></h2>
+
+        <!-- Grid-container: home.js rendert hier de route-tiles in.
+             data-i18n-loading/empty/error: worden door home.js uitgelezen
+             via i18nModule.t() voor de status-berichten, niet als attribuut
+             vertaald — de keys staan hier als documentatie van wat home.js
+             gebruikt (home:grid.loading / home:grid.empty / home:grid.error) -->
         <div id="routes-grid" class="routes-grid" role="list">
-          <!-- Tiles worden dynamisch ingevuld door js/home.js -->
+          <!-- Tiles worden hier dynamisch ingevuld door js/home.js -->
         </div>
       </section>
 
     </main>
 
-    <div id="footer-placeholder" aria-hidden="true"></div>
+    <!-- -------------------------------------------------------
+         FOOTER PLACEHOLDER (T0-006)
+         ------------------------------------------------------- -->
+    <div id="footer-placeholder" class="footer-placeholder" aria-hidden="true"></div>
 
-    <script src="js/app.js"></script>
+    <!-- -------------------------------------------------------
+         PAGINA INIT
+         home.js laadt na i18n.js (die al via <script> in <head>
+         geladen is). home.js roept i18nModule.init() aan met de
+         'home'-namespace, past vertalingen toe, en rendert de grid.
+         Het script staat onderaan de body zodat de DOM-elementen
+         waarnaar home.js refereert (#routes-grid, [data-i18n])
+         zeker al bestaan op het moment dat het script draait.
+         ------------------------------------------------------- -->
     <script src="js/home.js"></script>
 
   </body>
