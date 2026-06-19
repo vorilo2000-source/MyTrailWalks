@@ -1,9 +1,9 @@
-=======================================================
+// =======================================================
 // i18n.js — v1.2.0
 // MyTrailWalks — wrapper rond i18next (T0-005)
 // Wijziging v1.2.0: loadPath dynamisch op basis van paginadiepte
-// zodat index.html (root) en routes/*.html (submap) beide
-// correct data/i18n/ kunnen bereiken.
+// zodat zowel root-pagina's (index.html) als submap-pagina's
+// (routes/ninglinspo.html) correct de JSON-bestanden vinden.
 // =======================================================
 "use strict";
 
@@ -13,7 +13,8 @@ const DEFAULT_LANGUAGE = "nl";
 
 // ---------------------------------------------------------
 // BASE PAD HELPER
-// Berekent het relatieve pad terug naar de root.
+// Bepaalt het relatieve pad terug naar de root op basis van
+// de huidige paginalocatie.
 // index.html (diepte 0) → ""
 // routes/ninglinspo.html (diepte 1) → "../"
 // ---------------------------------------------------------
@@ -24,9 +25,6 @@ function getBasePath() {
   return depth > 0 ? "../".repeat(depth) : "";
 }
 
-// ---------------------------------------------------------
-// LOADSCRIPT HELPER
-// ---------------------------------------------------------
 function loadScript(src) {
   return new Promise((resolve, reject) => {
     const script = document.createElement("script");
@@ -37,9 +35,6 @@ function loadScript(src) {
   });
 }
 
-// ---------------------------------------------------------
-// I18NEXT INITIALISEREN
-// ---------------------------------------------------------
 function init(initialNamespaces) {
   const namespaces = ["common"].concat(initialNamespaces || []);
   const base = getBasePath();
@@ -80,9 +75,6 @@ function init(initialNamespaces) {
   });
 }
 
-// ---------------------------------------------------------
-// NAMESPACE LADEN
-// ---------------------------------------------------------
 function loadNamespace(namespace) {
   return new Promise((resolve, reject) => {
     i18next.loadNamespaces(namespace, (error) => {
@@ -96,16 +88,10 @@ function loadNamespace(namespace) {
   });
 }
 
-// ---------------------------------------------------------
-// VERTAALHELPER
-// ---------------------------------------------------------
 function t(key) {
   return i18next.t(key);
 }
 
-// ---------------------------------------------------------
-// VERTALINGEN TOEPASSEN OP DE DOM
-// ---------------------------------------------------------
 function applyTranslations(root) {
   const scope = root || document;
 
@@ -130,14 +116,6 @@ function applyTranslations(root) {
   });
 }
 
-// ---------------------------------------------------------
-// TAAL WISSELEN
-// ---------------------------------------------------------
-const LANGUAGE_LABELS = {
-  nl: "Nederlands",
-  en: "English",
-};
-
 function changeLanguage(lang) {
   if (!SUPPORTED_LANGUAGES.includes(lang)) {
     console.error(`i18n.js: taal "${lang}" wordt niet ondersteund`);
@@ -151,22 +129,22 @@ function changeLanguage(lang) {
         reject(error);
         return;
       }
-
       try {
         localStorage.setItem("mtw_language", lang);
       } catch (e) {
         console.warn("i18n.js: kon taalvoorkeur niet opslaan in localStorage", e);
       }
-
       applyTranslations();
       resolve(lang);
     });
   });
 }
 
-// ---------------------------------------------------------
-// TAALWISSELAAR BOUWEN
-// ---------------------------------------------------------
+const LANGUAGE_LABELS = {
+  nl: "Nederlands",
+  en: "English",
+};
+
 function buildLanguageSwitcher(selectEl) {
   if (!selectEl) {
     console.error("i18n.js: buildLanguageSwitcher — geen <select> element meegegeven");
@@ -180,11 +158,9 @@ function buildLanguageSwitcher(selectEl) {
     const option = document.createElement("option");
     option.value = lang;
     option.textContent = LANGUAGE_LABELS[lang] || lang.toUpperCase();
-
     if (lang === activeLang || activeLang.startsWith(lang)) {
       option.selected = true;
     }
-
     selectEl.appendChild(option);
   });
 
@@ -193,9 +169,6 @@ function buildLanguageSwitcher(selectEl) {
   });
 }
 
-// ---------------------------------------------------------
-// PUBLIEKE API
-// ---------------------------------------------------------
 window.i18nModule = {
   init,
   loadNamespace,
