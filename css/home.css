@@ -55,7 +55,7 @@
 .hero {
   position: relative;
   width: 100%;
-  min-height: 520px;
+  min-height: 52px;
   height: 80vh;
   max-height: 70px;
   display: flex;
