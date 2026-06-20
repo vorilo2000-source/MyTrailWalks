@@ -81,3 +81,69 @@
 ---
 
 # END OF PROJECTLOG.md
+
+---
+
+## Sessie 02b — 20-06-2026 (vervolg)
+**Onderwerp:** Architectuurbeslissingen route creator, print-functie, foto-opslag, login-strategie
+**Status:** Beslissingen vastgelegd, taken toegevoegd aan backlog. Geen code gebouwd.
+
+### Beslissingen
+
+| Onderwerp | Beslissing |
+|-----------|-----------|
+| **Foto-opslag** | Cloudinary gratis tier (25GB opslag, 25GB bandbreedte/maand, automatische WebP). Beter dan Supabase Storage (1GB) voor media. pCloud afgevallen — geen directe img-links. |
+| **Login creator** | Uitgesteld naar T6-001 (Supabase auth). In MVP geen login op creator. |
+| **Interactieve kaart** | Opent in apart tabblad via "Bekijk kaart" knop. Routepagina zelf blijft A4-clean. |
+| **Print-functie** | `@media print` CSS. Browser-native "Bewaar als PDF". Geen externe PDF-library. Kaart vervangen door statische afbeelding bij afdrukken. Actieve links blijven werken in PDF. |
+| **WYSIWYG** | Routepagina ziet er op scherm hetzelfde uit als bij afdrukken — A4-breedte alleen actief bij `@media print`. |
+| **Print publiek** | Print-knop wordt publiek toegankelijk zodat wandelaars pagina kunnen gebruiken voor planning, vervoer, navigatie. |
+| **Navbar** | Definitief verwijderd. Topbar doet het navigatiewerk. |
+| **Hosting** | Blijft GitHub Pages. Netlify uitgesteld (niet nodig zonder login in MVP). |
+
+### Nieuwe taken toegevoegd aan backlog
+
+| ID | Omschrijving |
+|----|-------------|
+| T0-007 | Cloudinary integratie |
+| T1-006 | Route creator (`creator.html`) |
+| T1-007 | Route kaartpagina (apart tabblad) |
+| T2-006 | Statische kaartafbeelding voor print |
+| T7-001 | Print CSS routepagina |
+| T7-002 | Print knop publiek |
+| T7-003 | Planningsinformatie op routepagina |
+| TD-006 | Favicon toevoegen aan alle pagina's |
+
+---
+
+# END OF PROJECTLOG.md
+
+---
+
+## Sessie 02c — 20-06-2026 (vervolg)
+**Onderwerp:** AI-integratie in route creator + GPX interpretatie + weerdata
+**Status:** Beslissingen vastgelegd, taken toegevoegd aan backlog.
+
+### Beslissingen
+
+| Onderwerp | Beslissing |
+|-----------|-----------|
+| **AI in creator** | Anthropic API — verhaal, tips, samenvatting, captions, vertaling genereren op basis van GPX + weerdata + steekwoorden |
+| **API-key** | Gebruiker voert key in bij openen creator, wordt niet opgeslagen |
+| **Modi creator** | Handmatig (geen AI) of AI-assisted (AI stelt voor, gebruiker past aan) |
+| **GPX interpretatie** | Client-side parser berekent: afstand, duur, hoogtemeters, snelheid, steilste stukken, rustpunten, hoogste/laagste punt |
+| **Weerdata** | Open-Meteo API — historische data op basis van datum + coördinaten. Gratis, geen key. |
+| **Locatienaam** | Nominatim (OSM) — automatisch uit GPX-coördinaten. Gratis, geen key. |
+| **JSON schema** | Uitgebreid met `gpx_stats` en `weather` velden |
+
+### Nieuwe taken toegevoegd
+
+| ID | Omschrijving |
+|----|-------------|
+| T0-008 | API integraties (Open-Meteo, Nominatim, Anthropic) |
+| T3-006 | Weer-blok op routepagina |
+| T1-006 | Route creator uitgebreid met AI + GPX + weer |
+
+---
+
+# END OF PROJECTLOG.md
