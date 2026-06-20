@@ -147,3 +147,27 @@
 ---
 
 # END OF PROJECTLOG.md
+
+## Sessie 02d — 20-06-2026 (vervolg)
+**Onderwerp:** Creator als pre-planning tool + draft/published workflow
+**Status:** Beslissingen vastgelegd, taken bijgewerkt.
+
+### Beslissingen
+
+| Onderwerp | Beslissing |
+|-----------|-----------|
+| **Creator pre-planning** | Creator ondersteunt twee statussen: `draft` (voor de wandeling) en `published` (na de wandeling) |
+| **Draft** | Velden: naam, regio, geplande datum, geschatte stats, bronlink (AllTrails). Geen GPX/weer/foto\'s. AI schrijft verwachtingsverhaal. |
+| **Published** | Draft heropenen na wandeling, GPX + weerdata + foto\'s toevoegen, AI verfijnt verhaal. |
+| **Homepage grid** | Draft-routes tonen "Binnenkort" badge, niet klikbaar. Published-routes volledig klikbaar. |
+| **JSON schema** | Uitgebreid met `status`, `planned_date`, `published_date`, `source_reference` |
+
+### Nieuwe taken toegevoegd
+
+| ID | Omschrijving |
+|----|-------------|
+| T1-008 | Draft management — homepage badge + creator draft heropenen |
+
+---
+
+# END OF PROJECTLOG.md
