@@ -1,6 +1,9 @@
 // =======================================================
-// i18n.js — v1.2.0
+// i18n.js — v1.3.0
 // MyTrailWalks — wrapper rond i18next (T0-005)
+// Wijziging v1.3.0: getBasePath() filtert nu ook .html
+// bestandsnamen uit het pad, zodat /index.html en
+// /routes/ninglinspo.html beide correct werken.
 // Wijziging v1.2.0: loadPath dynamisch op basis van paginadiepte
 // zodat zowel root-pagina's (index.html) als submap-pagina's
 // (routes/ninglinspo.html) correct de JSON-bestanden vinden.
@@ -15,13 +18,19 @@ const DEFAULT_LANGUAGE = "nl";
 // BASE PAD HELPER
 // Bepaalt het relatieve pad terug naar de root op basis van
 // de huidige paginalocatie.
-// index.html (diepte 0) → ""
-// routes/ninglinspo.html (diepte 1) → "../"
+// /MyTrailWalks/             (diepte 0) → ""
+// /MyTrailWalks/index.html   (diepte 0) → ""  ← fix v1.3.0
+// /MyTrailWalks/routes/x.html (diepte 1) → "../"
 // ---------------------------------------------------------
 function getBasePath() {
-  const depth = window.location.pathname
+  const segments = window.location.pathname
     .split("/")
-    .filter(Boolean).length - 1;
+    .filter(Boolean)
+    .filter((seg) => !seg.endsWith(".html")); // .html bestanden tellen niet mee als mapniveau
+
+  // Eerste segment is de repo-naam op GitHub Pages (bv. "MyTrailWalks")
+  // Die telt ook niet mee als diepte — enkel echte submappen daarna
+  const depth = Math.max(0, segments.length - 1);
   return depth > 0 ? "../".repeat(depth) : "";
 }
 
@@ -51,7 +60,6 @@ function init(initialNamespaces) {
           ns: namespaces,
           defaultNS: namespaces[namespaces.length - 1],
           backend: {
-            // Dynamisch pad: werkt correct vanuit root én submappen
             loadPath: `${base}data/i18n/{{lng}}/{{ns}}.json`,
           },
           detection: {
