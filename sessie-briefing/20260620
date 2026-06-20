@@ -1,0 +1,197 @@
+# MyTrailWalks — Sessie 03 Inbrief
+## Datum: volgende sessie na 20-06-2026
+> Doel: Route creator (AI-assisted) + route detail pagina + print-functie
+
+---
+
+## Context
+
+MyTrailWalks is een persoonlijk visueel outdoor storytelling platform. Vanilla HTML/CSS/JS, geen frameworks. i18next voor vertalingen. Foto's via Cloudinary (extern). Statische site op GitHub Pages.
+
+### Bestanden die al bestaan
+
+| Bestand | Versie | Status |
+|---------|--------|--------|
+| `js/i18n.js` | v1.2.0 | ✅ Dynamisch loadPath, mtw_language |
+| `js/app.js` | v2.1.0 | ✅ Component injectie via window.appReady |
+| `js/home.js` | v2.0.0 | ✅ Homepage grid |
+| `css/main.css` | — | ✅ Design tokens |
+| `css/home.css` | v2.1.0 | ✅ Hero + grid |
+| `css/topbar.css` | v1.1.0 | ✅ Logo + merknaam |
+| `css/footer.css` | v1.0.0 | ✅ Footer |
+| `components/topbar.html` | v1.1.0 | ✅ Logo2.png + taalswitch |
+| `components/footer.html` | v1.0.0 | ✅ Copyright + links |
+| `data/i18n/nl/` + `data/i18n/en/` | — | ✅ common + home namespaces |
+| `assets/images/favicon.ico` + varianten | — | ✅ Klaar, nog toevoegen aan pagina's |
+| `assets/images/Logo2.png` | — | ✅ MyTrailWalks logo |
+| `assets/images/hero.jpg` | — | ✅ Hero achtergrond homepage |
+
+### Nog te bouwen
+- `data/content/ninglinspo.json` — eerste route
+- `creator.html` + `css/creator.css` + `js/creator.js`
+- `routes/[id].html` — route detail pagina
+- `css/routes.css` + `js/routes.js`
+- `routes/[id]-map.html` — interactieve kaartpagina
+
+---
+
+## Prioriteiten sessie 03
+
+### 1. Cloudinary (T0-007)
+- Account aanmaken op cloudinary.com (gratis, 25GB)
+- Upload workflow: foto uploaden → directe URL kopiëren → in JSON plakken
+- Documenteer de URL-structuur voor het project
+
+### 2. API integraties voorbereiden (T0-008)
+
+**Open-Meteo** (historische weerdata, gratis, geen key):
+```javascript
+// Voorbeeld aanroep
+fetch(`https://archive-api.open-meteo.com/v1/archive
+  ?latitude=50.47&longitude=5.67
+  &start_date=2026-06-15&end_date=2026-06-15
+  &daily=temperature_2m_max,temperature_2m_min,precipitation_sum,wind_speed_10m_max
+  &timezone=Europe/Brussels`)
+```
+
+**OpenStreetMap Nominatim** (locatienaam uit coördinaten, gratis):
+```javascript
+// Voorbeeld aanroep
+fetch(`https://nominatim.openstreetmap.org/reverse
+  ?lat=50.47&lon=5.67&format=json`)
+```
+
+**Anthropic API** (AI-tekst generatie, betaald per gebruik):
+```javascript
+// Gebruiker voert API-key in bij openen creator
+// Key wordt NIET opgeslagen — alleen in geheugen tijdens sessie
+fetch("https://api.anthropic.com/v1/messages", {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({
+    model: "claude-sonnet-4-6",
+    max_tokens: 1000,
+    messages: [{ role: "user", content: prompt }]
+  })
+})
+```
+
+### 3. Route creator (T1-006)
+
+**Workflow:**
+1. GPX uploaden → automatisch berekend: afstand, duur, hoogtemeters op/neer, gemiddelde/max snelheid, hoogste/laagste punt, steilste stukken, rustpunten
+2. Datum + locatie (auto via Nominatim uit GPX) → weerdata opgehaald via Open-Meteo
+3. Foto-URLs invoeren (Cloudinary links)
+4. Steekwoorden/ervaringen invoeren
+5. AI genereert (optioneel): verhaal, tips, grid-samenvatting, foto-captions, vertaling
+6. Live preview naast formulier
+7. Export → downloadt `[id].json`
+
+**Twee modi:**
+- Handmatig — geen AI
+- AI-assisted — AI stelt voor, gebruiker past aan
+
+**Uitgebreid JSON schema (toevoeging op bestaand schema):**
+```json
+"status": "draft | published",
+"planned_date": "2026-07-10",
+"published_date": "2026-07-12",
+"source_reference": "https://www.alltrails.com/trail/...",
+"gpx_stats": {
+  "distance_km": 12.3,
+  "duration_hours": 3.5,
+  "elevation_up_m": 340,
+  "elevation_down_m": 310,
+  "avg_speed_kmh": 3.8,
+  "max_speed_kmh": 6.2,
+  "highest_point_m": 520,
+  "lowest_point_m": 180
+},
+"weather": {
+  "date": "2026-06-15",
+  "temperature_min": 12,
+  "temperature_max": 22,
+  "precipitation_mm": 0,
+  "wind_kmh": 8,
+  "condition": "zonnig",
+  "source": "Open-Meteo"
+}
+```
+
+### 4. Route detail pagina (T1-002)
+
+**Structuur:**
+topbar → hero foto → stats blok (GPX stats) → weer-blok → verhaal-blokken → tips → "Bekijk kaart" knop → "Print / Bewaar als PDF" knop → footer
+
+**Print:**
+- `@media print`: A4-formaat (794px), kaart → statische afbeelding, alle links actief
+- WYSIWYG: pagina ziet er op scherm hetzelfde uit als bij afdrukken
+- Print-knop is publiek toegankelijk
+
+### 5. Route kaartpagina (T1-007)
+`routes/[id]-map.html`: Leaflet + GPX overlay, topbar + footer, geopend in apart tabblad
+
+### 6. Favicon (TD-006)
+Toevoegen aan `<head>` van elke pagina — ná `<title>`, vóór CSS:
+```html
+<link rel="icon" type="image/x-icon" href="assets/images/favicon.ico">
+<link rel="icon" type="image/png" sizes="32x32" href="assets/images/favicon-32x32.png">
+<link rel="apple-touch-icon" sizes="180x180" href="assets/images/favicon-180x180.png">
+<link rel="icon" type="image/png" sizes="192x192" href="assets/images/favicon-192x192.png">
+```
+Pagina's in `routes/` gebruiken `../assets/images/`.
+
+---
+
+## Architectuurafspraken
+
+| Onderwerp | Afspraak |
+|-----------|---------|
+| **Foto-opslag** | Cloudinary — directe URL in JSON, geen lokale kopie |
+| **Kaart** | Apart tabblad (`[id]-map.html`) |
+| **Print** | Browser-native, geen externe library |
+| **Login creator** | Geen in MVP — uitgesteld naar T6-001 |
+| **Navbar** | Definitief verwijderd |
+| **AI API-key** | Ingevoerd door gebruiker, niet opgeslagen |
+| **Weerdata** | Open-Meteo, gratis, geen key |
+| **Locatienaam** | Nominatim, gratis, geen key |
+| **i18n** | Elke nieuwe pagina krijgt eigen namespace in `data/i18n/nl/` en `data/i18n/en/` |
+| **Scripts volgorde** | i18next CDN → `i18n.js` → `app.js` → pagina-JS |
+
+---
+
+## Design tokens (uit main.css)
+
+```
+--color-forest: #2C4A3B        (primair groen)
+--color-forest-dark: #1C3328   (donker groen)
+--color-earth: #8C6A4F         (aarde)
+--color-water: #4C7A89         (blauw accent)
+--color-cream: #F6F1E7         (achtergrond)
+--color-charcoal: #2B2926      (tekst)
+--color-charcoal-soft: #5C5752 (secundaire tekst)
+--color-line: #DDD4C2          (lijnen/dividers)
+--color-white: #FFFFFF
+--color-easy: #6E8F5C
+--color-medium: #C98A3E
+--color-hard: #B5503D
+--font-display: Fraunces
+--font-body: Inter
+--font-mono: JetBrains Mono
+--content-max-width: 1200px
+--content-narrow-width: 720px
+```
+
+---
+
+## Werkwijze
+
+1. Vraag altijd toestemming vóór uitvoering
+2. Check of gebruiker informatie heeft voordat je zelf zoekt
+3. Bouw in kleine iteraties
+4. Geef korte uitleg ná elke taak
+5. Update backlog + projectlog aan einde sessie
+
+---
+
+# END OF SESSIE_03_INBRIEF.md
