@@ -1,6 +1,6 @@
 # MyTrailWalks — PROJECTLOG.md
-## Bijgewerkt: 18-06-2026
-> Versie: v1.0.0 · Projectlog — chronologisch overzicht van sessies en wijzigingen
+## Bijgewerkt: 20-06-2026
+> Versie: v1.1.0 · Projectlog — chronologisch overzicht van sessies en wijzigingen
 
 ---
 
@@ -16,36 +16,67 @@
 
 | Bestand | Versie | Omschrijving |
 |---------|--------|--------------|
-| `js/i18n.js` | v1.1.0 | Nieuwe wrapper rond i18next: init, loadNamespace, t(), applyTranslations(), loadScript(), changeLanguage(), buildLanguageSwitcher(). Vervangt oude handgeschreven i18n-loader uit app.js (TrailStories-era). |
+| `js/i18n.js` | v1.1.0 | Nieuwe wrapper rond i18next: init, loadNamespace, t(), applyTranslations(), loadScript(), changeLanguage(), buildLanguageSwitcher(). |
 | `data/i18n/nl/common.json` | v1.0.0 | Gedeelde NL UI-teksten: navigatie, footer, route-stat-labels, moeilijkheidsgraden, a11y-labels. |
-| `data/i18n/nl/home.json` | v1.0.0 | Homepage-specifieke NL UI-teksten: paginatitel, intro-zin, grid-sectiekop, status-berichten (laden/leeg/fout). |
-| `data/i18n/en/common.json` | v1.0.0 | Engelse fallback voor common namespace. Structuur identiek aan NL-variant (vereist voor i18next fallback-mechanisme). |
+| `data/i18n/nl/home.json` | v1.0.0 | Homepage-specifieke NL UI-teksten. |
+| `data/i18n/en/common.json` | v1.0.0 | Engelse fallback voor common namespace. |
 | `data/i18n/en/home.json` | v1.0.0 | Engelse fallback voor home namespace. |
-| `data/routes.json` | v2.0.0 | Schema bijgewerkt: `language`-veld toegevoegd (verplicht conform CLAUDE.md), `detail_json` hernoemd naar `content_json`, pad gecorrigeerd naar `data/content/ninglinspo.json`. |
-| `index.html` | v1.1.0 | Homepage grid: CDN-scripts i18next, component-placeholders (topbar/navbar/footer), page-header met data-i18n, routes-grid container. CSS-links toegevoegd in v1.1.0. |
-| `css/home.css` | v1.0.0 | Grid-layout (mobile-first: 1→2→3 kolommen), tile-component, sticky nav-spacing via CSS-variabelen (--topbar-height / --navbar-height). |
-| `js/home.js` | v1.0.0 | Homepage init: i18next init + vertalingen toepassen + routes.json laden + grid renderen via createElement (geen innerHTML). |
-| `components/topbar.html` | v1.0.0 | Topbar fragment: auth-slot placeholder links, merknaam midden, taalwisselaar rechts. |
-| `css/topbar.css` | v1.0.0 | Topbar stijlen: sticky top:0, --topbar-height: 44px, lichte achtergrond (cream). |
-| `components/navbar.html` | v1.0.0 | Navbar fragment: logo links, drie directe links (Home/Wandelingen/Over), hamburger knop mobile. Geen dropdowns in MVP. |
-| `css/navbar.css` | v1.0.0 | Navbar stijlen: sticky top:var(--topbar-height), forest achtergrond, --navbar-height: 60px, mobile hamburger animatie. |
-| `components/footer.html` | v1.0.0 | Footer fragment: logo links, copyright + placeholder-links (disclaimer/privacy/terms) midden. Gebaseerd op MyFamTreeCollab footer v1.6, bewust aangepast (geen Ko-fi, geen inline styles, MyTrailWalks branding). |
-| `css/footer.css` | v1.0.0 | Footer stijlen: forest-dark achtergrond, flex-layout logo + center. |
+| `data/routes.json` | v2.0.0 | Schema bijgewerkt: `language`-veld toegevoegd, `content_json` pad gecorrigeerd. |
+| `index.html` | v1.1.0 | Homepage grid: CDN-scripts i18next, component-placeholders, page-header. |
+| `css/home.css` | v1.0.0 | Grid-layout (mobile-first), tile-component, sticky nav-spacing via CSS-variabelen. |
+| `js/home.js` | v1.0.0 | Homepage init: i18next + routes.json laden + grid renderen. |
+| `components/topbar.html` | v1.0.0 | Topbar fragment: auth-slot, merknaam midden, taalwisselaar rechts. |
+| `css/topbar.css` | v1.0.0 | Topbar stijlen: sticky, --topbar-height: 44px. |
+| `components/navbar.html` | v1.0.0 | Navbar fragment: logo, navigatielinks, hamburger mobile. |
+| `css/navbar.css` | v1.0.0 | Navbar stijlen: sticky, forest achtergrond, --navbar-height: 60px. |
+| `components/footer.html` | v1.0.0 | Footer fragment: logo + copyright + placeholder-links. |
+| `css/footer.css` | v1.0.0 | Footer stijlen: forest-dark achtergrond. |
 
-### Architectuurbeslissingen vastgelegd deze sessie
+### Openstaande punten na sessie 01
+- `js/app.js` herzien naar i18next-architectuur (TD-004)
+- `data/content/ninglinspo.json` aanmaken (T1-005)
+- CLAUDE.md localStorage-prefixtabel bijwerken naar `mtw_*` (TD-005)
 
-- **T0-005 herzien naar i18next** — `js/i18n.js` is volledig nieuw gebouwd als wrapper rond i18next (vervangt de handgeschreven loader uit de TrailStories-era `app.js`). De oude `app.js` is nog niet bijgewerkt — dat is een openstaand punt voor de volgende sessie.
-- **`mtw_` localStorage prefix** — taalvoorkeur wordt opgeslagen als `mtw_language` (prefix `mtw_` i.p.v. de verouderde `ts_` uit CLAUDE.md tabel — tabel moet bijgewerkt worden).
-- **Navbar: geen dropdowns in MVP** — bewuste keuze op basis van projectomvang. CSS-klassen zijn uitbreidbaar naar dropdown-structuur zonder herontwerp.
-- **Component-fragmenten als losse bestanden** — topbar/navbar/footer zijn aangeleverd als fragmenten. Fetch-injectie + hamburger-JS + buildLanguageSwitcher()-aanroep volgen in T0-006.
-- **CSS-variabelen voor sticky nav-spacing** — `--topbar-height: 44px` en `--navbar-height: 60px` staan in respectievelijk `topbar.css` en `navbar.css`. `home.css` gebruikt `calc(var(--nav-total-height) + var(--space-xl))` voor `main-content padding-top`. T0-006 hoeft `home.css` niet aan te raken.
+---
 
-### Openstaande punten na deze sessie
+## Sessie 02 — 20-06-2026
+**Onderwerp:** UI/UX redesign homepage — hero sectie, component-injectie, topbar zichtbaar, i18n keys, favicon, logo
+**Status aan einde sessie:** T0-006 ✅ Done · T0-005 ✅ Done (v1.2.0) · T1-001 ✅ Done · TD-004 ✅ Done · TD-005 ✅ Done
 
-- `js/app.js` is nog de oude TrailStories-versie — moet herzien worden naar i18next-architectuur (aanroep van `i18nModule.init()` i.p.v. eigen loader). Aanbeveling: oppakken als eerste stap in volgende sessie vóór T0-006.
-- `data/content/ninglinspo.json` bestaat nog niet — aanmaken als T1-005.
-- Logo-pad in navbar/footer (`assets/images/Logo1.png`) werkt vanuit root maar niet vanuit `routes/` submappen — T0-006 lost dit op via base-pad helper of absolute paden.
-- CLAUDE.md localStorage-prefixtabel vermeldt nog `ts_*` — bijwerken naar `mtw_*`.
+### Aangeleverde bestanden
+
+| Bestand | Versie | Omschrijving |
+|---------|--------|--------------|
+| `index.html` | v2.1.0 | Navbar verwijderd. Hero sectie toegevoegd (eyebrow + titel + subtitel + CTA). `app.js` als script toegevoegd. |
+| `css/home.css` | v2.1.0 | Dubbele hero-definitie verwijderd. Hero hoogte: `height: 55vh; max-height: 500px`. Overlay verlicht (neutraal zwart i.p.v. groen). Hero achtergrondafbeelding: `assets/images/hero.jpg`. |
+| `js/app.js` | v2.1.0 | Nieuw: fetch+injectie topbar + footer via `window.appReady` Promise. `getBasePath()` helper voor correcte paden vanuit submappen. `setActiveNavLink()`. |
+| `js/home.js` | v2.0.0 | Wacht op `window.appReady` vóór `buildLanguageSwitcher()`. i18n init volgorde gecorrigeerd. |
+| `js/i18n.js` | v1.2.0 | `loadPath` dynamisch via `getBasePath()` — werkt correct vanuit root én submappen. localStorage-detectie via `mtw_language`. |
+| `data/i18n/nl/home.json` | v2.0.0 | Hero keys toegevoegd: `hero.tagline`, `hero.title`, `hero.sub`, `hero.cta`. |
+| `data/i18n/en/home.json` | v2.0.0 | Hero keys toegevoegd (Engelse fallback). |
+| `data/i18n/en/common.json` | v1.0.0 | Nieuw aangemaakt — Engelse fallback voor common namespace. |
+| `components/topbar.html` | v1.1.0 | Logo (Logo2.png) toegevoegd naast merknaam. |
+| `css/topbar.css` | v1.1.0 | Logo stijlen: `height: 32px`, flex naast merknaam. --topbar-height: 52px. |
+| `assets/images/hero.jpg` | — | Hero achtergrondafbeelding homepage (woestijnlandschap). |
+| `assets/images/Logo2.png` | — | MyTrailWalks logo (wandelaar met wandelstok, boom, bergen). |
+| `assets/images/favicon.ico` | — | Favicon gegenereerd uit Logo2.png (16/32/48px). |
+| `assets/images/favicon-32x32.png` | — | Favicon PNG 32x32. |
+| `assets/images/favicon-180x180.png` | — | Apple touch icon 180x180. |
+| `assets/images/favicon-192x192.png` | — | Android favicon 192x192. |
+
+### Architectuurbeslissingen sessie 02
+
+- **Navbar verwijderd** — bewuste beslissing: topbar doet het navigatiewerk (merknaam + taalswitch + inlog post-MVP). Geen aparte navbar op de homepage.
+- **Hero sectie toegevoegd** — fullwidth, donkere overlay, gecentreerde tekst + CTA. Achtergrondafbeelding via `hero__bg` element.
+- **`window.appReady` patroon** — `app.js` exporteert een Promise die resolvet na component-injectie. `home.js` wacht hierop zodat `buildLanguageSwitcher()` pas aangeroepen wordt als de `<select>` in de DOM zit.
+- **Dynamisch loadPath in i18n.js** — `getBasePath()` berekent het juiste pad op basis van paginadiepte. Lost het `../` probleem op voor pagina's in submappen.
+- **Favicon toegevoegd** — gegenereerd uit Logo2.png via Pillow. Toe te voegen in `<head>` van elke pagina na `<title>`.
+
+### Openstaande punten na sessie 02
+- Favicon `<link>` tags toevoegen aan elke pagina's `<head>`
+- `T1-005` — `data/content/ninglinspo.json` aanmaken
+- `T0-003` — Route template herzien
+- `T1-002` — Route detail pagina
 
 ---
 
