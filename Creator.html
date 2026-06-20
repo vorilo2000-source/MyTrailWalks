@@ -1,0 +1,343 @@
+<! -- Creator.html version 1.0.0 -- >                        
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Route creator — MyTrailWalks</title>
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/x-icon" href="assets/images/favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/images/favicon-32x32.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="assets/images/favicon-180x180.png">
+  <link rel="icon" type="image/png" sizes="192x192" href="assets/images/favicon-192x192.png">
+
+  <!-- Fonts via Google -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+
+  <!-- i18next CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/i18next@23/dist/umd/i18next.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/i18next-http-backend@2/i18nextHttpBackend.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/i18next-browser-languagedetector@7/i18nextBrowserLanguageDetector.min.js"></script>
+
+  <!-- CSS -->
+  <link rel="stylesheet" href="css/main.css">
+  <link rel="stylesheet" href="css/topbar.css">
+  <link rel="stylesheet" href="css/footer.css">
+  <link rel="stylesheet" href="css/creator.css">
+</head>
+<body>
+
+  <!-- Topbar -->
+  <div id="topbar-placeholder" aria-hidden="true"></div>
+
+  <!-- Main -->
+  <main id="main-content" class="creator-layout">
+
+    <!-- Header balk -->
+    <header class="creator-header">
+      <div class="creator-header__inner">
+        <div class="creator-header__title">
+          <span class="creator-header__eyebrow">Route creator</span>
+          <h1>Nieuwe wandeling</h1>
+        </div>
+        <div class="creator-header__actions">
+          <button class="btn btn--ghost" id="btn-mode-toggle" title="Schakel tussen handmatig en AI-modus">
+            <span class="btn-icon">✦</span>
+            <span id="mode-label">AI-modus inschakelen</span>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <!-- API key balk (verborgen tenzij AI-modus) -->
+    <div class="api-key-bar" id="api-key-bar" hidden>
+      <div class="api-key-bar__inner">
+        <label for="input-api-key" class="api-key-bar__label">
+          Anthropic API-sleutel
+          <span class="api-key-bar__note">Wordt niet opgeslagen — enkel actief tijdens deze sessie</span>
+        </label>
+        <div class="api-key-bar__field">
+          <input type="password" id="input-api-key" class="input input--mono" placeholder="sk-ant-..." autocomplete="off">
+          <button class="btn btn--primary btn--sm" id="btn-key-confirm">Bevestigen</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Werkruimte: formulier + preview naast elkaar -->
+    <div class="creator-workspace">
+
+      <!-- LINKER KOLOM: stap-voor-stap formulier -->
+      <div class="creator-form-col">
+
+        <!-- STAP 1: GPX -->
+        <section class="creator-step" id="step-gpx">
+          <div class="creator-step__header">
+            <span class="creator-step__num">1</span>
+            <h2 class="creator-step__title">GPX-bestand</h2>
+            <span class="creator-step__status" id="gpx-status"></span>
+          </div>
+          <div class="creator-step__body">
+            <div class="drop-zone" id="gpx-drop-zone">
+              <input type="file" id="gpx-file-input" accept=".gpx" hidden>
+              <div class="drop-zone__inner" id="gpx-drop-inner">
+                <span class="drop-zone__icon">↑</span>
+                <p class="drop-zone__text">Sleep je GPX-bestand hierheen</p>
+                <p class="drop-zone__sub">of <button class="link-btn" id="gpx-browse-btn">kies een bestand</button></p>
+              </div>
+            </div>
+
+            <!-- GPX resultaten (verborgen tot na parse) -->
+            <div class="gpx-stats" id="gpx-stats" hidden>
+              <div class="stat-grid">
+                <div class="stat-item">
+                  <span class="stat-value" id="stat-distance">—</span>
+                  <span class="stat-label">Afstand</span>
+                </div>
+                <div class="stat-item">
+                  <span class="stat-value" id="stat-duration">—</span>
+                  <span class="stat-label">Duur</span>
+                </div>
+                <div class="stat-item">
+                  <span class="stat-value" id="stat-ele-up">—</span>
+                  <span class="stat-label">Stijging</span>
+                </div>
+                <div class="stat-item">
+                  <span class="stat-value" id="stat-ele-down">—</span>
+                  <span class="stat-label">Daling</span>
+                </div>
+                <div class="stat-item">
+                  <span class="stat-value" id="stat-highest">—</span>
+                  <span class="stat-label">Hoogste punt</span>
+                </div>
+                <div class="stat-item">
+                  <span class="stat-value" id="stat-lowest">—</span>
+                  <span class="stat-label">Laagste punt</span>
+                </div>
+                <div class="stat-item">
+                  <span class="stat-value" id="stat-avg-speed">—</span>
+                  <span class="stat-label">Gem. snelheid</span>
+                </div>
+                <div class="stat-item">
+                  <span class="stat-value" id="stat-max-speed">—</span>
+                  <span class="stat-label">Max. snelheid</span>
+                </div>
+              </div>
+              <button class="link-btn link-btn--small" id="gpx-reset-btn">Ander bestand kiezen</button>
+            </div>
+          </div>
+        </section>
+
+        <hr class="step-divider">
+
+        <!-- STAP 2: Datum + locatie + weer -->
+        <section class="creator-step" id="step-meta">
+          <div class="creator-step__header">
+            <span class="creator-step__num">2</span>
+            <h2 class="creator-step__title">Datum &amp; locatie</h2>
+          </div>
+          <div class="creator-step__body">
+            <div class="field-row">
+              <div class="field">
+                <label class="field__label" for="input-date">Wandeldatum</label>
+                <input type="date" id="input-date" class="input">
+              </div>
+              <div class="field field--grow">
+                <label class="field__label" for="input-location">Locatie</label>
+                <div class="input-with-action">
+                  <input type="text" id="input-location" class="input" placeholder="Automatisch via GPX of handmatig">
+                  <button class="btn btn--ghost btn--sm" id="btn-fetch-location" title="Locatie ophalen via GPX-coördinaten">↺</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Weerdata -->
+            <div class="weather-block" id="weather-block" hidden>
+              <div class="weather-block__header">
+                <span class="weather-block__label">Weerdata — Open-Meteo</span>
+                <button class="link-btn link-btn--small" id="btn-refetch-weather">Opnieuw ophalen</button>
+              </div>
+              <div class="weather-grid">
+                <div class="weather-item">
+                  <span class="stat-value" id="w-temp-min">—</span>
+                  <span class="stat-label">Min. temp</span>
+                </div>
+                <div class="weather-item">
+                  <span class="stat-value" id="w-temp-max">—</span>
+                  <span class="stat-label">Max. temp</span>
+                </div>
+                <div class="weather-item">
+                  <span class="stat-value" id="w-precip">—</span>
+                  <span class="stat-label">Neerslag</span>
+                </div>
+                <div class="weather-item">
+                  <span class="stat-value" id="w-wind">—</span>
+                  <span class="stat-label">Wind</span>
+                </div>
+              </div>
+              <div class="field field--inline">
+                <label class="field__label" for="input-weather-condition">Omschrijving</label>
+                <input type="text" id="input-weather-condition" class="input" placeholder="zonnig, bewolkt, regenachtig…">
+              </div>
+            </div>
+
+            <button class="btn btn--secondary btn--sm" id="btn-fetch-weather">Weerdata ophalen</button>
+          </div>
+        </section>
+
+        <hr class="step-divider">
+
+        <!-- STAP 3: Route info -->
+        <section class="creator-step" id="step-info">
+          <div class="creator-step__header">
+            <span class="creator-step__num">3</span>
+            <h2 class="creator-step__title">Route-informatie</h2>
+          </div>
+          <div class="creator-step__body">
+            <div class="field">
+              <label class="field__label" for="input-title">Titel</label>
+              <input type="text" id="input-title" class="input" placeholder="bv. Ninglinspo in de vroege ochtend">
+            </div>
+            <div class="field-row">
+              <div class="field">
+                <label class="field__label" for="input-difficulty">Moeilijkheid</label>
+                <select id="input-difficulty" class="input">
+                  <option value="">— Kies —</option>
+                  <option value="easy">Gemakkelijk</option>
+                  <option value="medium">Gemiddeld</option>
+                  <option value="hard">Zwaar</option>
+                </select>
+              </div>
+              <div class="field field--grow">
+                <label class="field__label" for="input-region">Regio</label>
+                <input type="text" id="input-region" class="input" placeholder="bv. Ardennen">
+              </div>
+            </div>
+            <div class="field">
+              <label class="field__label" for="input-source">Bronvermelding (optioneel)</label>
+              <input type="url" id="input-source" class="input" placeholder="https://www.alltrails.com/…">
+            </div>
+          </div>
+        </section>
+
+        <hr class="step-divider">
+
+        <!-- STAP 4: Foto's -->
+        <section class="creator-step" id="step-photos">
+          <div class="creator-step__header">
+            <span class="creator-step__num">4</span>
+            <h2 class="creator-step__title">Foto's</h2>
+            <span class="creator-step__hint">Cloudinary URLs</span>
+          </div>
+          <div class="creator-step__body">
+            <div class="field">
+              <label class="field__label" for="input-hero-photo">Hero-foto URL</label>
+              <input type="url" id="input-hero-photo" class="input" placeholder="https://res.cloudinary.com/…">
+            </div>
+            <div id="photo-list" class="photo-list">
+              <!-- Extra foto's worden hier dynamisch ingevoegd -->
+            </div>
+            <button class="btn btn--ghost btn--sm" id="btn-add-photo">+ Foto toevoegen</button>
+          </div>
+        </section>
+
+        <hr class="step-divider">
+
+        <!-- STAP 5: Verhaal & tips -->
+        <section class="creator-step" id="step-story">
+          <div class="creator-step__header">
+            <span class="creator-step__num">5</span>
+            <h2 class="creator-step__title">Verhaal &amp; tips</h2>
+            <span class="creator-step__hint ai-hint" id="ai-story-hint" hidden>AI kan dit genereren</span>
+          </div>
+          <div class="creator-step__body">
+            <div class="field">
+              <label class="field__label" for="input-keywords">Steekwoorden / ervaringen</label>
+              <input type="text" id="input-keywords" class="input" placeholder="bv. waterval, mist, stilte, modderig pad">
+              <span class="field__help">Komma-gescheiden. Gebruikt als input voor AI of als tags.</span>
+            </div>
+            <div class="field">
+              <label class="field__label" for="input-intro">Korte samenvatting <span class="field__char-count" id="intro-count">0/160</span></label>
+              <textarea id="input-intro" class="input input--textarea" rows="3" maxlength="160" placeholder="Eén zin die de wandeling samenvat voor de grid-weergave…"></textarea>
+            </div>
+            <div class="field">
+              <label class="field__label" for="input-story">Verhaal</label>
+              <textarea id="input-story" class="input input--textarea" rows="8" placeholder="Het volledige wandelverhaal…"></textarea>
+            </div>
+            <div class="field">
+              <label class="field__label" for="input-tips">Tips</label>
+              <textarea id="input-tips" class="input input--textarea" rows="4" placeholder="Praktische tips voor wandelaars…"></textarea>
+            </div>
+
+            <!-- AI genereer-knop (enkel zichtbaar in AI-modus) -->
+            <div class="ai-actions" id="ai-actions" hidden>
+              <button class="btn btn--ai" id="btn-ai-generate">
+                <span class="btn-icon">✦</span>
+                Genereer met AI
+              </button>
+              <span class="ai-actions__note">Vult verhaal, samenvatting en tips in op basis van jouw gegevens</span>
+            </div>
+          </div>
+        </section>
+
+        <hr class="step-divider">
+
+        <!-- STAP 6: Export -->
+        <section class="creator-step" id="step-export">
+          <div class="creator-step__header">
+            <span class="creator-step__num">6</span>
+            <h2 class="creator-step__title">Exporteren</h2>
+          </div>
+          <div class="creator-step__body">
+            <div class="field-row">
+              <div class="field">
+                <label class="field__label" for="input-route-id">Route ID (bestandsnaam)</label>
+                <div class="input-with-action">
+                  <input type="text" id="input-route-id" class="input input--mono" placeholder="bv. ninglinspo">
+                  <span class="input-suffix">.json</span>
+                </div>
+                <span class="field__help">Kleine letters, koppelteken i.p.v. spatie</span>
+              </div>
+              <div class="field">
+                <label class="field__label" for="input-status">Status</label>
+                <select id="input-status" class="input">
+                  <option value="draft">Draft</option>
+                  <option value="published">Gepubliceerd</option>
+                </select>
+              </div>
+            </div>
+            <button class="btn btn--primary btn--lg" id="btn-export">
+              JSON downloaden
+            </button>
+          </div>
+        </section>
+
+      </div><!-- /creator-form-col -->
+
+      <!-- RECHTER KOLOM: live preview -->
+      <aside class="creator-preview-col">
+        <div class="preview-sticky">
+          <div class="preview-header">
+            <span class="preview-header__label">Voorvertoning JSON</span>
+            <button class="link-btn link-btn--small" id="btn-copy-json">Kopieer</button>
+          </div>
+          <pre class="preview-json" id="preview-json"><code>{}</code></pre>
+        </div>
+      </aside>
+
+    </div><!-- /creator-workspace -->
+
+  </main>
+
+  <!-- Footer -->
+  <div id="footer-placeholder" aria-hidden="true"></div>
+
+  <!-- Scripts: volgorde conform architectuurafspraken -->
+  <script src="js/i18n.js"></script>
+  <script src="js/app.js"></script>
+  <script src="js/creator.js"></script>
+
+</body>
+</html>
