@@ -34,26 +34,26 @@
     root.id = "auth-modal-root";
     root.innerHTML = `
       <div id="auth-modal-backdrop" onclick="TopBarAuth.closeModal()"></div>
-      <div id="auth-modal-box" role="dialog" aria-modal="true" aria-label="${_t('auth.login')}">
-        <button id="auth-modal-close" onclick="TopBarAuth.closeModal()" aria-label="${_t('auth.close')}">&times;</button>
+      <div id="auth-modal-box" role="dialog" aria-modal="true" aria-label="${_t('auth:login')}">
+        <button id="auth-modal-close" onclick="TopBarAuth.closeModal()" aria-label="${_t('auth:close')}">&times;</button>
         <div class="auth-tabs" id="auth-tabs">
-          <button class="auth-tab active" id="tab-btn-login"    onclick="TopBarAuth.switchTab('login')">${_t('auth.login')}</button>
-          <button class="auth-tab"        id="tab-btn-register" onclick="TopBarAuth.switchTab('register')">${_t('auth.register')}</button>
+          <button class="auth-tab active" id="tab-btn-login"    onclick="TopBarAuth.switchTab('login')">${_t('auth:login')}</button>
+          <button class="auth-tab"        id="tab-btn-register" onclick="TopBarAuth.switchTab('register')">${_t('auth:register')}</button>
         </div>
 
         <!-- LOGIN -->
         <div class="auth-form-section active" id="auth-section-login">
           <div class="auth-field">
-            <label for="auth-login-email">${_t('auth.email')}</label>
-            <input type="email" id="auth-login-email" placeholder="${_t('auth.email_placeholder')}" autocomplete="email">
+            <label for="auth-login-email">${_t('auth:email')}</label>
+            <input type="email" id="auth-login-email" placeholder="${_t('auth:email_placeholder')}" autocomplete="email">
           </div>
           <div class="auth-field">
-            <label for="auth-login-password">${_t('auth.password')}</label>
-            <input type="password" id="auth-login-password" placeholder="${_t('auth.password_placeholder')}" autocomplete="current-password">
+            <label for="auth-login-password">${_t('auth:password')}</label>
+            <input type="password" id="auth-login-password" placeholder="${_t('auth:password_placeholder')}" autocomplete="current-password">
           </div>
-          <button class="auth-btn-primary" id="auth-btn-login" onclick="TopBarAuth.doLogin()">${_t('auth.login')}</button>
+          <button class="auth-btn-primary" id="auth-btn-login" onclick="TopBarAuth.doLogin()">${_t('auth:login')}</button>
           <p class="auth-forgot-link">
-            <a href="#" onclick="TopBarAuth.switchTab('forgot'); return false;">${_t('auth.forgot_password')}</a>
+            <a href="#" onclick="TopBarAuth.switchTab('forgot'); return false;">${_t('auth:forgot_password')}</a>
           </p>
           <div class="auth-msg" id="auth-msg-login"></div>
         </div>
@@ -61,36 +61,36 @@
         <!-- REGISTRATIE -->
         <div class="auth-form-section" id="auth-section-register">
           <div class="auth-field">
-            <label for="auth-reg-username">${_t('auth.username')}</label>
-            <input type="text" id="auth-reg-username" placeholder="${_t('auth.username_placeholder')}" maxlength="32" autocomplete="nickname">
+            <label for="auth-reg-username">${_t('auth:username')}</label>
+            <input type="text" id="auth-reg-username" placeholder="${_t('auth:username_placeholder')}" maxlength="32" autocomplete="nickname">
           </div>
           <div class="auth-field">
-            <label for="auth-reg-email">${_t('auth.email')}</label>
-            <input type="email" id="auth-reg-email" placeholder="${_t('auth.email_placeholder')}" autocomplete="email">
+            <label for="auth-reg-email">${_t('auth:email')}</label>
+            <input type="email" id="auth-reg-email" placeholder="${_t('auth:email_placeholder')}" autocomplete="email">
           </div>
           <div class="auth-field">
-            <label for="auth-reg-password">${_t('auth.password')}</label>
-            <input type="password" id="auth-reg-password" placeholder="${_t('auth.password_new_placeholder')}" autocomplete="new-password">
+            <label for="auth-reg-password">${_t('auth:password')}</label>
+            <input type="password" id="auth-reg-password" placeholder="${_t('auth:password_new_placeholder')}" autocomplete="new-password">
           </div>
           <div class="auth-field">
-            <label for="auth-reg-password2">${_t('auth.password_repeat')}</label>
-            <input type="password" id="auth-reg-password2" placeholder="${_t('auth.password_repeat_placeholder')}" autocomplete="new-password">
+            <label for="auth-reg-password2">${_t('auth:password_repeat')}</label>
+            <input type="password" id="auth-reg-password2" placeholder="${_t('auth:password_repeat_placeholder')}" autocomplete="new-password">
           </div>
-          <button class="auth-btn-primary" id="auth-btn-register" onclick="TopBarAuth.doRegister()">${_t('auth.register')}</button>
+          <button class="auth-btn-primary" id="auth-btn-register" onclick="TopBarAuth.doRegister()">${_t('auth:register')}</button>
           <div class="auth-msg" id="auth-msg-register"></div>
         </div>
 
         <!-- WACHTWOORD VERGETEN -->
         <div class="auth-form-section" id="auth-section-forgot">
           <p class="auth-back-link">
-            <a href="#" onclick="TopBarAuth.switchTab('login'); return false;">${_t('auth.back_to_login')}</a>
+            <a href="#" onclick="TopBarAuth.switchTab('login'); return false;">${_t('auth:back_to_login')}</a>
           </p>
-          <p class="auth-forgot-intro">${_t('auth.forgot_intro')}</p>
+          <p class="auth-forgot-intro">${_t('auth:forgot_intro')}</p>
           <div class="auth-field">
-            <label for="auth-forgot-email">${_t('auth.email')}</label>
-            <input type="email" id="auth-forgot-email" placeholder="${_t('auth.email_placeholder')}" autocomplete="email">
+            <label for="auth-forgot-email">${_t('auth:email')}</label>
+            <input type="email" id="auth-forgot-email" placeholder="${_t('auth:email_placeholder')}" autocomplete="email">
           </div>
-          <button class="auth-btn-primary" id="auth-btn-forgot" onclick="TopBarAuth.doForgotPassword()">${_t('auth.send_reset_link')}</button>
+          <button class="auth-btn-primary" id="auth-btn-forgot" onclick="TopBarAuth.doForgotPassword()">${_t('auth:send_reset_link')}</button>
           <div class="auth-msg" id="auth-msg-forgot"></div>
         </div>
       </div>
@@ -311,8 +311,8 @@
 
     if (username) {
       const adminItems = isCreator ? `
-        <div class="dropdown-section-label">${_t('auth.admin_section')}</div>
-        <a href="creator.html" role="menuitem">✦ ${_t('auth.route_creator')}</a>
+        <div class="dropdown-section-label">${_t('auth:admin_section')}</div>
+        <a href="creator.html" role="menuitem">✦ ${_t('auth:route_creator')}</a>
         <hr class="dropdown-divider">
       ` : "";
 
@@ -326,7 +326,7 @@
           <div class="top-user-dropdown" role="menu" id="top-user-dropdown">
             <div class="top-user-dropdown-header">${_escHtml(username)}</div>
             ${adminItems}
-            <button class="btn-logout" id="btn-dropdown-logout" role="menuitem">🚪 ${_t('auth.logout')}</button>
+            <button class="btn-logout" id="btn-dropdown-logout" role="menuitem">🚪 ${_t('auth:logout')}</button>
           </div>
         </div>
       `;
@@ -349,7 +349,7 @@
 
     } else {
       slot.innerHTML = `
-        <button class="top-auth-login" onclick="TopBarAuth.openModal()">${_t('auth.login')}</button>
+        <button class="top-auth-login" onclick="TopBarAuth.openModal()">${_t('auth:login')}</button>
       `;
     }
   }
@@ -385,7 +385,7 @@
       if (profile && profile.username) return profile.username;
     } catch (e) { /* profiel bestaat nog niet */ }
     const email = session.user.email || "";
-    return email.split("@")[0] || _t('auth.fallback_user');
+    return email.split("@")[0] || _t('auth:fallback_user');
   }
 
   // ---------------------------------------------------------------------------
@@ -436,11 +436,11 @@
     const email    = document.getElementById("auth-login-email").value.trim();
     const password = document.getElementById("auth-login-password").value;
     const btn      = document.getElementById("auth-btn-login");
-    btn.disabled = true; btn.textContent = _t('auth.busy');
+    btn.disabled = true; btn.textContent = _t('auth:busy');
     const { user, error } = await AuthModule.login(email, password);
-    btn.disabled = false; btn.textContent = _t('auth.login');
+    btn.disabled = false; btn.textContent = _t('auth:login');
     if (error) { _showMsg("auth-msg-login", error, "error"); return; }
-    _showMsg("auth-msg-login", _t('auth.logged_in'), "success");
+    _showMsg("auth-msg-login", _t('auth:logged_in'), "success");
     setTimeout(() => closeModal(), 800);
   }
 
@@ -451,25 +451,25 @@
     const password2 = document.getElementById("auth-reg-password2").value;
     const btn       = document.getElementById("auth-btn-register");
     if (password !== password2) {
-      _showMsg("auth-msg-register", _t('auth.passwords_no_match'), "error");
+      _showMsg("auth-msg-register", _t('auth:passwords_no_match'), "error");
       return;
     }
-    btn.disabled = true; btn.textContent = _t('auth.busy');
+    btn.disabled = true; btn.textContent = _t('auth:busy');
     const { user, error } = await AuthModule.register(email, password, username);
-    btn.disabled = false; btn.textContent = _t('auth.register');
+    btn.disabled = false; btn.textContent = _t('auth:register');
     if (error) { _showMsg("auth-msg-register", error, "error"); return; }
     switchTab("login");
-    _showMsg("auth-msg-login", _t('auth.confirm_email'), "success");
+    _showMsg("auth-msg-login", _t('auth:confirm_email'), "success");
   }
 
   async function doForgotPassword() {
     const email = document.getElementById("auth-forgot-email").value.trim();
     const btn   = document.getElementById("auth-btn-forgot");
-    btn.disabled = true; btn.textContent = _t('auth.busy');
+    btn.disabled = true; btn.textContent = _t('auth:busy');
     const { error } = await AuthModule.resetPassword(email);
-    btn.disabled = false; btn.textContent = _t('auth.send_reset_link');
+    btn.disabled = false; btn.textContent = _t('auth:send_reset_link');
     if (error) { _showMsg("auth-msg-forgot", error, "error"); return; }
-    _showMsg("auth-msg-forgot", _t('auth.reset_sent'), "success");
+    _showMsg("auth-msg-forgot", _t('auth:reset_sent'), "success");
   }
 
   // ---------------------------------------------------------------------------
