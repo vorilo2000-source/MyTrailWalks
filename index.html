@@ -1,8 +1,10 @@
 <!-- =======================================================
-     index.html — v2.2.0
+     index.html — v2.3.0
      MyTrailWalks — homepage
      Structuur: topbar → hero → route-grid → footer
-     Favicon toegevoegd
+     v2.3.0: Supabase SDK + auth.js + topbar-auth.js toegevoegd
+             voor login/admin dropdown in topbar
+     v2.2.0: Favicon toegevoegd
      ======================================================= -->
 <!DOCTYPE html>
 <html lang="nl" id="html-root">
@@ -11,33 +13,37 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>MyTrailWalks</title>
 
-       <!-- ======================= Favicon ======================= -->
-<link rel="icon" type="image/x-icon" href="assets/images/favicon.ico">
-<link rel="icon" type="image/png" sizes="32x32" href="assets/images/favicon-32x32.png">
-<link rel="apple-touch-icon" sizes="180x180" href="assets/images/favicon-180x180.png">
-<link rel="icon" type="image/png" sizes="192x192" href="assets/images/favicon-192x192.png">
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="assets/images/favicon.ico">
+    <link rel="icon" type="image/png" sizes="32x32" href="assets/images/favicon-32x32.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="assets/images/favicon-180x180.png">
+    <link rel="icon" type="image/png" sizes="192x192" href="assets/images/favicon-192x192.png">
 
+    <!-- CSS -->
     <link rel="stylesheet" href="css/main.css" />
-    <link rel="stylesheet" href="css/home.css" />
     <link rel="stylesheet" href="css/topbar.css" />
+    <link rel="stylesheet" href="css/home.css" />
     <link rel="stylesheet" href="css/footer.css" />
 
+    <!-- Supabase SDK -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+
+    <!-- i18next CDN -->
     <script src="https://cdn.jsdelivr.net/npm/i18next@23/i18next.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/i18next-http-backend@2/i18nextHttpBackend.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/i18next-browser-languagedetector@7/i18nextBrowserLanguageDetector.min.js"></script>
+
+    <!-- Scripts: volgorde conform architectuurafspraken -->
     <script src="js/i18n.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/topbar-auth.js"></script>
   </head>
-
   <body>
-
     <div id="topbar-placeholder" class="topbar-placeholder" aria-hidden="true"></div>
-
     <a href="#main-content" class="skip-link" data-i18n-aria="common:nav.skip_to_content">
       <span data-i18n="common:nav.skip_to_content"></span>
     </a>
-
     <main id="main-content" class="main-content">
-
       <section class="hero" aria-label="Intro">
         <div class="hero__bg"></div>
         <div class="hero__overlay"></div>
@@ -48,20 +54,16 @@
           <a href="#routes-grid" class="hero__cta" data-i18n="home:hero.cta"></a>
         </div>
       </section>
-
       <section class="routes-section container" aria-labelledby="routes-heading">
         <h2 id="routes-heading" class="routes-section__heading" data-i18n="home:grid.heading"></h2>
         <div id="routes-grid" class="routes-grid" role="list">
           <!-- Tiles worden dynamisch ingevuld door js/home.js -->
         </div>
       </section>
-
     </main>
-
     <div id="footer-placeholder" class="footer-placeholder" aria-hidden="true"></div>
 
     <script src="js/app.js"></script>
     <script src="js/home.js"></script>
-
   </body>
 </html>
