@@ -1,44 +1,33 @@
 // =============================================================================
 // auth.js — Supabase Authentication Module
-// MyTrailWalks v1.0.0
+// MyTrailWalks v1.1.0
 // -----------------------------------------------------------------------------
-// Gebaseerd op MyFamTreeCollab auth.js v2.5.2
-// Vereenvoudigd voor MyTrailWalks: geen tiers, geen collab-functies.
-// Enkel: login, register, logout, resetPassword, getProfile, is_admin check.
-//
-// ⚠️  CONFIGURATIE VEREIST:
-//     Vervang SUPABASE_URL en SUPABASE_ANON met jouw MyTrailWalks projectwaarden.
-//     Te vinden op: https://supabase.com/dashboard → jouw project → Settings → API
-//
-// Supabase tabel vereist:
-//     profiles (
-//       id uuid references auth.users primary key,
-//       username text,
-//       is_admin boolean default false,
-//       created_at timestamptz default now()
-//     )
+// Changelog v1.1.0:
+// - getProfile() haalt nu `role` op i.p.v. `is_admin` (tabel gewijzigd)
+// - window._supabase geëxporteerd voor analytics.js
+// - redirectTo aangepast naar correcte GitHub Pages URL
 //
 // Dependencies: Supabase JS SDK (geladen via CDN vóór dit script)
-// Load order:   auth.js → topbar.js → app.js → [pagina].js
+// Load order:   auth.js → topbar-auth.js → analytics.js → app.js → [pagina].js
 // =============================================================================
 
 (function () {
   "use strict";
 
   // ---------------------------------------------------------------------------
-  // ⚠️  CONFIGURATIE — vervang deze waarden na aanmaken Supabase project
+  // Configuratie
   // ---------------------------------------------------------------------------
   var SUPABASE_URL  = "https://bzcevvfesushlorymszd.supabase.co";
   var SUPABASE_ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ6Y2V2dmZlc3VzaGxvcnltc3pkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIwMTQ4NjIsImV4cCI6MjA5NzU5MDg2Mn0.0uHB4KdVftiHnKWeB0T2FArbNtjcZ51fvQz_PDBy72Y";
 
   // ---------------------------------------------------------------------------
-  // Supabase client
+  // Supabase client — ook beschikbaar als window._supabase voor analytics.js
   // ---------------------------------------------------------------------------
   var _client = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
+  window._supabase = _client;
 
   // ---------------------------------------------------------------------------
   // _errMsg(error)
-  // Vertaalt Supabase foutmeldingen naar Nederlandse tekst.
   // ---------------------------------------------------------------------------
   function _errMsg(error) {
     if (!error) return null;
@@ -103,9 +92,8 @@
   async function resetPassword(email) {
     if (!email) return { error: "Vul je e-mailadres in." };
 
-    // ⚠️  Pas de redirectTo URL aan naar jouw GitHub Pages URL
     var result = await _client.auth.resetPasswordForEmail(email, {
-      redirectTo: "https://JOUW_GITHUB_USERNAME.github.io/MyTrailWalks/reset.html",
+      redirectTo: "https://vorilo2000-source.github.io/MyTrailWalks/reset.html",
     });
 
     if (result.error) return { error: _errMsg(result.error) };
@@ -142,7 +130,7 @@
 
   // ---------------------------------------------------------------------------
   // getProfile()
-  // Haalt username en is_admin op uit de profiles tabel.
+  // Haalt username en role op uit de profiles tabel.
   // ---------------------------------------------------------------------------
   async function getProfile() {
     var user = await getUser();
@@ -150,7 +138,7 @@
 
     var result = await _client
       .from("profiles")
-      .select("username, is_admin")
+      .select("username, role")
       .eq("id", user.id)
       .single();
 
