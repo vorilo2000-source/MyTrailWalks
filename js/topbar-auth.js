@@ -392,6 +392,9 @@
   // Modal functies
   // ---------------------------------------------------------------------------
   function openModal() {
+    // Verwijder bestaande modal zodat hij opnieuw gebouwd wordt met actuele i18n vertalingen
+    const existing = document.getElementById("auth-modal-root");
+    if (existing) existing.remove();
     _injectModal();
     switchTab("login");
     document.getElementById("auth-modal-root").classList.add("open");
@@ -476,7 +479,8 @@
   // init()
   // ---------------------------------------------------------------------------
   async function init() {
-    _injectModal();
+    // Modal NIET hier injecteren — i18next is nog niet klaar.
+    // _injectModal() wordt aangeroepen bij openModal(), dan is i18next geïnitialiseerd.
 
     const session = await AuthModule.getSession();
 
