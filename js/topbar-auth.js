@@ -1,20 +1,28 @@
 // =============================================================================
 // topbar-auth.js — TopBar Auth Modal & Admin Dropdown
-// MyTrailWalks v1.0.0
+// MyTrailWalks v1.1.0
 // -----------------------------------------------------------------------------
-// Gebaseerd op MyFamTreeCollab topbar.js v2.3.2
-// Vereenvoudigd voor MyTrailWalks:
-// - Geen collab-badge
-// - Geen develop-dropdown
-// - Admin dropdown toont enkel "Creator" link (uitbreidbaar)
-// - Stijl aangepast aan MyTrailWalks design tokens
+// Changelog v1.1.0:
+// - Alle hardcoded teksten vervangen door i18next.t() sleutels
+// - Nieuwe auth.* sleutels in nl.json + en.json (v1.1.0)
 //
-// Dependencies: Supabase SDK, auth.js
+// Dependencies: Supabase SDK, auth.js, i18next (geladen via i18n.js)
 // Load order:   auth.js → topbar-auth.js → app.js → [pagina].js
 // =============================================================================
 
 (function () {
   "use strict";
+
+  // ---------------------------------------------------------------------------
+  // _t(key) — veilige i18next wrapper
+  // ---------------------------------------------------------------------------
+  function _t(key) {
+    if (window.i18next && window.i18next.isInitialized) {
+      return window.i18next.t(key);
+    }
+    // Fallback: laatste deel van de sleutel als leesbare tekst
+    return key.split(".").pop().replace(/_/g, " ");
+  }
 
   // ---------------------------------------------------------------------------
   // _injectModal()
@@ -26,26 +34,26 @@
     root.id = "auth-modal-root";
     root.innerHTML = `
       <div id="auth-modal-backdrop" onclick="TopBarAuth.closeModal()"></div>
-      <div id="auth-modal-box" role="dialog" aria-modal="true" aria-label="Inloggen">
-        <button id="auth-modal-close" onclick="TopBarAuth.closeModal()" aria-label="Sluiten">&times;</button>
+      <div id="auth-modal-box" role="dialog" aria-modal="true" aria-label="${_t('auth.login')}">
+        <button id="auth-modal-close" onclick="TopBarAuth.closeModal()" aria-label="${_t('auth.close')}">&times;</button>
         <div class="auth-tabs" id="auth-tabs">
-          <button class="auth-tab active" id="tab-btn-login"    onclick="TopBarAuth.switchTab('login')">Inloggen</button>
-          <button class="auth-tab"        id="tab-btn-register" onclick="TopBarAuth.switchTab('register')">Account aanmaken</button>
+          <button class="auth-tab active" id="tab-btn-login"    onclick="TopBarAuth.switchTab('login')">${_t('auth.login')}</button>
+          <button class="auth-tab"        id="tab-btn-register" onclick="TopBarAuth.switchTab('register')">${_t('auth.register')}</button>
         </div>
 
         <!-- LOGIN -->
         <div class="auth-form-section active" id="auth-section-login">
           <div class="auth-field">
-            <label for="auth-login-email">E-mailadres</label>
-            <input type="email" id="auth-login-email" placeholder="naam@voorbeeld.nl" autocomplete="email">
+            <label for="auth-login-email">${_t('auth.email')}</label>
+            <input type="email" id="auth-login-email" placeholder="${_t('auth.email_placeholder')}" autocomplete="email">
           </div>
           <div class="auth-field">
-            <label for="auth-login-password">Wachtwoord</label>
-            <input type="password" id="auth-login-password" placeholder="••••••••" autocomplete="current-password">
+            <label for="auth-login-password">${_t('auth.password')}</label>
+            <input type="password" id="auth-login-password" placeholder="${_t('auth.password_placeholder')}" autocomplete="current-password">
           </div>
-          <button class="auth-btn-primary" id="auth-btn-login" onclick="TopBarAuth.doLogin()">Inloggen</button>
+          <button class="auth-btn-primary" id="auth-btn-login" onclick="TopBarAuth.doLogin()">${_t('auth.login')}</button>
           <p class="auth-forgot-link">
-            <a href="#" onclick="TopBarAuth.switchTab('forgot'); return false;">Wachtwoord vergeten?</a>
+            <a href="#" onclick="TopBarAuth.switchTab('forgot'); return false;">${_t('auth.forgot_password')}</a>
           </p>
           <div class="auth-msg" id="auth-msg-login"></div>
         </div>
@@ -53,38 +61,36 @@
         <!-- REGISTRATIE -->
         <div class="auth-form-section" id="auth-section-register">
           <div class="auth-field">
-            <label for="auth-reg-username">Gebruikersnaam</label>
-            <input type="text" id="auth-reg-username" placeholder="Hoe wil je heten?" maxlength="32" autocomplete="nickname">
+            <label for="auth-reg-username">${_t('auth.username')}</label>
+            <input type="text" id="auth-reg-username" placeholder="${_t('auth.username_placeholder')}" maxlength="32" autocomplete="nickname">
           </div>
           <div class="auth-field">
-            <label for="auth-reg-email">E-mailadres</label>
-            <input type="email" id="auth-reg-email" placeholder="naam@voorbeeld.nl" autocomplete="email">
+            <label for="auth-reg-email">${_t('auth.email')}</label>
+            <input type="email" id="auth-reg-email" placeholder="${_t('auth.email_placeholder')}" autocomplete="email">
           </div>
           <div class="auth-field">
-            <label for="auth-reg-password">Wachtwoord</label>
-            <input type="password" id="auth-reg-password" placeholder="Minimaal 6 tekens" autocomplete="new-password">
+            <label for="auth-reg-password">${_t('auth.password')}</label>
+            <input type="password" id="auth-reg-password" placeholder="${_t('auth.password_new_placeholder')}" autocomplete="new-password">
           </div>
           <div class="auth-field">
-            <label for="auth-reg-password2">Wachtwoord herhalen</label>
-            <input type="password" id="auth-reg-password2" placeholder="Herhaal wachtwoord" autocomplete="new-password">
+            <label for="auth-reg-password2">${_t('auth.password_repeat')}</label>
+            <input type="password" id="auth-reg-password2" placeholder="${_t('auth.password_repeat_placeholder')}" autocomplete="new-password">
           </div>
-          <button class="auth-btn-primary" id="auth-btn-register" onclick="TopBarAuth.doRegister()">Account aanmaken</button>
+          <button class="auth-btn-primary" id="auth-btn-register" onclick="TopBarAuth.doRegister()">${_t('auth.register')}</button>
           <div class="auth-msg" id="auth-msg-register"></div>
         </div>
 
         <!-- WACHTWOORD VERGETEN -->
         <div class="auth-form-section" id="auth-section-forgot">
           <p class="auth-back-link">
-            <a href="#" onclick="TopBarAuth.switchTab('login'); return false;">← Terug naar inloggen</a>
+            <a href="#" onclick="TopBarAuth.switchTab('login'); return false;">${_t('auth.back_to_login')}</a>
           </p>
-          <p class="auth-forgot-intro">
-            Vul je e-mailadres in. Je ontvangt een link om een nieuw wachtwoord in te stellen.
-          </p>
+          <p class="auth-forgot-intro">${_t('auth.forgot_intro')}</p>
           <div class="auth-field">
-            <label for="auth-forgot-email">E-mailadres</label>
-            <input type="email" id="auth-forgot-email" placeholder="naam@voorbeeld.nl" autocomplete="email">
+            <label for="auth-forgot-email">${_t('auth.email')}</label>
+            <input type="email" id="auth-forgot-email" placeholder="${_t('auth.email_placeholder')}" autocomplete="email">
           </div>
-          <button class="auth-btn-primary" id="auth-btn-forgot" onclick="TopBarAuth.doForgotPassword()">Resetlink versturen</button>
+          <button class="auth-btn-primary" id="auth-btn-forgot" onclick="TopBarAuth.doForgotPassword()">${_t('auth.send_reset_link')}</button>
           <div class="auth-msg" id="auth-msg-forgot"></div>
         </div>
       </div>
@@ -95,8 +101,7 @@
   }
 
   // ---------------------------------------------------------------------------
-  // _injectStyles()
-  // Modal + dropdown CSS, afgestemd op MyTrailWalks design tokens
+  // _injectStyles() — ongewijzigd t.o.v. v1.0.0
   // ---------------------------------------------------------------------------
   function _injectStyles() {
     if (document.getElementById("auth-modal-styles")) return;
@@ -104,7 +109,6 @@
     const style = document.createElement("style");
     style.id = "auth-modal-styles";
     style.textContent = `
-      /* --- Backdrop & box --- */
       #auth-modal-backdrop {
         display: none; position: fixed; inset: 0;
         background: rgba(43, 41, 38, 0.6); z-index: 1000;
@@ -127,7 +131,6 @@
       }
       #auth-modal-close:hover { color: #2B2926; }
 
-      /* --- Tabs --- */
       .auth-tabs {
         display: flex; border-bottom: 1px solid #DDD4C2;
         margin-bottom: 24px; gap: 0;
@@ -141,11 +144,9 @@
       }
       .auth-tab.active { color: #2C4A3B; border-bottom-color: #2C4A3B; }
 
-      /* --- Secties --- */
       .auth-form-section        { display: none; }
       .auth-form-section.active { display: block; }
 
-      /* --- Velden --- */
       .auth-field { margin-bottom: 16px; }
       .auth-field label {
         display: block; font-size: 0.82rem; font-weight: 600;
@@ -164,7 +165,6 @@
         box-shadow: 0 0 0 3px rgba(44,74,59,0.12);
       }
 
-      /* --- Primaire knop --- */
       .auth-btn-primary {
         width: 100%; padding: 10px; font-size: 0.9rem; font-weight: 600;
         background: #2C4A3B; color: #fff; border: none;
@@ -175,7 +175,6 @@
       .auth-btn-primary:hover    { background: #1C3328; }
       .auth-btn-primary:disabled { background: #7a9e8e; cursor: default; }
 
-      /* --- Feedback berichten --- */
       .auth-msg {
         margin-top: 12px; padding: 10px 14px; border-radius: 6px;
         font-size: 0.85rem; display: none; line-height: 1.5;
@@ -192,7 +191,6 @@
         margin-bottom: 16px; line-height: 1.6;
       }
 
-      /* --- TopBar auth slot --- */
       #top-auth { display: flex; align-items: center; position: relative; }
 
       .top-auth-login {
@@ -210,7 +208,6 @@
         text-decoration: none;
       }
 
-      /* --- User knop + dropdown --- */
       .top-user-wrapper { position: relative; display: inline-block; }
 
       .top-user-btn {
@@ -277,7 +274,6 @@
       .top-user-dropdown .btn-logout { color: #B5503D; }
       .top-user-dropdown .btn-logout:hover { background: #fdf0ee; color: #8b3a2b; }
 
-      /* Admin sectie label */
       .dropdown-section-label {
         padding: 6px 16px 4px;
         font-size: 0.7rem; font-weight: 600;
@@ -304,17 +300,19 @@
   }
 
   // ---------------------------------------------------------------------------
-  // _renderTopBar(username, isAdmin)
+  // _renderTopBar(username, role)
   // ---------------------------------------------------------------------------
-  function _renderTopBar(username, isAdmin) {
+  function _renderTopBar(username, role) {
     const slot = document.getElementById("top-auth");
     if (!slot) return;
 
+    const isAdmin   = role === "admin";
+    const isCreator = role === "creator" || isAdmin;
+
     if (username) {
-      // Admin menu items — uitbreidbaar met meer items later
-      const adminItems = isAdmin ? `
-        <div class="dropdown-section-label">Beheer</div>
-        <a href="creator.html" role="menuitem">✦ Route creator</a>
+      const adminItems = isCreator ? `
+        <div class="dropdown-section-label">${_t('auth.admin_section')}</div>
+        <a href="creator.html" role="menuitem">✦ ${_t('auth.route_creator')}</a>
         <hr class="dropdown-divider">
       ` : "";
 
@@ -328,7 +326,7 @@
           <div class="top-user-dropdown" role="menu" id="top-user-dropdown">
             <div class="top-user-dropdown-header">${_escHtml(username)}</div>
             ${adminItems}
-            <button class="btn-logout" id="btn-dropdown-logout" role="menuitem">🚪 Uitloggen</button>
+            <button class="btn-logout" id="btn-dropdown-logout" role="menuitem">🚪 ${_t('auth.logout')}</button>
           </div>
         </div>
       `;
@@ -351,7 +349,7 @@
 
     } else {
       slot.innerHTML = `
-        <button class="top-auth-login" onclick="TopBarAuth.openModal()">Inloggen</button>
+        <button class="top-auth-login" onclick="TopBarAuth.openModal()">${_t('auth.login')}</button>
       `;
     }
   }
@@ -387,7 +385,7 @@
       if (profile && profile.username) return profile.username;
     } catch (e) { /* profiel bestaat nog niet */ }
     const email = session.user.email || "";
-    return email.split("@")[0] || "Gebruiker";
+    return email.split("@")[0] || _t('auth.fallback_user');
   }
 
   // ---------------------------------------------------------------------------
@@ -438,11 +436,11 @@
     const email    = document.getElementById("auth-login-email").value.trim();
     const password = document.getElementById("auth-login-password").value;
     const btn      = document.getElementById("auth-btn-login");
-    btn.disabled = true; btn.textContent = "Bezig…";
+    btn.disabled = true; btn.textContent = _t('auth.busy');
     const { user, error } = await AuthModule.login(email, password);
-    btn.disabled = false; btn.textContent = "Inloggen";
+    btn.disabled = false; btn.textContent = _t('auth.login');
     if (error) { _showMsg("auth-msg-login", error, "error"); return; }
-    _showMsg("auth-msg-login", "Ingelogd!", "success");
+    _showMsg("auth-msg-login", _t('auth.logged_in'), "success");
     setTimeout(() => closeModal(), 800);
   }
 
@@ -453,25 +451,25 @@
     const password2 = document.getElementById("auth-reg-password2").value;
     const btn       = document.getElementById("auth-btn-register");
     if (password !== password2) {
-      _showMsg("auth-msg-register", "Wachtwoorden komen niet overeen.", "error");
+      _showMsg("auth-msg-register", _t('auth.passwords_no_match'), "error");
       return;
     }
-    btn.disabled = true; btn.textContent = "Bezig…";
+    btn.disabled = true; btn.textContent = _t('auth.busy');
     const { user, error } = await AuthModule.register(email, password, username);
-    btn.disabled = false; btn.textContent = "Account aanmaken";
+    btn.disabled = false; btn.textContent = _t('auth.register');
     if (error) { _showMsg("auth-msg-register", error, "error"); return; }
     switchTab("login");
-    _showMsg("auth-msg-login", "Account aangemaakt! Controleer je e-mail en bevestig je adres, log daarna in.", "success");
+    _showMsg("auth-msg-login", _t('auth.confirm_email'), "success");
   }
 
   async function doForgotPassword() {
     const email = document.getElementById("auth-forgot-email").value.trim();
     const btn   = document.getElementById("auth-btn-forgot");
-    btn.disabled = true; btn.textContent = "Bezig…";
+    btn.disabled = true; btn.textContent = _t('auth.busy');
     const { error } = await AuthModule.resetPassword(email);
-    btn.disabled = false; btn.textContent = "Resetlink versturen";
+    btn.disabled = false; btn.textContent = _t('auth.send_reset_link');
     if (error) { _showMsg("auth-msg-forgot", error, "error"); return; }
-    _showMsg("auth-msg-forgot", "Als dit e-mailadres bekend is, ontvang je een resetlink. Controleer ook je spammap.", "success");
+    _showMsg("auth-msg-forgot", _t('auth.reset_sent'), "success");
   }
 
   // ---------------------------------------------------------------------------
@@ -484,32 +482,30 @@
 
     if (session) {
       const username = await _getUsernameFromSession(session);
-      let isAdmin = false;
+      let role = "gast";
       try {
         const { profile } = await AuthModule.getProfile();
-        isAdmin = profile && profile.is_admin === true;
+        if (profile && profile.role) role = profile.role;
       } catch (e) { /* geen profiel */ }
-      _renderTopBar(username, isAdmin);
+      _renderTopBar(username, role);
     } else {
-      _renderTopBar(null, false);
+      _renderTopBar(null, null);
     }
 
-    // Luister naar auth-wijzigingen
     AuthModule.onAuthChange(async (event, session) => {
       if (session) {
         const username = await _getUsernameFromSession(session);
-        let isAdmin = false;
+        let role = "gast";
         try {
           const { profile } = await AuthModule.getProfile();
-          isAdmin = profile && profile.is_admin === true;
+          if (profile && profile.role) role = profile.role;
         } catch (e) { /* geen profiel */ }
-        _renderTopBar(username, isAdmin);
+        _renderTopBar(username, role);
       } else {
-        _renderTopBar(null, false);
+        _renderTopBar(null, null);
       }
     });
 
-    // Klik buiten sluit dropdown
     document.addEventListener("click", () => _closeUserDropdown());
     document.addEventListener("keydown", (e) => {
       if (e.key === "Escape") { _closeUserDropdown(); closeModal(); }
