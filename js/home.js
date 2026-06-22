@@ -1,7 +1,7 @@
 // =======================================================
-// home.js — v2.1.0
+// home.js — v2.2.0
 // MyTrailWalks — homepage init
-// Wijziging v2.1.0: auth namespace toegevoegd aan i18nModule.init()
+// Wijziging v2.2.0: i18nModule.init() verwijderd — app.js initialiseert nu centraal
 //   zodat topbar-auth.js vertalingen correct laadt.
 // Volgorde: wacht op app.js (component injectie) via
 // window.appReady Promise, dan i18n init, dan grid renderen.
@@ -120,19 +120,11 @@ async function initHomePage() {
     await window.appReady;
   }
 
-  // i18n initialiseren — auth namespace toegevoegd voor topbar-auth.js (v2.1.0)
+  // i18n is al geïnitialiseerd door app.js — alleen title instellen
   try {
-    await i18nModule.init(["home", "auth"]);
-    i18nModule.applyTranslations();
     document.title = i18nModule.t("home:page.title");
   } catch (error) {
-    console.error("home.js: i18n init mislukt", error);
-  }
-
-  // Taalwisselaar vullen — topbar is nu zeker geïnjecteerd
-  const selectEl = document.getElementById("languageSwitcher");
-  if (selectEl) {
-    i18nModule.buildLanguageSwitcher(selectEl);
+    console.warn("home.js: title vertaling mislukt", error);
   }
 
   if (!gridEl) {
