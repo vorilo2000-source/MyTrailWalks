@@ -1,7 +1,8 @@
 // =======================================================
 // creator.js — MyTrailWalks
 // Route creator: GPX parse, weer, locatie, AI, JSON export
-// Wijziging v1.1.0: i18nModule.init() toegevoegd in INIT
+// v2.0.0: visuele preview, blokken-editor, JSON import
+// v1.2.0: geen eigen i18n init (app.js doet dit centraal)
 // =======================================================
 "use strict";
 
@@ -14,7 +15,7 @@ const state = {
   apiKeyConfirmed: false,
   gpx: null,
   weather: null,
-  photos: [],
+  storyBlocks: [], // [{ type: 'text'|'photo', value: string }]
 };
 
 // -----------------------------------------------------------
@@ -61,18 +62,17 @@ const els = {
   inputRegion: $("input-region"),
   inputSource: $("input-source"),
   inputHeroPhoto: $("input-hero-photo"),
-  photoList: $("photo-list"),
-  btnAddPhoto: $("btn-add-photo"),
   inputKeywords: $("input-keywords"),
   inputIntro: $("input-intro"),
   introCount: $("intro-count"),
-  inputStory: $("input-story"),
   inputTips: $("input-tips"),
   inputRouteId: $("input-route-id"),
   inputStatus: $("input-status"),
   btnExport: $("btn-export"),
-  previewJson: $("preview-json"),
-  btnCopyJson: $("btn-copy-json"),
+  jsonImportInput: $("json-import-input"),
+  blockList: $("block-list"),
+  btnAddTextBlock: $("btn-add-text-block"),
+  btnAddPhotoBlock: $("btn-add-photo-block"),
 };
 
 // -----------------------------------------------------------
@@ -96,9 +96,221 @@ els.btnKeyConfirm.addEventListener("click", () => {
   }
   state.apiKey = key;
   state.apiKeyConfirmed = true;
-  els.inputApiKey.value = "\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022";
+  els.inputApiKey.value = "\u2022".repeat(20);
   els.btnKeyConfirm.textContent = "\u2713 Bevestigd";
   els.btnKeyConfirm.disabled = true;
+});
+
+// -----------------------------------------------------------
+// JSON IMPORT
+// -----------------------------------------------------------
+els.jsonImportInput.addEventListener("change", () => {
+  const file = els.jsonImportInput.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    try {
+      const data = JSON.parse(e.target.result);
+      loadJsonIntoForm(data);
+    } catch (err) {
+      alert("Ongeldig JSON-bestand. Controleer het bestand en probeer opnieuw.");
+      console.error("JSON import fout:", err);
+    }
+  };
+  reader.readAsText(file);
+  // Reset input zodat hetzelfde bestand opnieuw geladen kan worden
+  els.jsonImportInput.value = "";
+});
+
+function loadJsonIntoForm(data) {
+  // Route ID & status
+  if (data.id) els.inputRouteId.value = data.id;
+  if (data.status) els.inputStatus.value = data.status;
+
+  // Datum & locatie
+  if (data.published_date) els.inputDate.value = data.published_date;
+  if (data.location) els.inputLocation.value = data.location;
+  if (data.region) els.inputRegion.value = data.region;
+
+  // Route info
+  if (data.title?.nl) els.inputTitle.value = data.title.nl;
+  if (data.difficulty) els.inputDifficulty.value = data.difficulty;
+  if (data.source_reference) els.inputSource.value = data.source_reference;
+
+  // Tags / keywords
+  if (data.tags?.length) els.inputKeywords.value = data.tags.join(", ");
+
+  // Samenvatting
+  if (data.summary?.nl) {
+    els.inputIntro.value = data.summary.nl;
+    els.introCount.textContent = `${data.summary.nl.length}/160`;
+  }
+
+  // Tips
+  if (data.tips?.nl) els.inputTips.value = data.tips.nl;
+
+  // Hero foto
+  if (data.photos?.length) {
+    els.inputHeroPhoto.value = data.photos[0].url || "";
+  }
+
+  // Verhaal → blokken
+  // Bestaande JSON heeft story als string; we zetten dat om naar één tekstblok
+  // Nieuwe JSON heeft story als blocks array
+  state.storyBlocks = [];
+  if (data.story_blocks?.length) {
+    state.storyBlocks = data.story_blocks.map((b) => ({ type: b.type, value: b.value || "" }));
+  } else if (data.story?.nl) {
+    state.storyBlocks = [{ type: "text", value: data.story.nl }];
+  }
+
+  // Extra foto's (index 1+) als fotoblokken toevoegen indien geen story_blocks
+  if (!data.story_blocks && data.photos?.length > 1) {
+    data.photos.slice(1).forEach((p) => {
+      if (p.url) state.storyBlocks.push({ type: "photo", value: p.url });
+    });
+  }
+
+  // Weerdata
+  if (data.weather) {
+    state.weather = { ...data.weather };
+    els.wTempMin.textContent = data.weather.temperature_min !== null ? `${data.weather.temperature_min}°C` : "—";
+    els.wTempMax.textContent = data.weather.temperature_max !== null ? `${data.weather.temperature_max}°C` : "—";
+    els.wPrecip.textContent = data.weather.precipitation_mm !== null ? `${data.weather.precipitation_mm} mm` : "—";
+    els.wWind.textContent = data.weather.wind_kmh !== null ? `${data.weather.wind_kmh} km/u` : "—";
+    if (data.weather.condition) els.inputWeatherCondition.value = data.weather.condition;
+    els.weatherBlock.hidden = false;
+  }
+
+  // GPX stats (read-only invullen als er geen GPX geladen wordt)
+  if (data.gpx_stats && !state.gpx) {
+    const g = data.gpx_stats;
+    els.statDistance.textContent = g.distance_km ? `${g.distance_km} km` : "—";
+    els.statDuration.textContent = g.duration_hours ? `${g.duration_hours} u` : "—";
+    els.statEleUp.textContent = g.elevation_up_m ? `+${g.elevation_up_m} m` : "—";
+    els.statEleDown.textContent = g.elevation_down_m ? `-${g.elevation_down_m} m` : "—";
+    els.statHighest.textContent = g.highest_point_m ? `${g.highest_point_m} m` : "—";
+    els.statLowest.textContent = g.lowest_point_m ? `${g.lowest_point_m} m` : "—";
+    els.statAvgSpeed.textContent = g.avg_speed_kmh ? `${g.avg_speed_kmh} km/u` : "—";
+    els.statMaxSpeed.textContent = g.max_speed_kmh ? `${g.max_speed_kmh} km/u` : "—";
+    els.gpxDropZone.hidden = true;
+    els.gpxStats.hidden = false;
+    els.gpxStatus.textContent = "✓ Uit JSON";
+    // Sla stats op in state zodat export werkt
+    state.gpx = { ...g };
+  }
+
+  renderBlockEditor();
+  updatePreview();
+}
+
+// -----------------------------------------------------------
+// BLOKKEN-EDITOR
+// -----------------------------------------------------------
+function renderBlockEditor() {
+  els.blockList.innerHTML = "";
+  state.storyBlocks.forEach((block, i) => {
+    const item = document.createElement("div");
+    item.className = `block-item block-item--${block.type}`;
+    item.dataset.idx = i;
+
+    const isFirst = i === 0;
+    const isLast = i === state.storyBlocks.length - 1;
+
+    let bodyHtml = "";
+    if (block.type === "text") {
+      const escaped = block.value.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+      bodyHtml = `
+        <div class="block-item__label">Tekst</div>
+        <textarea class="block-textarea input input--textarea" rows="4" placeholder="Schrijf een alinea\u2026" data-idx="${i}">${escaped}</textarea>
+      `;
+    } else {
+      bodyHtml = `
+        <div class="block-item__label">Foto — Cloudinary URL</div>
+        <input type="url" class="block-url-input input" placeholder="https://res.cloudinary.com/dgzlcqdcc/image/upload/w_800,f_auto/\u2026" value="${block.value}" data-idx="${i}">
+        <div class="block-photo-preview" data-idx="${i}">
+          ${block.value ? `<img src="${block.value}" alt="Foto preview" class="block-photo-preview__img" onerror="this.parentElement.hidden=true">` : ""}
+        </div>
+      `;
+    }
+
+    item.innerHTML = `
+      <div class="block-controls">
+        <button class="block-ctrl-btn" data-action="up" data-idx="${i}" title="Omhoog" ${isFirst ? "disabled" : ""}>↑</button>
+        <button class="block-ctrl-btn" data-action="down" data-idx="${i}" title="Omlaag" ${isLast ? "disabled" : ""}>↓</button>
+      </div>
+      <div class="block-body">${bodyHtml}</div>
+      <button class="block-remove-btn" data-action="remove" data-idx="${i}" title="Verwijder blok">✕</button>
+    `;
+
+    els.blockList.appendChild(item);
+  });
+
+  // Events delegeren
+  els.blockList.querySelectorAll("[data-action]").forEach((btn) => {
+    btn.addEventListener("click", handleBlockAction);
+  });
+
+  els.blockList.querySelectorAll(".block-textarea").forEach((ta) => {
+    ta.addEventListener("input", (e) => {
+      const idx = parseInt(e.target.dataset.idx);
+      state.storyBlocks[idx].value = e.target.value;
+      updatePreview();
+    });
+  });
+
+  els.blockList.querySelectorAll(".block-url-input").forEach((inp) => {
+    inp.addEventListener("input", (e) => {
+      const idx = parseInt(e.target.dataset.idx);
+      state.storyBlocks[idx].value = e.target.value;
+      // Foto preview bijwerken
+      const preview = els.blockList.querySelector(`.block-photo-preview[data-idx="${idx}"]`);
+      if (preview) {
+        const url = e.target.value.trim();
+        if (url) {
+          preview.hidden = false;
+          preview.innerHTML = `<img src="${url}" alt="Foto preview" class="block-photo-preview__img" onerror="this.parentElement.hidden=true">`;
+        } else {
+          preview.hidden = true;
+          preview.innerHTML = "";
+        }
+      }
+      updatePreview();
+    });
+  });
+}
+
+function handleBlockAction(e) {
+  const action = e.currentTarget.dataset.action;
+  const idx = parseInt(e.currentTarget.dataset.idx);
+
+  if (action === "up" && idx > 0) {
+    [state.storyBlocks[idx - 1], state.storyBlocks[idx]] = [state.storyBlocks[idx], state.storyBlocks[idx - 1]];
+  } else if (action === "down" && idx < state.storyBlocks.length - 1) {
+    [state.storyBlocks[idx], state.storyBlocks[idx + 1]] = [state.storyBlocks[idx + 1], state.storyBlocks[idx]];
+  } else if (action === "remove") {
+    state.storyBlocks.splice(idx, 1);
+  }
+
+  renderBlockEditor();
+  updatePreview();
+}
+
+els.btnAddTextBlock.addEventListener("click", () => {
+  state.storyBlocks.push({ type: "text", value: "" });
+  renderBlockEditor();
+  updatePreview();
+  // Scroll naar nieuw blok
+  const items = els.blockList.querySelectorAll(".block-item");
+  if (items.length) items[items.length - 1].scrollIntoView({ behavior: "smooth", block: "nearest" });
+});
+
+els.btnAddPhotoBlock.addEventListener("click", () => {
+  state.storyBlocks.push({ type: "photo", value: "" });
+  renderBlockEditor();
+  updatePreview();
+  const items = els.blockList.querySelectorAll(".block-item");
+  if (items.length) items[items.length - 1].scrollIntoView({ behavior: "smooth", block: "nearest" });
 });
 
 // -----------------------------------------------------------
@@ -256,14 +468,14 @@ function haversine(lat1, lon1, lat2, lon2) {
 }
 
 function displayGpxStats(gpx) {
-  els.statDistance.textContent = gpx.distance_km ? `${gpx.distance_km} km` : "\u2014";
-  els.statDuration.textContent = gpx.duration_hours ? `${gpx.duration_hours} u` : "\u2014";
-  els.statEleUp.textContent = gpx.elevation_up_m ? `+${gpx.elevation_up_m} m` : "\u2014";
-  els.statEleDown.textContent = gpx.elevation_down_m ? `-${gpx.elevation_down_m} m` : "\u2014";
-  els.statHighest.textContent = gpx.highest_point_m ? `${gpx.highest_point_m} m` : "\u2014";
-  els.statLowest.textContent = gpx.lowest_point_m ? `${gpx.lowest_point_m} m` : "\u2014";
-  els.statAvgSpeed.textContent = gpx.avg_speed_kmh ? `${gpx.avg_speed_kmh} km/u` : "\u2014";
-  els.statMaxSpeed.textContent = gpx.max_speed_kmh ? `${gpx.max_speed_kmh} km/u` : "\u2014";
+  els.statDistance.textContent = gpx.distance_km ? `${gpx.distance_km} km` : "—";
+  els.statDuration.textContent = gpx.duration_hours ? `${gpx.duration_hours} u` : "—";
+  els.statEleUp.textContent = gpx.elevation_up_m ? `+${gpx.elevation_up_m} m` : "—";
+  els.statEleDown.textContent = gpx.elevation_down_m ? `-${gpx.elevation_down_m} m` : "—";
+  els.statHighest.textContent = gpx.highest_point_m ? `${gpx.highest_point_m} m` : "—";
+  els.statLowest.textContent = gpx.lowest_point_m ? `${gpx.lowest_point_m} m` : "—";
+  els.statAvgSpeed.textContent = gpx.avg_speed_kmh ? `${gpx.avg_speed_kmh} km/u` : "—";
+  els.statMaxSpeed.textContent = gpx.max_speed_kmh ? `${gpx.max_speed_kmh} km/u` : "—";
   els.gpxDropZone.hidden = true;
   els.gpxStats.hidden = false;
   els.gpxStatus.textContent = "\u2713 Geladen";
@@ -307,7 +519,7 @@ async function fetchWeather() {
   const lat = state.gpx?.startLat;
   const lon = state.gpx?.startLon;
   if (!date) { alert("Kies eerst een wandeldatum."); return; }
-  if (!lat || !lon) { alert("Laad eerst een GPX-bestand (voor co\u00f6rdinaten)."); return; }
+  if (!lat || !lon) { alert("Laad eerst een GPX-bestand (voor coördinaten)."); return; }
 
   els.btnFetchWeather.textContent = "Ophalen\u2026";
   els.btnFetchWeather.disabled = true;
@@ -328,10 +540,10 @@ async function fetchWeather() {
       source: "Open-Meteo",
     };
 
-    els.wTempMin.textContent = state.weather.temperature_min !== null ? `${state.weather.temperature_min}\u00b0C` : "\u2014";
-    els.wTempMax.textContent = state.weather.temperature_max !== null ? `${state.weather.temperature_max}\u00b0C` : "\u2014";
-    els.wPrecip.textContent = state.weather.precipitation_mm !== null ? `${state.weather.precipitation_mm} mm` : "\u2014";
-    els.wWind.textContent = state.weather.wind_kmh !== null ? `${state.weather.wind_kmh} km/u` : "\u2014";
+    els.wTempMin.textContent = state.weather.temperature_min !== null ? `${state.weather.temperature_min}°C` : "—";
+    els.wTempMax.textContent = state.weather.temperature_max !== null ? `${state.weather.temperature_max}°C` : "—";
+    els.wPrecip.textContent = state.weather.precipitation_mm !== null ? `${state.weather.precipitation_mm} mm` : "—";
+    els.wWind.textContent = state.weather.wind_kmh !== null ? `${state.weather.wind_kmh} km/u` : "—";
     els.weatherBlock.hidden = false;
     updatePreview();
   } catch (err) {
@@ -347,37 +559,6 @@ els.btnFetchWeather.addEventListener("click", fetchWeather);
 els.btnRefetchWeather.addEventListener("click", fetchWeather);
 
 // -----------------------------------------------------------
-// FOTO'S
-// -----------------------------------------------------------
-els.btnAddPhoto.addEventListener("click", () => {
-  const idx = state.photos.length;
-  state.photos.push("");
-  const entry = document.createElement("div");
-  entry.className = "photo-entry";
-  entry.dataset.idx = idx;
-  entry.innerHTML = `
-    <input type="url" class="input photo-url-input" placeholder="https://res.cloudinary.com/\u2026" data-idx="${idx}">
-    <button class="photo-entry__remove" title="Verwijder foto" data-idx="${idx}">\u2715</button>
-  `;
-  els.photoList.appendChild(entry);
-  entry.querySelector(".photo-url-input").addEventListener("input", (e) => {
-    state.photos[parseInt(e.target.dataset.idx)] = e.target.value;
-    updatePreview();
-  });
-  entry.querySelector(".photo-entry__remove").addEventListener("click", (e) => {
-    const i = parseInt(e.target.dataset.idx);
-    state.photos.splice(i, 1);
-    entry.remove();
-    document.querySelectorAll(".photo-entry").forEach((el, newIdx) => {
-      el.dataset.idx = newIdx;
-      el.querySelector(".photo-url-input").dataset.idx = newIdx;
-      el.querySelector(".photo-entry__remove").dataset.idx = newIdx;
-    });
-    updatePreview();
-  });
-});
-
-// -----------------------------------------------------------
 // KARAKTER TELLER INTRO
 // -----------------------------------------------------------
 els.inputIntro.addEventListener("input", () => {
@@ -386,17 +567,125 @@ els.inputIntro.addEventListener("input", () => {
 });
 
 // -----------------------------------------------------------
-// LIVE PREVIEW
+// VISUELE PREVIEW
+// -----------------------------------------------------------
+function updatePreview() {
+  const title = els.inputTitle.value.trim();
+  const location = els.inputLocation.value.trim();
+  const summary = els.inputIntro.value.trim();
+  const heroUrl = els.inputHeroPhoto.value.trim();
+  const status = els.inputStatus.value;
+  const difficulty = els.inputDifficulty.value;
+  const gpx = state.gpx;
+  const weather = state.weather;
+
+  // Titel
+  $("rp-title").textContent = title || "Wandeling zonder titel";
+
+  // Locatie
+  $("rp-location").textContent = location || "Locatie onbekend";
+
+  // Samenvatting
+  $("rp-summary").textContent = summary;
+  $("rp-summary").hidden = !summary;
+
+  // Status badge
+  $("rp-status-badge").textContent = status || "draft";
+
+  // Hero foto
+  const heroImg = $("rp-hero-img");
+  const heroPlaceholder = $("rp-hero-placeholder");
+  if (heroUrl) {
+    heroImg.src = heroUrl;
+    heroImg.hidden = false;
+    heroPlaceholder.hidden = true;
+  } else {
+    heroImg.hidden = true;
+    heroPlaceholder.hidden = false;
+  }
+
+  // Stats
+  $("rp-distance").textContent = gpx?.distance_km ? `${gpx.distance_km} km` : "—";
+  $("rp-duration").textContent = gpx?.duration_hours ? `${gpx.duration_hours} u` : "—";
+  $("rp-elevation").textContent = gpx?.elevation_up_m ? `+${gpx.elevation_up_m} m` : "—";
+
+  const diffLabels = { easy: "Gemakkelijk", medium: "Gemiddeld", hard: "Zwaar" };
+  $("rp-difficulty").textContent = diffLabels[difficulty] || "—";
+
+  // Weer
+  const weatherEl = $("rp-weather");
+  if (weather) {
+    $("rp-w-temp").innerHTML = `<span class="rp-weather__icon">🌡</span> ${weather.temperature_min ?? "—"}° – ${weather.temperature_max ?? "—"}°C`;
+    $("rp-w-precip").innerHTML = `<span class="rp-weather__icon">💧</span> ${weather.precipitation_mm ?? "—"} mm`;
+    $("rp-w-wind").innerHTML = `<span class="rp-weather__icon">💨</span> ${weather.wind_kmh ?? "—"} km/u`;
+    const dateStr = weather.date ? new Date(weather.date).toLocaleDateString("nl-BE", { day: "numeric", month: "long", year: "numeric" }) : "—";
+    $("rp-w-date").innerHTML = `<span class="rp-weather__icon">📅</span> ${dateStr}`;
+    weatherEl.hidden = false;
+  } else {
+    weatherEl.hidden = true;
+  }
+
+  // Verhaal blokken preview
+  const storyEl = $("rp-story");
+  storyEl.innerHTML = "";
+  state.storyBlocks.forEach((block) => {
+    if (block.type === "text" && block.value.trim()) {
+      const p = document.createElement("p");
+      p.className = "rp-story__text";
+      p.textContent = block.value;
+      storyEl.appendChild(p);
+    } else if (block.type === "photo" && block.value.trim()) {
+      const img = document.createElement("img");
+      img.className = "rp-story__photo";
+      img.src = block.value;
+      img.alt = "";
+      img.onerror = () => img.remove();
+      storyEl.appendChild(img);
+    }
+  });
+
+  // Kaart via GPX startpunt
+  const mapEl = $("rp-map");
+  if (gpx?.startLat && gpx?.startLon) {
+    const lat = gpx.startLat;
+    const lon = gpx.startLon;
+    const mapImg = $("rp-map-img");
+    mapImg.src = `https://staticmap.openstreetmap.de/staticmap.php?center=${lat},${lon}&zoom=13&size=600x200&maptype=mapnik&markers=${lat},${lon},red`;
+    mapImg.alt = `Kaart van ${location || "startpunt"}`;
+    mapEl.hidden = false;
+  } else {
+    mapEl.hidden = true;
+  }
+}
+
+// Live preview bijwerken bij alle inputs
+document.querySelectorAll(".input").forEach((el) => {
+  el.addEventListener("input", updatePreview);
+  el.addEventListener("change", updatePreview);
+});
+
+// -----------------------------------------------------------
+// JSON EXPORT
 // -----------------------------------------------------------
 function buildRouteJson() {
   const id = els.inputRouteId.value.trim() || "nieuwe-route";
+
+  // Foto's: hero altijd eerste
   const allPhotos = [];
   if (els.inputHeroPhoto.value.trim()) {
     allPhotos.push({ url: els.inputHeroPhoto.value.trim(), caption: "" });
   }
-  state.photos.forEach((url) => {
-    if (url.trim()) allPhotos.push({ url: url.trim(), caption: "" });
-  });
+
+  // Verhaal als blokken + tekst samengevoegd voor achterwaartse compatibiliteit
+  const storyText = state.storyBlocks
+    .filter((b) => b.type === "text" && b.value.trim())
+    .map((b) => b.value.trim())
+    .join("\n\n");
+
+  // Foto's uit blokken toevoegen aan photos array
+  state.storyBlocks
+    .filter((b) => b.type === "photo" && b.value.trim())
+    .forEach((b) => allPhotos.push({ url: b.value.trim(), caption: "" }));
 
   return {
     id,
@@ -409,7 +698,8 @@ function buildRouteJson() {
     source_reference: els.inputSource.value.trim() || null,
     tags: els.inputKeywords.value.split(",").map((k) => k.trim()).filter(Boolean),
     summary: { nl: els.inputIntro.value.trim(), en: "" },
-    story: { nl: els.inputStory.value.trim(), en: "" },
+    story: { nl: storyText, en: "" },
+    story_blocks: state.storyBlocks.filter((b) => b.value.trim()).map((b) => ({ type: b.type, value: b.value.trim() })),
     tips: { nl: els.inputTips.value.trim(), en: "" },
     photos: allPhotos,
     gpx_stats: state.gpx ? {
@@ -434,25 +724,21 @@ function buildRouteJson() {
   };
 }
 
-function updatePreview() {
+els.btnExport.addEventListener("click", () => {
+  const id = els.inputRouteId.value.trim();
+  if (!id) {
+    showInlineError(els.inputRouteId, "Geef de route een ID (bestandsnaam).");
+    els.inputRouteId.focus();
+    return;
+  }
   const json = buildRouteJson();
-  els.previewJson.querySelector("code").textContent = JSON.stringify(json, null, 2);
-}
-
-document.querySelectorAll(".input").forEach((el) => {
-  el.addEventListener("input", updatePreview);
-  el.addEventListener("change", updatePreview);
-});
-
-// -----------------------------------------------------------
-// KOPIEER JSON
-// -----------------------------------------------------------
-els.btnCopyJson.addEventListener("click", () => {
-  const text = els.previewJson.querySelector("code").textContent;
-  navigator.clipboard.writeText(text).then(() => {
-    els.btnCopyJson.textContent = "Gekopieerd!";
-    setTimeout(() => (els.btnCopyJson.textContent = "Kopieer"), 1500);
-  });
+  const blob = new Blob([JSON.stringify(json, null, 2)], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `${id}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
 });
 
 // -----------------------------------------------------------
@@ -487,14 +773,19 @@ Gegevens van de wandeling:
 - Moeilijkheid: ${difficulty || "onbekend"}
 - Steekwoorden / ervaringen: ${keywords || "geen"}
 ${gpx ? `- Afstand: ${gpx.distance_km} km, Duur: ${gpx.duration_hours} uur, Stijging: ${gpx.elevation_up_m} m` : ""}
-${weather ? `- Weer: min ${weather.temperature_min}\u00b0C, max ${weather.temperature_max}\u00b0C, neerslag ${weather.precipitation_mm} mm, wind ${weather.wind_kmh} km/u` : ""}
+${weather ? `- Weer: min ${weather.temperature_min}°C, max ${weather.temperature_max}°C, neerslag ${weather.precipitation_mm} mm, wind ${weather.wind_kmh} km/u` : ""}
 
 Genereer ALLEEN een JSON-object (geen uitleg, geen markdown) met deze velden:
 {
-  "summary": "E\u00e9n zin samenvatting van max 160 tekens voor de grid-weergave.",
-  "story": "Volledig wandelverhaal in 3-5 alinea's. Persoonlijk, beschrijvend, no clickbait.",
+  "summary": "Één zin samenvatting van max 160 tekens voor de grid-weergave.",
+  "story_blocks": [
+    { "type": "text", "value": "Eerste alinea van het verhaal." },
+    { "type": "text", "value": "Tweede alinea van het verhaal." }
+  ],
   "tips": "2-4 praktische tips voor wandelaars, als doorlopende tekst."
-}`;
+}
+
+Schrijf het verhaal in 3-5 alinea's. Persoonlijk, beschrijvend, no clickbait.`;
 
   try {
     const response = await fetch("https://api.anthropic.com/v1/messages", {
@@ -513,14 +804,19 @@ Genereer ALLEEN een JSON-object (geen uitleg, geen markdown) met deze velden:
 
     const data = await response.json();
     const text = data.content?.map((c) => c.text || "").join("") || "";
-    const clean = text.replace(/\`\`\`json|\`\`\`/g, "").trim();
+    const clean = text.replace(/```json|```/g, "").trim();
     const parsed = JSON.parse(clean);
 
-    if (parsed.summary) els.inputIntro.value = parsed.summary;
-    if (parsed.story) els.inputStory.value = parsed.story;
+    if (parsed.summary) {
+      els.inputIntro.value = parsed.summary;
+      els.introCount.textContent = `${parsed.summary.length}/160`;
+    }
+    if (parsed.story_blocks?.length) {
+      state.storyBlocks = parsed.story_blocks;
+      renderBlockEditor();
+    }
     if (parsed.tips) els.inputTips.value = parsed.tips;
 
-    els.introCount.textContent = `${els.inputIntro.value.length}/160`;
     updatePreview();
   } catch (err) {
     console.error("AI generatie fout:", err);
@@ -529,26 +825,6 @@ Genereer ALLEEN een JSON-object (geen uitleg, geen markdown) met deze velden:
     els.btnAiGenerate.classList.remove("is-loading");
     els.btnAiGenerate.innerHTML = '<span class="btn-icon">\u2746</span> Genereer met AI';
   }
-});
-
-// -----------------------------------------------------------
-// JSON EXPORT
-// -----------------------------------------------------------
-els.btnExport.addEventListener("click", () => {
-  const id = els.inputRouteId.value.trim();
-  if (!id) {
-    showInlineError(els.inputRouteId, "Geef de route een ID (bestandsnaam).");
-    els.inputRouteId.focus();
-    return;
-  }
-  const json = buildRouteJson();
-  const blob = new Blob([JSON.stringify(json, null, 2)], { type: "application/json" });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = `${id}.json`;
-  a.click();
-  URL.revokeObjectURL(url);
 });
 
 // -----------------------------------------------------------
@@ -570,8 +846,9 @@ function showInlineError(inputEl, message) {
 }
 
 // -----------------------------------------------------------
-// INIT — v1.2.0: i18n init verwijderd — app.js doet dit centraal
+// INIT — v2.0.0
 // -----------------------------------------------------------
 window.appReady.then(() => {
+  renderBlockEditor();
   updatePreview();
 });
