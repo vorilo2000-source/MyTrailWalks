@@ -313,10 +313,6 @@
     _currentUsername = username;
     _currentRole     = role;
 
-    // Sluit modal als die nog open is (bv. na inloggen of paginanavigatie)
-    const existingModal = document.getElementById("auth-modal-root");
-    if (existingModal) existingModal.remove();
-
     const slot = document.getElementById("top-auth");
     if (!slot) return;
 
@@ -458,7 +454,12 @@
     btn.disabled = false; btn.textContent = _t('auth:login');
     if (error) { _showMsg("auth-msg-login", error, "error"); return; }
     _showMsg("auth-msg-login", _t('auth:logged_in'), "success");
-    setTimeout(() => closeModal(), 800);
+    setTimeout(() => {
+      closeModal();
+      // Verwijder modal volledig uit DOM na inloggen
+      const root = document.getElementById("auth-modal-root");
+      if (root) root.remove();
+    }, 800);
   }
 
   async function doRegister() {
