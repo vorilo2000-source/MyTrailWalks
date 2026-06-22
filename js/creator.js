@@ -570,20 +570,8 @@ function showInlineError(inputEl, message) {
 }
 
 // -----------------------------------------------------------
-// INIT — v1.1.0: i18nModule.init() toegevoegd
+// INIT — v1.2.0: i18n init verwijderd — app.js doet dit centraal
 // -----------------------------------------------------------
-window.appReady.then(async () => {
-  try {
-    await i18nModule.init(["auth"]);
-    i18nModule.applyTranslations();
-  } catch (error) {
-    console.error("creator.js: i18n init mislukt", error);
-  }
-
-  const selectEl = document.getElementById("languageSwitcher");
-  if (selectEl) {
-    i18nModule.buildLanguageSwitcher(selectEl);
-  }
-
+window.appReady.then(() => {
   updatePreview();
 });
