@@ -1,7 +1,9 @@
 // =============================================================================
 // topbar-auth.js — TopBar Auth Modal & Admin Dropdown
-// MyTrailWalks v1.3.0
+// MyTrailWalks v1.6.0
 // -----------------------------------------------------------------------------
+// Changelog v1.6.0:
+// - Modal volledig verwijderd uit DOM na inloggen
 // Changelog v1.3.0:
 // - Luistert naar i18next languageChanged event → herrendert topbar knop
 // Changelog v1.2.0:
