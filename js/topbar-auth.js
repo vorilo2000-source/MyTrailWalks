@@ -1,15 +1,12 @@
 // =============================================================================
 // topbar-auth.js — TopBar Auth Modal & Admin Dropdown
-// MyTrailWalks v1.7.0
+// MyTrailWalks v2.0.0
 // -----------------------------------------------------------------------------
-// Changelog v1.6.0:
-// - Modal volledig verwijderd uit DOM na inloggen
-// Changelog v1.3.0:
-// - Luistert naar i18next languageChanged event → herrendert topbar knop
-// Changelog v1.2.0:
-// - Modal wordt pas gebouwd bij openModal() zodat i18next klaar is
-// Changelog v1.1.0:
-// - Alle hardcoded teksten vervangen door i18next.t() sleutels
+// Changelog v2.0.0:
+// - Terugkeer naar werkende v1.0.0 structuur
+// - i18n toegevoegd via _updateModalTexts() zonder structuur te breken
+// - Modal wordt gebouwd in init() zoals in v1.0.0
+// - Teksten worden bijgewerkt na i18next init + bij taalwissel
 //
 // Dependencies: Supabase SDK, auth.js, i18next (geladen via i18n.js)
 // Load order:   auth.js → topbar-auth.js → app.js → [pagina].js
@@ -17,10 +14,6 @@
 
 (function () {
   "use strict";
-
-  // Huidige sessiestate bijhouden voor herrender bij taalwissel
-  var _currentUsername = null;
-  var _currentRole     = null;
 
   // ---------------------------------------------------------------------------
   // _t(key) — veilige i18next wrapper
@@ -33,6 +26,70 @@
   }
 
   // ---------------------------------------------------------------------------
+  // _updateModalTexts()
+  // Bijwerken van alle teksten in de modal na i18next init of taalwissel
+  // ---------------------------------------------------------------------------
+  function _updateModalTexts() {
+    const set = (id, text) => {
+      const el = document.getElementById(id);
+      if (el) el.textContent = text;
+    };
+    const setAttr = (id, attr, text) => {
+      const el = document.getElementById(id);
+      if (el) el.setAttribute(attr, text);
+    };
+    const setPlaceholder = (id, text) => {
+      const el = document.getElementById(id);
+      if (el) el.placeholder = text;
+    };
+
+    // Modal aria label
+    setAttr("auth-modal-box", "aria-label", _t("auth:login"));
+    setAttr("auth-modal-close", "aria-label", _t("auth:close"));
+
+    // Tabs
+    set("tab-btn-login", _t("auth:login"));
+    set("tab-btn-register", _t("auth:register"));
+
+    // Login sectie
+    const loginLabel = document.querySelector("label[for='auth-login-email']");
+    if (loginLabel) loginLabel.textContent = _t("auth:email");
+    setPlaceholder("auth-login-email", _t("auth:email_placeholder"));
+    const loginPwLabel = document.querySelector("label[for='auth-login-password']");
+    if (loginPwLabel) loginPwLabel.textContent = _t("auth:password");
+    setPlaceholder("auth-login-password", _t("auth:password_placeholder"));
+    set("auth-btn-login", _t("auth:login"));
+
+    const forgotLink = document.querySelector(".auth-forgot-link a");
+    if (forgotLink) forgotLink.textContent = _t("auth:forgot_password");
+
+    // Register sectie
+    const usernameLabel = document.querySelector("label[for='auth-reg-username']");
+    if (usernameLabel) usernameLabel.textContent = _t("auth:username");
+    setPlaceholder("auth-reg-username", _t("auth:username_placeholder"));
+    const regEmailLabel = document.querySelector("label[for='auth-reg-email']");
+    if (regEmailLabel) regEmailLabel.textContent = _t("auth:email");
+    setPlaceholder("auth-reg-email", _t("auth:email_placeholder"));
+    const regPwLabel = document.querySelector("label[for='auth-reg-password']");
+    if (regPwLabel) regPwLabel.textContent = _t("auth:password");
+    setPlaceholder("auth-reg-password", _t("auth:password_new_placeholder"));
+    const regPw2Label = document.querySelector("label[for='auth-reg-password2']");
+    if (regPw2Label) regPw2Label.textContent = _t("auth:password_repeat");
+    setPlaceholder("auth-reg-password2", _t("auth:password_repeat_placeholder"));
+    set("auth-btn-register", _t("auth:register"));
+
+    // Forgot sectie
+    const backLink = document.querySelector(".auth-back-link a");
+    if (backLink) backLink.textContent = _t("auth:back_to_login");
+    const forgotIntro = document.querySelector(".auth-forgot-intro");
+    if (forgotIntro) forgotIntro.textContent = _t("auth:forgot_intro");
+    const forgotEmailLabel = document.querySelector("label[for='auth-forgot-email']");
+    if (forgotEmailLabel) forgotEmailLabel.textContent = _t("auth:email");
+    setPlaceholder("auth-forgot-email", _t("auth:email_placeholder"));
+    set("auth-btn-forgot", _t("auth:send_reset_link"));
+  }
+
+  // ---------------------------------------------------------------------------
   // _injectModal()
   // ---------------------------------------------------------------------------
   function _injectModal() {
@@ -42,26 +99,26 @@
     root.id = "auth-modal-root";
     root.innerHTML = `
       <div id="auth-modal-backdrop" onclick="TopBarAuth.closeModal()"></div>
-      <div id="auth-modal-box" role="dialog" aria-modal="true" aria-label="${_t('auth:login')}">
-        <button id="auth-modal-close" onclick="TopBarAuth.closeModal()" aria-label="${_t('auth:close')}">&times;</button>
+      <div id="auth-modal-box" role="dialog" aria-modal="true" aria-label="Inloggen">
+        <button id="auth-modal-close" onclick="TopBarAuth.closeModal()" aria-label="Sluiten">&times;</button>
         <div class="auth-tabs" id="auth-tabs">
-          <button class="auth-tab active" id="tab-btn-login"    onclick="TopBarAuth.switchTab('login')">${_t('auth:login')}</button>
-          <button class="auth-tab"        id="tab-btn-register" onclick="TopBarAuth.switchTab('register')">${_t('auth:register')}</button>
+          <button class="auth-tab active" id="tab-btn-login"    onclick="TopBarAuth.switchTab('login')">Inloggen</button>
+          <button class="auth-tab"        id="tab-btn-register" onclick="TopBarAuth.switchTab('register')">Account aanmaken</button>
         </div>
 
         <!-- LOGIN -->
         <div class="auth-form-section active" id="auth-section-login">
           <div class="auth-field">
-            <label for="auth-login-email">${_t('auth:email')}</label>
-            <input type="email" id="auth-login-email" placeholder="${_t('auth:email_placeholder')}" autocomplete="email">
+            <label for="auth-login-email">E-mailadres</label>
+            <input type="email" id="auth-login-email" placeholder="naam@voorbeeld.nl" autocomplete="email">
           </div>
           <div class="auth-field">
-            <label for="auth-login-password">${_t('auth:password')}</label>
-            <input type="password" id="auth-login-password" placeholder="${_t('auth:password_placeholder')}" autocomplete="current-password">
+            <label for="auth-login-password">Wachtwoord</label>
+            <input type="password" id="auth-login-password" placeholder="••••••••" autocomplete="current-password">
           </div>
-          <button class="auth-btn-primary" id="auth-btn-login" onclick="TopBarAuth.doLogin()">${_t('auth:login')}</button>
+          <button class="auth-btn-primary" id="auth-btn-login" onclick="TopBarAuth.doLogin()">Inloggen</button>
           <p class="auth-forgot-link">
-            <a href="#" onclick="TopBarAuth.switchTab('forgot'); return false;">${_t('auth:forgot_password')}</a>
+            <a href="#" onclick="TopBarAuth.switchTab('forgot'); return false;">Wachtwoord vergeten?</a>
           </p>
           <div class="auth-msg" id="auth-msg-login"></div>
         </div>
@@ -69,36 +126,38 @@
         <!-- REGISTRATIE -->
         <div class="auth-form-section" id="auth-section-register">
           <div class="auth-field">
-            <label for="auth-reg-username">${_t('auth:username')}</label>
-            <input type="text" id="auth-reg-username" placeholder="${_t('auth:username_placeholder')}" maxlength="32" autocomplete="nickname">
+            <label for="auth-reg-username">Gebruikersnaam</label>
+            <input type="text" id="auth-reg-username" placeholder="Hoe wil je heten?" maxlength="32" autocomplete="nickname">
           </div>
           <div class="auth-field">
-            <label for="auth-reg-email">${_t('auth:email')}</label>
-            <input type="email" id="auth-reg-email" placeholder="${_t('auth:email_placeholder')}" autocomplete="email">
+            <label for="auth-reg-email">E-mailadres</label>
+            <input type="email" id="auth-reg-email" placeholder="naam@voorbeeld.nl" autocomplete="email">
           </div>
           <div class="auth-field">
-            <label for="auth-reg-password">${_t('auth:password')}</label>
-            <input type="password" id="auth-reg-password" placeholder="${_t('auth:password_new_placeholder')}" autocomplete="new-password">
+            <label for="auth-reg-password">Wachtwoord</label>
+            <input type="password" id="auth-reg-password" placeholder="Minimaal 6 tekens" autocomplete="new-password">
           </div>
           <div class="auth-field">
-            <label for="auth-reg-password2">${_t('auth:password_repeat')}</label>
-            <input type="password" id="auth-reg-password2" placeholder="${_t('auth:password_repeat_placeholder')}" autocomplete="new-password">
+            <label for="auth-reg-password2">Wachtwoord herhalen</label>
+            <input type="password" id="auth-reg-password2" placeholder="Herhaal wachtwoord" autocomplete="new-password">
           </div>
-          <button class="auth-btn-primary" id="auth-btn-register" onclick="TopBarAuth.doRegister()">${_t('auth:register')}</button>
+          <button class="auth-btn-primary" id="auth-btn-register" onclick="TopBarAuth.doRegister()">Account aanmaken</button>
           <div class="auth-msg" id="auth-msg-register"></div>
         </div>
 
         <!-- WACHTWOORD VERGETEN -->
         <div class="auth-form-section" id="auth-section-forgot">
           <p class="auth-back-link">
-            <a href="#" onclick="TopBarAuth.switchTab('login'); return false;">${_t('auth:back_to_login')}</a>
+            <a href="#" onclick="TopBarAuth.switchTab('login'); return false;">← Terug naar inloggen</a>
           </p>
-          <p class="auth-forgot-intro">${_t('auth:forgot_intro')}</p>
+          <p class="auth-forgot-intro">
+            Vul je e-mailadres in. Je ontvangt een link om een nieuw wachtwoord in te stellen.
+          </p>
           <div class="auth-field">
-            <label for="auth-forgot-email">${_t('auth:email')}</label>
-            <input type="email" id="auth-forgot-email" placeholder="${_t('auth:email_placeholder')}" autocomplete="email">
+            <label for="auth-forgot-email">E-mailadres</label>
+            <input type="email" id="auth-forgot-email" placeholder="naam@voorbeeld.nl" autocomplete="email">
           </div>
-          <button class="auth-btn-primary" id="auth-btn-forgot" onclick="TopBarAuth.doForgotPassword()">${_t('auth:send_reset_link')}</button>
+          <button class="auth-btn-primary" id="auth-btn-forgot" onclick="TopBarAuth.doForgotPassword()">Resetlink versturen</button>
           <div class="auth-msg" id="auth-msg-forgot"></div>
         </div>
       </div>
@@ -106,6 +165,11 @@
 
     document.body.appendChild(root);
     _injectStyles();
+
+    // Teksten bijwerken als i18next al klaar is
+    if (window.i18next && window.i18next.isInitialized) {
+      _updateModalTexts();
+    }
   }
 
   // ---------------------------------------------------------------------------
@@ -122,7 +186,7 @@
         background: rgba(43, 41, 38, 0.6); z-index: 1000;
       }
       #auth-modal-box {
-        display: none; position: fixed; top: 50dvh; left: 50%;
+        display: none; position: fixed; top: 50%; left: 50%;
         transform: translate(-50%, -50%);
         background: #F6F1E7; border-radius: 8px;
         padding: 32px 36px 28px; width: 100%; max-width: 420px;
@@ -308,21 +372,14 @@
   }
 
   // ---------------------------------------------------------------------------
-  // _renderTopBar(username, role)
+  // _renderTopBar(username, isAdmin)
   // ---------------------------------------------------------------------------
-  function _renderTopBar(username, role) {
-    // Sla op voor herrender bij taalwissel
-    _currentUsername = username;
-    _currentRole     = role;
-
+  function _renderTopBar(username, isAdmin) {
     const slot = document.getElementById("top-auth");
     if (!slot) return;
 
-    const isAdmin   = role === "admin";
-    const isCreator = role === "creator" || isAdmin;
-
     if (username) {
-      const adminItems = isCreator ? `
+      const adminItems = isAdmin ? `
         <div class="dropdown-section-label">${_t('auth:admin_section')}</div>
         <a href="creator.html" role="menuitem">✦ ${_t('auth:route_creator')}</a>
         <hr class="dropdown-divider">
@@ -397,16 +454,13 @@
       if (profile && profile.username) return profile.username;
     } catch (e) { /* profiel bestaat nog niet */ }
     const email = session.user.email || "";
-    return email.split("@")[0] || _t('auth:fallback_user');
+    return email.split("@")[0] || "Gebruiker";
   }
 
   // ---------------------------------------------------------------------------
   // Modal functies
   // ---------------------------------------------------------------------------
   function openModal() {
-    // Verwijder bestaande modal zodat hij opnieuw gebouwd wordt met actuele i18n vertalingen
-    const existing = document.getElementById("auth-modal-root");
-    if (existing) existing.remove();
     _injectModal();
     switchTab("login");
     document.getElementById("auth-modal-root").classList.add("open");
@@ -451,17 +505,12 @@
     const email    = document.getElementById("auth-login-email").value.trim();
     const password = document.getElementById("auth-login-password").value;
     const btn      = document.getElementById("auth-btn-login");
-    btn.disabled = true; btn.textContent = _t('auth:busy');
+    btn.disabled = true; btn.textContent = _t("auth:busy");
     const { user, error } = await AuthModule.login(email, password);
-    btn.disabled = false; btn.textContent = _t('auth:login');
+    btn.disabled = false; btn.textContent = _t("auth:login");
     if (error) { _showMsg("auth-msg-login", error, "error"); return; }
-    _showMsg("auth-msg-login", _t('auth:logged_in'), "success");
-    setTimeout(() => {
-      closeModal();
-      // Verwijder modal volledig uit DOM na inloggen
-      const root = document.getElementById("auth-modal-root");
-      if (root) root.remove();
-    }, 800);
+    _showMsg("auth-msg-login", _t("auth:logged_in"), "success");
+    setTimeout(() => closeModal(), 800);
   }
 
   async function doRegister() {
@@ -471,66 +520,76 @@
     const password2 = document.getElementById("auth-reg-password2").value;
     const btn       = document.getElementById("auth-btn-register");
     if (password !== password2) {
-      _showMsg("auth-msg-register", _t('auth:passwords_no_match'), "error");
+      _showMsg("auth-msg-register", _t("auth:passwords_no_match"), "error");
       return;
     }
-    btn.disabled = true; btn.textContent = _t('auth:busy');
+    btn.disabled = true; btn.textContent = _t("auth:busy");
     const { user, error } = await AuthModule.register(email, password, username);
-    btn.disabled = false; btn.textContent = _t('auth:register');
+    btn.disabled = false; btn.textContent = _t("auth:register");
     if (error) { _showMsg("auth-msg-register", error, "error"); return; }
     switchTab("login");
-    _showMsg("auth-msg-login", _t('auth:confirm_email'), "success");
+    _showMsg("auth-msg-login", _t("auth:confirm_email"), "success");
   }
 
   async function doForgotPassword() {
     const email = document.getElementById("auth-forgot-email").value.trim();
     const btn   = document.getElementById("auth-btn-forgot");
-    btn.disabled = true; btn.textContent = _t('auth:busy');
+    btn.disabled = true; btn.textContent = _t("auth:busy");
     const { error } = await AuthModule.resetPassword(email);
-    btn.disabled = false; btn.textContent = _t('auth:send_reset_link');
+    btn.disabled = false; btn.textContent = _t("auth:send_reset_link");
     if (error) { _showMsg("auth-msg-forgot", error, "error"); return; }
-    _showMsg("auth-msg-forgot", _t('auth:reset_sent'), "success");
+    _showMsg("auth-msg-forgot", _t("auth:reset_sent"), "success");
   }
 
   // ---------------------------------------------------------------------------
   // init()
   // ---------------------------------------------------------------------------
   async function init() {
-    // Modal NIET hier injecteren — i18next is nog niet klaar.
-    // _injectModal() wordt aangeroepen bij openModal(), dan is i18next geïnitialiseerd.
+    _injectModal();
 
     const session = await AuthModule.getSession();
 
     if (session) {
       const username = await _getUsernameFromSession(session);
-      let role = "gast";
+      let isAdmin = false;
       try {
         const { profile } = await AuthModule.getProfile();
-        if (profile && profile.role) role = profile.role;
+        isAdmin = profile && (profile.role === "admin" || profile.role === "creator");
       } catch (e) { /* geen profiel */ }
-      _renderTopBar(username, role);
+      _renderTopBar(username, isAdmin);
     } else {
-      _renderTopBar(null, null);
+      _renderTopBar(null, false);
     }
 
+    // Auth wijzigingen
     AuthModule.onAuthChange(async (event, session) => {
       if (session) {
         const username = await _getUsernameFromSession(session);
-        let role = "gast";
+        let isAdmin = false;
         try {
           const { profile } = await AuthModule.getProfile();
-          if (profile && profile.role) role = profile.role;
+          isAdmin = profile && (profile.role === "admin" || profile.role === "creator");
         } catch (e) { /* geen profiel */ }
-        _renderTopBar(username, role);
+        _renderTopBar(username, isAdmin);
       } else {
-        _renderTopBar(null, null);
+        _renderTopBar(null, false);
       }
     });
 
-    // Herrender topbar knop bij taalwissel (v1.3.0)
-    if (window.i18next) {
-      window.i18next.on("languageChanged", function () {
-        _renderTopBar(_currentUsername, _currentRole);
+    // Teksten bijwerken na i18next init
+    if (window.i18nReady) {
+      window.i18nReady.then(() => {
+        _updateModalTexts();
+        _renderTopBar(
+          document.getElementById("top-user-btn") ? document.getElementById("top-user-btn").querySelector("span:nth-child(2)")?.textContent : null,
+          !!document.querySelector(".dropdown-section-label")
+        );
+        // Herrender bij taalwissel
+        if (window.i18next) {
+          window.i18next.on("languageChanged", () => {
+            _updateModalTexts();
+          });
+        }
       });
     }
 
@@ -540,16 +599,11 @@
     });
   }
 
-  // Auto-init — wacht op i18nReady zodat vertalingen gegarandeerd beschikbaar zijn
-  function startInit() {
-    const ready = window.i18nReady || Promise.resolve();
-    ready.then(init).catch(init); // init ook bij fout — pagina blijft werken
-  }
-
+  // Auto-init — zelfde als v1.0.0
   if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", startInit);
+    document.addEventListener("DOMContentLoaded", init);
   } else {
-    startInit();
+    init();
   }
 
   // ---------------------------------------------------------------------------
