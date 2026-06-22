@@ -1,6 +1,6 @@
 // =============================================================================
 // topbar-auth.js — TopBar Auth Modal & Admin Dropdown
-// MyTrailWalks v1.6.0
+// MyTrailWalks v1.7.0
 // -----------------------------------------------------------------------------
 // Changelog v1.6.0:
 // - Modal volledig verwijderd uit DOM na inloggen
@@ -122,7 +122,7 @@
         background: rgba(43, 41, 38, 0.6); z-index: 1000;
       }
       #auth-modal-box {
-        display: none; position: fixed; top: 50%; left: 50%;
+        display: none; position: fixed; top: 50dvh; left: 50%;
         transform: translate(-50%, -50%);
         background: #F6F1E7; border-radius: 8px;
         padding: 32px 36px 28px; width: 100%; max-width: 420px;
