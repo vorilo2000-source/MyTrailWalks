@@ -723,23 +723,17 @@ function updatePreview() {
     mapEl.hidden = false;
     const mapFrame = $("rp-map-frame");
 
-    // Leaflet container aanmaken als die er nog niet is
+    // Container aanmaken als die er nog niet is
     if (!mapFrame.querySelector("#leaflet-preview-map")) {
       mapFrame.innerHTML = `<div id="leaflet-preview-map" style="width:100%;height:200px;"></div>`;
     }
 
-    // Wacht tot Leaflet beschikbaar is
-    if (window.L) {
-      initLeafletMap(gpx);
-    } else {
-      // Leaflet nog niet geladen — wacht en probeer opnieuw
-      const interval = setInterval(() => {
-        if (window.L) {
-          clearInterval(interval);
-          initLeafletMap(gpx);
-        }
-      }, 100);
-    }
+    // setTimeout zodat de DOM de container heeft gerenderd voor Leaflet start
+    setTimeout(() => {
+      if (window.L) {
+        initLeafletMap(gpx);
+      }
+    }, 50);
   } else {
     mapEl.hidden = true;
   }
