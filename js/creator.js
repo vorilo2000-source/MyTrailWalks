@@ -684,14 +684,25 @@ function updatePreview() {
     }
   });
 
-  // Kaart via GPX startpunt
+  // Kaart via GPX startpunt — OSM iframe embed
   const mapEl = $("rp-map");
   if (gpx?.startLat && gpx?.startLon) {
     const lat = gpx.startLat;
     const lon = gpx.startLon;
-    const mapImg = $("rp-map-img");
-    mapImg.src = `https://staticmap.openstreetmap.de/staticmap.php?center=${lat},${lon}&zoom=13&size=600x200&maptype=mapnik&markers=${lat},${lon},red`;
-    mapImg.alt = `Kaart van ${location || "startpunt"}`;
+    const mapFrame = $("rp-map-frame");
+    // Alleen herladen als coördinaten veranderd zijn
+    const currentSrc = mapFrame.querySelector("iframe")?.src || "";
+    const newSrc = `https://www.openstreetmap.org/export/embed.html?bbox=${lon - 0.03},${lat - 0.02},${lon + 0.03},${lat + 0.02}&layer=mapnik&marker=${lat},${lon}`;
+    if (!currentSrc.includes(lat.toString())) {
+      mapFrame.innerHTML = `<iframe
+        src="${newSrc}"
+        title="Kaart van ${location || "startpunt"}"
+        style="width:100%;height:200px;border:none;display:block;"
+        loading="lazy"
+        allowfullscreen
+      ></iframe>
+      <span class="rp-map__credit">© OpenStreetMap contributors</span>`;
+    }
     mapEl.hidden = false;
   } else {
     mapEl.hidden = true;
