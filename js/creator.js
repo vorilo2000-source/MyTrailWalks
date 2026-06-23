@@ -459,6 +459,17 @@ function parseGpx(xmlText) {
     const firstTime = trkpts[0].querySelector("time");
     if (firstTime) date = firstTime.textContent.split("T")[0];
 
+    // Alle trackpunten opslaan voor routetekening op kaart
+    // Samplen tot max 500 punten voor performantie
+    const step = Math.max(1, Math.floor(trkpts.length / 500));
+    const trackPoints = [];
+    for (let i = 0; i < trkpts.length; i += step) {
+      trackPoints.push([
+        parseFloat(trkpts[i].getAttribute("lat")),
+        parseFloat(trkpts[i].getAttribute("lon")),
+      ]);
+    }
+
     return {
       distance_km: Math.round(totalDistance / 10) / 100,
       duration_hours: durationHours ? Math.round(durationHours * 10) / 10 : null,
@@ -470,6 +481,7 @@ function parseGpx(xmlText) {
       max_speed_kmh: Math.round(maxSpeed * 10) / 10,
       startLat,
       startLon,
+      trackPoints,
       date,
     };
   } catch (err) {
@@ -705,26 +717,29 @@ function updatePreview() {
     }
   });
 
-  // Kaart via GPX startpunt — OSM iframe embed
+  // Kaart via Leaflet — toont route als lijn + startmarker
   const mapEl = $("rp-map");
   if (gpx?.startLat && gpx?.startLon) {
-    const lat = gpx.startLat;
-    const lon = gpx.startLon;
-    const mapFrame = $("rp-map-frame");
-    // Alleen herladen als coördinaten veranderd zijn
-    const currentSrc = mapFrame.querySelector("iframe")?.src || "";
-    const newSrc = `https://www.openstreetmap.org/export/embed.html?bbox=${lon - 0.03},${lat - 0.02},${lon + 0.03},${lat + 0.02}&layer=mapnik&marker=${lat},${lon}`;
-    if (!currentSrc.includes(lat.toString())) {
-      mapFrame.innerHTML = `<iframe
-        src="${newSrc}"
-        title="Kaart van ${location || "startpunt"}"
-        style="width:100%;height:200px;border:none;display:block;"
-        loading="lazy"
-        allowfullscreen
-      ></iframe>
-      <span class="rp-map__credit">© OpenStreetMap contributors</span>`;
-    }
     mapEl.hidden = false;
+    const mapFrame = $("rp-map-frame");
+
+    // Leaflet container aanmaken als die er nog niet is
+    if (!mapFrame.querySelector("#leaflet-preview-map")) {
+      mapFrame.innerHTML = `<div id="leaflet-preview-map" style="width:100%;height:200px;"></div>`;
+    }
+
+    // Wacht tot Leaflet beschikbaar is
+    if (window.L) {
+      initLeafletMap(gpx);
+    } else {
+      // Leaflet nog niet geladen — wacht en probeer opnieuw
+      const interval = setInterval(() => {
+        if (window.L) {
+          clearInterval(interval);
+          initLeafletMap(gpx);
+        }
+      }, 100);
+    }
   } else {
     mapEl.hidden = true;
   }
@@ -904,6 +919,57 @@ Schrijf het verhaal in 3-5 alinea's. Persoonlijk, beschrijvend, no clickbait.`;
     els.btnAiGenerate.innerHTML = '<span class="btn-icon">\u2746</span> Genereer met AI';
   }
 });
+
+// -----------------------------------------------------------
+// LEAFLET KAART
+// -----------------------------------------------------------
+let leafletMap = null;
+let leafletRoute = null;
+
+function initLeafletMap(gpx) {
+  const container = document.getElementById("leaflet-preview-map");
+  if (!container) return;
+
+  // Kaart verwijderen als die al bestaat (bij herladen)
+  if (leafletMap) {
+    leafletMap.remove();
+    leafletMap = null;
+    leafletRoute = null;
+  }
+
+  const lat = gpx.startLat;
+  const lon = gpx.startLon;
+
+  leafletMap = L.map("leaflet-preview-map", { zoomControl: true, scrollWheelZoom: false });
+
+  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+    attribution: "© OpenStreetMap contributors",
+    maxZoom: 18,
+  }).addTo(leafletMap);
+
+  // Route tekenen als trackpunten beschikbaar zijn
+  if (gpx.trackPoints?.length > 1) {
+    leafletRoute = L.polyline(gpx.trackPoints, {
+      color: "#2C4A3B",
+      weight: 3,
+      opacity: 0.85,
+    }).addTo(leafletMap);
+    leafletMap.fitBounds(leafletRoute.getBounds(), { padding: [16, 16] });
+  } else {
+    // Geen trackpunten — toon alleen startpunt
+    leafletMap.setView([lat, lon], 13);
+  }
+
+  // Startmarker
+  L.circleMarker([lat, lon], {
+    radius: 6,
+    fillColor: "#2C4A3B",
+    color: "#fff",
+    weight: 2,
+    opacity: 1,
+    fillOpacity: 1,
+  }).addTo(leafletMap).bindPopup("Startpunt");
+}
 
 // -----------------------------------------------------------
 // HELPERS
