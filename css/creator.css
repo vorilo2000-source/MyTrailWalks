@@ -783,8 +783,39 @@
   flex-wrap: wrap;
 }
 
-/* -----------------------------------------------------------
-   14. VISUELE ROUTE PREVIEW
+/* Vervoersmiddel checkboxes */
+.transport-select {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-sm);
+}
+
+.transport-option {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  font-size: var(--text-sm);
+  color: var(--color-charcoal);
+  background: var(--color-white);
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-md);
+  padding: var(--space-xs) var(--space-sm);
+  cursor: pointer;
+  transition: border-color 0.15s ease, background 0.15s ease;
+  user-select: none;
+}
+
+.transport-option:hover {
+  border-color: var(--color-forest);
+  background: rgba(44, 74, 59, 0.04);
+}
+
+.transport-option input[type="checkbox"] {
+  accent-color: var(--color-forest);
+  width: 14px;
+  height: 14px;
+  cursor: pointer;
+}
    ----------------------------------------------------------- */
 .route-preview {
   background: var(--color-white);
