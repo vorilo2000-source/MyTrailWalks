@@ -157,9 +157,13 @@ function loadJsonIntoForm(data) {
   // Tips
   if (data.tips?.nl) els.inputTips.value = data.tips.nl;
 
-  // Hero foto
+  // Hero foto — automatisch w_1200,f_auto toevoegen als transformatie ontbreekt
   if (data.photos?.length) {
-    els.inputHeroPhoto.value = data.photos[0].url || "";
+    let heroUrl = data.photos[0].url || "";
+    if (heroUrl && heroUrl.includes("res.cloudinary.com") && !heroUrl.includes("w_1200")) {
+      heroUrl = heroUrl.replace("/upload/", "/upload/w_1200,f_auto/");
+    }
+    els.inputHeroPhoto.value = heroUrl;
   }
 
   // Verhaal → blokken
@@ -208,8 +212,12 @@ function loadJsonIntoForm(data) {
     els.gpxDropZone.hidden = true;
     els.gpxStats.hidden = false;
     els.gpxStatus.textContent = "✓ Uit JSON";
-    // Sla stats op in state zodat export werkt
-    state.gpx = { ...g };
+    // Coördinaten overnemen voor kaart
+    state.gpx = {
+      ...g,
+      startLat: g.start_lat || null,
+      startLon: g.start_lon || null,
+    };
   }
 
   renderBlockEditor();
@@ -779,6 +787,8 @@ function buildRouteJson() {
       max_speed_kmh: state.gpx.max_speed_kmh,
       highest_point_m: state.gpx.highest_point_m,
       lowest_point_m: state.gpx.lowest_point_m,
+      start_lat: state.gpx.startLat || null,
+      start_lon: state.gpx.startLon || null,
     } : null,
     weather: state.weather ? {
       date: state.weather.date,
@@ -920,4 +930,3 @@ window.appReady.then(() => {
   renderBlockEditor();
   updatePreview();
 });
-    
