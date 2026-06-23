@@ -1,6 +1,22 @@
 /* ===========================================================
    creator.css — MyTrailWalks
    Route creator pagina styling
+
+   Inhoudsopgave:
+   1.  Layout
+   2.  API key balk
+   3.  Workspace: 2-koloms grid
+   4.  Stap-secties
+   5.  Formulier elementen
+   6.  Knoppen
+   7.  Drop zone (GPX upload)
+   8.  GPX stats grid
+   9.  Weerblok
+   10. Foto lijst
+   11. AI acties
+   12. Preview kolom
+   13. Blokken-editor
+   14. Visuele route preview
    =========================================================== */
 
 /* -----------------------------------------------------------
@@ -45,6 +61,33 @@
   font-size: var(--text-xl);
   color: var(--color-white);
   margin: 0;
+}
+
+/* Knoppen in de header staan op een donkergroene achtergrond —
+   btn--ghost gebruikt standaard color-charcoal-soft (donker),
+   dat is onleesbaar op groen. Overschrijven met witte variant. */
+.creator-header .btn--ghost {
+  color: rgba(255, 255, 255, 0.85);
+  border-color: rgba(255, 255, 255, 0.3);
+  background: transparent;
+}
+
+.creator-header .btn--ghost:hover {
+  color: var(--color-white);
+  border-color: rgba(255, 255, 255, 0.6);
+  background: rgba(255, 255, 255, 0.08);
+}
+
+/* Label dat als knop fungeert (JSON laden) — zelfde stijl als btn--ghost */
+.creator-header label.btn--ghost {
+  color: rgba(255, 255, 255, 0.85);
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+.creator-header label.btn--ghost:hover {
+  color: var(--color-white);
+  border-color: rgba(255, 255, 255, 0.6);
+  background: rgba(255, 255, 255, 0.08);
 }
 
 /* -----------------------------------------------------------
@@ -108,6 +151,7 @@
   .creator-workspace {
     grid-template-columns: 1fr;
   }
+  /* Preview bovenaan tonen op smal scherm */
   .creator-preview-col {
     order: -1;
   }
@@ -127,6 +171,7 @@
   margin-bottom: var(--space-md);
 }
 
+/* Genummerd bolletje per stap */
 .creator-step__num {
   display: flex;
   align-items: center;
@@ -322,6 +367,7 @@
   text-decoration: none;
 }
 
+/* Standaard ghost — donkere tekst voor gebruik op lichte achtergrond */
 .btn--ghost {
   background: transparent;
   color: var(--color-charcoal-soft);
@@ -359,7 +405,7 @@
   font-size: 0.9em;
 }
 
-/* Knop als inline link -->
+/* Knop als inline link */
 .link-btn {
   background: none;
   border: none;
@@ -454,6 +500,18 @@
 
 .stat-item .stat-value {
   font-size: var(--text-lg);
+}
+
+/* Gedeelde stat/weather waarden en labels */
+.stat-value {
+  font-size: var(--text-base);
+  font-weight: var(--weight-medium);
+  color: var(--color-charcoal);
+}
+
+.stat-label {
+  font-size: var(--text-xs);
+  color: var(--color-charcoal-soft);
 }
 
 /* -----------------------------------------------------------
@@ -557,7 +615,7 @@
   line-height: 1.4;
 }
 
-/* Loading staat voor AI knop -->
+/* Loading staat voor AI knop */
 .btn--ai.is-loading {
   opacity: 0.7;
   cursor: wait;
@@ -574,8 +632,10 @@
   position: sticky;
   top: 80px;
   max-height: calc(100vh - 100px);
+  overflow-y: auto;
   display: flex;
   flex-direction: column;
+  gap: var(--space-xs);
 }
 
 .preview-header {
@@ -595,20 +655,336 @@
   letter-spacing: 0.07em;
 }
 
-.preview-json {
+/* -----------------------------------------------------------
+   13. BLOKKEN-EDITOR
+   ----------------------------------------------------------- */
+.block-editor {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.block-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+/* Elk blok: verplaats-knoppen + inhoud + verwijder-knop */
+.block-item {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-sm);
+  background: var(--color-white);
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-md);
+  padding: var(--space-sm) var(--space-md);
+}
+
+/* Fotoblok krijgt licht gekleurd achtergrond om onderscheid te maken */
+.block-item--photo {
+  background: rgba(76, 122, 137, 0.04);
+  border-color: rgba(76, 122, 137, 0.2);
+}
+
+.block-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding-top: 2px;
+  flex-shrink: 0;
+}
+
+.block-ctrl-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--color-charcoal-soft);
+  font-size: var(--text-base);
+  padding: 2px 5px;
+  border-radius: var(--radius-sm);
+  line-height: 1;
+  transition: background 0.1s ease, color 0.1s ease;
+}
+
+.block-ctrl-btn:hover:not(:disabled) {
+  background: var(--color-cream);
+  color: var(--color-charcoal);
+}
+
+.block-ctrl-btn:disabled {
+  opacity: 0.2;
+  cursor: default;
+}
+
+.block-body {
   flex: 1;
-  overflow-y: auto;
-  background: var(--color-charcoal);
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}
+
+/* Klein label boven elk blok (Tekst / Foto) */
+.block-item__label {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  color: var(--color-charcoal-soft);
+}
+
+.block-textarea {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.block-url-input {
+  width: 100%;
+  box-sizing: border-box;
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+}
+
+/* Kleine foto-preview onder URL input in blokken-editor */
+.block-photo-preview {
+  margin-top: var(--space-xs);
+}
+
+.block-photo-preview__img {
+  width: 100%;
+  max-height: 120px;
+  object-fit: cover;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-line);
+  display: block;
+}
+
+.block-remove-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--color-charcoal-soft);
+  font-size: var(--text-base);
+  padding: 4px 6px;
+  border-radius: var(--radius-sm);
+  transition: color 0.15s ease, background 0.15s ease;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.block-remove-btn:hover {
+  color: var(--color-hard, #c0392b);
+  background: rgba(192, 57, 43, 0.06);
+}
+
+/* Knoppen om nieuwe blokken toe te voegen */
+.block-add-bar {
+  display: flex;
+  gap: var(--space-sm);
+  flex-wrap: wrap;
+}
+
+/* -----------------------------------------------------------
+   14. VISUELE ROUTE PREVIEW
+   ----------------------------------------------------------- */
+.route-preview {
+  background: var(--color-white);
+  border: 1px solid var(--color-line);
   border-radius: 0 0 var(--radius-md) var(--radius-md);
-  padding: var(--space-md);
+  overflow: hidden;
+}
+
+/* Hero afbeelding bovenaan de preview */
+.rp-hero {
+  position: relative;
+  height: 160px;
+  background: linear-gradient(135deg, var(--color-forest) 0%, var(--color-water) 100%);
+  overflow: hidden;
+}
+
+.rp-hero__img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* Placeholder als er nog geen hero-foto is */
+.rp-hero__placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-xs);
+}
+
+.rp-hero__icon {
+  font-size: 1.5rem;
+  color: rgba(255,255,255,0.3);
+}
+
+.rp-hero__text {
+  font-size: var(--text-xs);
+  color: rgba(255,255,255,0.4);
+}
+
+/* Status badge (draft / published) rechtsboven in hero */
+.rp-status-badge {
+  position: absolute;
+  top: var(--space-sm);
+  right: var(--space-sm);
+  background: rgba(0,0,0,0.4);
+  color: var(--color-white);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  padding: 2px 8px;
+  border-radius: var(--radius-sm);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* Inhoud onder de hero */
+.rp-body {
+  padding: var(--space-md) var(--space-md);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.rp-location {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  color: var(--color-charcoal-soft);
   margin: 0;
 }
 
-.preview-json code {
-  font-family: var(--font-mono);
-  font-size: 0.78rem;
-  color: #a8d8a8;
+.rp-title {
+  font-size: var(--text-lg);
+  font-weight: var(--weight-medium);
+  color: var(--color-charcoal);
+  margin: 0;
+}
+
+.rp-summary {
+  font-size: var(--text-sm);
+  color: var(--color-charcoal-soft);
+  margin: 0;
+  line-height: 1.5;
+}
+
+/* Stats grid: 4 kolommen */
+.rp-stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--space-xs);
+}
+
+.rp-stat {
+  background: var(--color-cream);
+  border-radius: var(--radius-sm);
+  padding: var(--space-xs) var(--space-sm);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 2px;
+}
+
+.rp-stat__value {
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+  color: var(--color-charcoal);
+}
+
+.rp-stat__label {
+  font-size: 10px;
+  color: var(--color-charcoal-soft);
+}
+
+/* Weerdata rij */
+.rp-weather {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-sm);
+  padding-top: var(--space-sm);
+  border-top: 1px solid var(--color-line);
+}
+
+.rp-weather__item {
+  font-size: var(--text-xs);
+  color: var(--color-charcoal-soft);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.rp-weather__icon {
+  font-size: 13px;
+}
+
+/* Verhaal blokken in de preview */
+.rp-story {
+  padding-top: var(--space-sm);
+  border-top: 1px solid var(--color-line);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.rp-story__text {
+  font-size: var(--text-sm);
+  color: var(--color-charcoal-soft);
   line-height: 1.6;
-  white-space: pre-wrap;
-  word-break: break-all;
+  margin: 0;
+  font-style: italic;
+}
+
+.rp-story__photo {
+  width: 100%;
+  max-height: 180px;
+  object-fit: cover;
+  border-radius: var(--radius-sm);
+  display: block;
+}
+
+/* Kaart sectie onderaan de preview */
+.rp-map {
+  padding-top: var(--space-sm);
+  border-top: 1px solid var(--color-line);
+}
+
+.rp-map__label {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--color-charcoal-soft);
+  margin: 0 0 var(--space-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.rp-map__frame {
+  position: relative;
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  border: 1px solid var(--color-line);
+}
+
+.rp-map__img {
+  width: 100%;
+  height: 140px;
+  object-fit: cover;
+  display: block;
+}
+
+/* OSM attribuut label rechtsonder op de kaart */
+.rp-map__credit {
+  position: absolute;
+  bottom: 4px;
+  right: 6px;
+  font-size: 9px;
+  color: #333;
+  background: rgba(255,255,255,0.8);
+  padding: 1px 4px;
+  border-radius: 2px;
 }
