@@ -137,6 +137,13 @@ function loadJsonIntoForm(data) {
   if (data.difficulty) els.inputDifficulty.value = data.difficulty;
   if (data.source_reference) els.inputSource.value = data.source_reference;
 
+  // Vervoersmiddel
+  if (data.transport?.length) {
+    document.querySelectorAll("#transport-select input").forEach((cb) => {
+      cb.checked = data.transport.includes(cb.value);
+    });
+  }
+
   // Tags / keywords
   if (data.tags?.length) els.inputKeywords.value = data.tags.join(", ");
 
@@ -648,6 +655,7 @@ function updatePreview() {
   $("rp-distance").textContent = gpx?.distance_km ? `${gpx.distance_km} km` : "—";
   $("rp-duration").textContent = gpx?.duration_hours ? `${gpx.duration_hours} u` : "—";
   $("rp-elevation").textContent = gpx?.elevation_up_m ? `+${gpx.elevation_up_m} m` : "—";
+  $("rp-avg-speed").textContent = gpx?.avg_speed_kmh ? `${gpx.avg_speed_kmh} km/u` : "—";
 
   const diffLabels = { easy: "Gemakkelijk", medium: "Gemiddeld", hard: "Zwaar" };
   $("rp-difficulty").textContent = diffLabels[difficulty] || "—";
@@ -738,10 +746,14 @@ function buildRouteJson() {
     .filter((b) => b.type === "photo" && b.value.trim())
     .forEach((b) => allPhotos.push({ url: b.value.trim(), caption: "" }));
 
+  // Vervoersmiddel
+  const transport = Array.from(document.querySelectorAll("#transport-select input:checked")).map((el) => el.value);
+
   return {
     id,
     status: els.inputStatus.value,
     published_date: els.inputDate.value || null,
+    transport: transport.length ? transport : null,
     title: { nl: els.inputTitle.value.trim(), en: "" },
     location: els.inputLocation.value.trim(),
     region: els.inputRegion.value.trim(),
