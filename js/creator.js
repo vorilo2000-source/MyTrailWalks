@@ -57,6 +57,7 @@ const els = {
   wPrecip: $("w-precip"),
   wWind: $("w-wind"),
   inputWeatherCondition: $("input-weather-condition"),
+  weatherBlock: $("weather-block"),
   inputTitle: $("input-title"),
   inputDifficulty: $("input-difficulty"),
   inputRegion: $("input-region"),
@@ -180,13 +181,17 @@ function loadJsonIntoForm(data) {
 
   // Weerdata
   if (data.weather) {
-    state.weather = { ...data.weather };
-    els.wTempMin.textContent = data.weather.temperature_min !== null ? `${data.weather.temperature_min}°C` : "—";
-    els.wTempMax.textContent = data.weather.temperature_max !== null ? `${data.weather.temperature_max}°C` : "—";
-    els.wPrecip.textContent = data.weather.precipitation_mm !== null ? `${data.weather.precipitation_mm} mm` : "—";
-    els.wWind.textContent = data.weather.wind_kmh !== null ? `${data.weather.wind_kmh} km/u` : "—";
-    if (data.weather.condition) els.inputWeatherCondition.value = data.weather.condition;
-    els.weatherBlock.hidden = false;
+    try {
+      state.weather = { ...data.weather };
+      if (els.wTempMin) els.wTempMin.textContent = data.weather.temperature_min !== null ? `${data.weather.temperature_min}°C` : "—";
+      if (els.wTempMax) els.wTempMax.textContent = data.weather.temperature_max !== null ? `${data.weather.temperature_max}°C` : "—";
+      if (els.wPrecip) els.wPrecip.textContent = data.weather.precipitation_mm !== null ? `${data.weather.precipitation_mm} mm` : "—";
+      if (els.wWind) els.wWind.textContent = data.weather.wind_kmh !== null ? `${data.weather.wind_kmh} km/u` : "—";
+      if (data.weather.condition && els.inputWeatherCondition) els.inputWeatherCondition.value = data.weather.condition;
+      if (els.weatherBlock) els.weatherBlock.hidden = false;
+    } catch (err) {
+      console.warn("Weerdata inladen fout (niet kritiek):", err);
+    }
   }
 
   // GPX stats (read-only invullen als er geen GPX geladen wordt)
@@ -915,3 +920,4 @@ window.appReady.then(() => {
   renderBlockEditor();
   updatePreview();
 });
+    
