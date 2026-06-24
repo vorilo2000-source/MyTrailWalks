@@ -1,0 +1,73 @@
+{
+  "id": "20260618 - Grenspark Kalmthout",
+  "status": "draft",
+  "published_date": "2026-06-18",
+  "transport": [
+    "walking"
+  ],
+  "title": {
+    "nl": "Grenspark noord <> Brasserie de Wolf",
+    "en": ""
+  },
+  "location": "Kalmthout, Antwerpen, België",
+  "region": "Grenspark Kalmthout",
+  "difficulty": "T3",
+  "source_reference": null,
+  "tags": [
+    "Zandpaden"
+  ],
+  "summary": {
+    "nl": "Eerste keer dat we samen een wandeling gemaakt hebben. Mooie wandeling en genoten van de natuur.",
+    "en": ""
+  },
+  "story": {
+    "nl": "",
+    "en": ""
+  },
+  "story_blocks": [
+    {
+      "type": "photo",
+      "value": "https://res.cloudinary.com/dgzlcqdcc/image/upload/w_800,f_auto/v1782207547/Grenspark_Kalmthoutse_Heide_Informatie_kaart_aflo99.jpg"
+    }
+  ],
+  "gallery": [
+    {
+      "url": "https://res.cloudinary.com/dgzlcqdcc/image/upload/w_800,f_auto/v1782207547/Grenspark_Kalmthoutse_Heide_Informatie_kaart_aflo99.jpg"
+    }
+  ],
+  "tips": {
+    "nl": "Neem water mee op een zonnige dag en blijf zoveel mogelijk in de schaduw lopen..",
+    "en": ""
+  },
+  "photos": [
+    {
+      "url": "https://res.cloudinary.com/dgzlcqdcc/image/upload/w_1200,f_auto/v1782207834/Grenspark_Kalmthoutse_Heide_wandelpad_xtmeln.webp",
+      "caption": ""
+    },
+    {
+      "url": "https://res.cloudinary.com/dgzlcqdcc/image/upload/w_800,f_auto/v1782207547/Grenspark_Kalmthoutse_Heide_Informatie_kaart_aflo99.jpg",
+      "caption": ""
+    }
+  ],
+  "gpx_stats": {
+    "distance_km": 6.9,
+    "duration_hours": 2.7,
+    "elevation_up_m": 423,
+    "elevation_down_m": 432,
+    "avg_speed_kmh": 5.5,
+    "max_speed_kmh": 37.8,
+    "highest_point_m": 30,
+    "lowest_point_m": 16,
+    "start_lat": 51.418323435323096,
+    "start_lon": 4.418673734357835
+  },
+  "weather": {
+    "date": "2026-06-18",
+    "temperature_min": 14.9,
+    "temperature_max": 28.8,
+    "precipitation_mm": 0.6,
+    "wind_kmh": 13.1,
+    "condition": "Zonnig",
+    "source": "Open-Meteo"
+  }
+}

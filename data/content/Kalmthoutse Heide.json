@@ -1,0 +1,57 @@
+{
+  "id": "Kalmthoutse Heide",
+  "status": "draft",
+  "published_date": "2026-06-18",
+  "title": {
+    "nl": "Kalmthoutse Heide -",
+    "en": ""
+  },
+  "location": "Kalmthout, Antwerpen, België",
+  "region": "",
+  "difficulty": "medium",
+  "source_reference": "https://maps.app.goo.gl/8sWWomyT4rLRbieU7?g_st=ic",
+  "tags": [],
+  "summary": {
+    "nl": "Korte wandeling naar Brasserie de Wolf en terug",
+    "en": ""
+  },
+  "story": {
+    "nl": "Dit was de eerste keer dat we samen wandelde.",
+    "en": ""
+  },
+  "story_blocks": [
+    {
+      "type": "text",
+      "value": "Dit was de eerste keer dat we samen wandelde."
+    }
+  ],
+  "tips": {
+    "nl": "",
+    "en": ""
+  },
+  "photos": [
+    {
+      "url": "https://maps.app.goo.gl/NKyqggZ7RpnYfbzB6?g_st=ic",
+      "caption": ""
+    }
+  ],
+  "gpx_stats": {
+    "distance_km": 6.9,
+    "duration_hours": 2.7,
+    "elevation_up_m": 423,
+    "elevation_down_m": 432,
+    "avg_speed_kmh": 5.5,
+    "max_speed_kmh": 37.8,
+    "highest_point_m": 30,
+    "lowest_point_m": 16
+  },
+  "weather": {
+    "date": "2026-06-18",
+    "temperature_min": 14.9,
+    "temperature_max": 28.8,
+    "precipitation_mm": 0.6,
+    "wind_kmh": 13.1,
+    "condition": "Warme dag de route zoveel mogelijk in de schaduw van bomen gelopen",
+    "source": "Open-Meteo"
+  }
+}
