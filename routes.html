@@ -1,1 +1,148 @@
+<!-- ======================= routes/[id].html v1.0.0 =======================
+     Route detail pagina — MyTrailWalks
+     Laadt een route JSON en rendert de volledige route pagina.
 
+     Secties:
+       1. Hero (fullscreen foto + titel + moeilijkheid)
+       2. Stats (afstand, duur, stijging, snelheid, datum)
+       3. Weerdata
+       4. Verhaal blokken (tekst, foto, fotogrid, links)
+       5. Tips
+       6. Kaart (Leaflet met route)
+       7. Vervoersmiddel
+       8. Galerij (foto grid onderaan)
+       9. Acties (kaart openen, afdrukken, delen)
+
+     Gebruik: routes/kalmthoutse-heide.html?id=kalmthoutse-heide
+     Of: routes/index.html?id=kalmthoutse-heide
+
+     v1.0.0: initiële versie
+     ======================================================================= -->
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Route — MyTrailWalks</title>
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/x-icon" href="../assets/images/favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="../assets/images/favicon-32x32.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="../assets/images/favicon-180x180.png">
+  <link rel="icon" type="image/png" sizes="192x192" href="../assets/images/favicon-192x192.png">
+
+  <!-- CSS -->
+  <link rel="stylesheet" href="../css/main.css">
+  <link rel="stylesheet" href="../css/topbar.css">
+  <link rel="stylesheet" href="../css/footer.css">
+  <link rel="stylesheet" href="../css/route.css">
+
+  <!-- Leaflet -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.min.css" crossorigin="">
+</head>
+<body>
+
+  <!-- Eruda debugger — niet verwijderen -->
+  <script src="https://cdn.jsdelivr.net/npm/eruda"></script>
+  <script>eruda.init();</script>
+
+  <!-- Topbar -->
+  <div id="topbar-placeholder" aria-hidden="true"></div>
+
+  <!-- Main -->
+  <main id="main-content" class="route-layout">
+
+    <!-- Hero -->
+    <section class="route-hero" id="route-hero">
+      <div class="route-hero__bg" id="route-hero-bg"></div>
+      <div class="route-hero__overlay"></div>
+      <div class="route-hero__content">
+        <p class="route-hero__eyebrow" id="route-region"></p>
+        <h1 class="route-hero__title" id="route-title">Laden…</h1>
+        <p class="route-hero__location" id="route-location"></p>
+        <div class="route-hero__badges" id="route-badges"></div>
+      </div>
+    </section>
+
+    <!-- Inhoud -->
+    <div class="route-content">
+
+      <!-- Stats -->
+      <section class="route-section" id="section-stats">
+        <div class="route-stats" id="route-stats"></div>
+      </section>
+
+      <!-- Weer -->
+      <section class="route-section" id="section-weather" hidden>
+        <div class="route-weather" id="route-weather"></div>
+      </section>
+
+      <!-- Verhaal -->
+      <section class="route-section" id="section-story" hidden>
+        <div class="route-story" id="route-story"></div>
+      </section>
+
+      <!-- Tips -->
+      <section class="route-section" id="section-tips" hidden>
+        <h2 class="route-section__title">Tips</h2>
+        <div class="route-tips" id="route-tips"></div>
+      </section>
+
+      <!-- Kaart -->
+      <section class="route-section" id="section-map" hidden>
+        <h2 class="route-section__title">Route op kaart</h2>
+        <div id="route-map" class="route-map"></div>
+      </section>
+
+      <!-- Vervoersmiddel -->
+      <section class="route-section" id="section-transport" hidden>
+        <h2 class="route-section__title">Vervoersmiddel</h2>
+        <div class="route-transport" id="route-transport"></div>
+      </section>
+
+      <!-- Galerij -->
+      <section class="route-section" id="section-gallery" hidden>
+        <h2 class="route-section__title">Foto's</h2>
+        <div class="route-gallery" id="route-gallery"></div>
+      </section>
+
+      <!-- Acties -->
+      <div class="route-actions">
+        <button class="route-action-btn" id="btn-open-map" hidden>
+          <span>🗺</span> Route openen
+        </button>
+        <button class="route-action-btn" onclick="window.print()">
+          <span>🖨</span> Afdrukken
+        </button>
+        <button class="route-action-btn" id="btn-share">
+          <span>🔗</span> Delen
+        </button>
+      </div>
+
+    </div><!-- /route-content -->
+  </main>
+
+  <!-- Footer -->
+  <div id="footer-placeholder" aria-hidden="true"></div>
+
+  <!-- Supabase SDK -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+
+  <!-- i18next CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/i18next@23/i18next.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/i18next-http-backend@2/i18nextHttpBackend.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/i18next-browser-languagedetector@7/i18nextBrowserLanguageDetector.min.js"></script>
+
+  <!-- Leaflet -->
+  <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.min.js"></script>
+
+  <!-- Scripts -->
+  <script src="../js/i18n.js"></script>
+  <script src="../js/auth.js"></script>
+  <script src="../js/topbar-auth.js"></script>
+  <script src="../js/analytics.js"></script>
+  <script src="../js/app.js"></script>
+  <script src="../js/route.js?v=1.0.0"></script>
+
+</body>
+</html>
