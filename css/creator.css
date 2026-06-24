@@ -824,6 +824,35 @@
   overflow: hidden;
 }
 
+/* Photo-grid blok in editor */
+.block-grid-controls {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  margin-bottom: var(--space-xs);
+}
+
+.block-grid-col-opt {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: var(--text-xs);
+  color: var(--color-charcoal-soft);
+  cursor: pointer;
+}
+
+.photo-grid-entry {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+/* Link blok */
+.block-item--link {
+  background: rgba(76, 122, 137, 0.04);
+  border-color: rgba(76, 122, 137, 0.2);
+}
+
 /* Hero afbeelding bovenaan de preview */
 .rp-hero {
   position: relative;
