@@ -624,9 +624,13 @@ function calculateDifficulty() {
     if (weather.wind_kmh >= 30) score += 1;
   }
 
-  if (score <= 7) return "easy";
-  if (score <= 14) return "medium";
-  return "hard";
+  // SAC-wandelschaal T1–T6
+  if (score <= 5)  return "T1";
+  if (score <= 10) return "T2";
+  if (score <= 16) return "T3";
+  if (score <= 22) return "T4";
+  if (score <= 28) return "T5";
+  return "T6";
 }
 
 function applyCalculatedDifficulty() {
@@ -713,7 +717,14 @@ function updatePreview() {
   $("rp-elevation").textContent = gpx?.elevation_up_m ? `+${gpx.elevation_up_m} m` : "—";
   $("rp-avg-speed").textContent = gpx?.avg_speed_kmh ? `${gpx.avg_speed_kmh} km/u` : "—";
 
-  const diffLabels = { easy: "Gemakkelijk", medium: "Gemiddeld", hard: "Zwaar" };
+  const diffLabels = {
+    T1: "T1 — Wandelen",
+    T2: "T2 — Bergwandeling",
+    T3: "T3 — Veeleisend",
+    T4: "T4 — Alpien",
+    T5: "T5 — Veeleisend alpien",
+    T6: "T6 — Moeilijk alpien",
+  };
   $("rp-difficulty").textContent = diffLabels[difficulty] || "—";
 
   // Weer
