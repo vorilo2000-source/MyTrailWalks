@@ -309,7 +309,9 @@
                 <div class="block-list" id="block-list"></div>
                 <div class="block-add-bar">
                   <button class="btn btn--ghost btn--sm" id="btn-add-text-block">+ Tekstblok</button>
-                  <button class="btn btn--ghost btn--sm" id="btn-add-photo-block">+ Fotoblok</button>
+                  <button class="btn btn--ghost btn--sm" id="btn-add-photo-block">+ Foto</button>
+                  <button class="btn btn--ghost btn--sm" id="btn-add-photo-grid-block">+ Fotogrid</button>
+                  <button class="btn btn--ghost btn--sm" id="btn-add-link-block">+ Link</button>
                 </div>
               </div>
             </div>
@@ -317,6 +319,14 @@
             <div class="field">
               <label class="field__label" for="input-tips">Tips</label>
               <textarea id="input-tips" class="input input--textarea" rows="4" placeholder="Praktische tips voor wandelaars…"></textarea>
+            </div>
+
+            <!-- Galerij onderaan -->
+            <div class="field">
+              <label class="field__label">Galerij (onderaan pagina)</label>
+              <span class="field__help" style="display:block;margin-bottom:8px;">Extra foto's die als grid worden getoond onderaan de route pagina.</span>
+              <div id="gallery-list" class="photo-list"></div>
+              <button class="btn btn--ghost btn--sm" id="btn-add-gallery-photo" style="margin-top:6px;">+ Foto toevoegen</button>
             </div>
 
             <div class="ai-actions" id="ai-actions" hidden>
