@@ -1,227 +1,372 @@
 /* ===========================================================
-   TrailStories — routes.css
-   Styling specifiek voor de route detail pagina
-   Bouwt verder op de design tokens uit main.css
+   route.css — MyTrailWalks
+   Route detail pagina styling
+
+   Inhoudsopgave:
+   1.  Layout
+   2.  Hero
+   3.  Content wrapper
+   4.  Secties
+   5.  Stats grid
+   6.  Weerdata
+   7.  Verhaal blokken
+   8.  Tips
+   9.  Kaart
+   10. Vervoersmiddel
+   11. Galerij
+   12. Acties
    =========================================================== */
 
 /* -----------------------------------------------------------
-   1. HERO BANNER
+   1. LAYOUT
+   ----------------------------------------------------------- */
+.route-layout {
+  min-height: 100vh;
+}
+
+/* -----------------------------------------------------------
+   2. HERO
    ----------------------------------------------------------- */
 .route-hero {
   position: relative;
-  height: 60vh;
-  min-height: 360px;
-  background-color: var(--color-forest-dark); /* fallback kleur vóór/zonder hero-foto */
-  background-size: cover;
-  background-position: center;
-  display: flex;
-  align-items: flex-end;
+  height: 380px;
+  overflow: hidden;
+  background: linear-gradient(135deg, var(--color-forest) 0%, var(--color-water) 100%);
 }
 
-/* Donkere gradient onderin zodat titel-tekst leesbaar blijft op elke foto */
-.route-hero::after {
-  content: '';
+.route-hero__bg {
   position: absolute;
   inset: 0;
-  background: linear-gradient(to top, rgba(28, 51, 40, 0.85) 0%, rgba(28, 51, 40, 0) 55%);
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  transition: opacity 0.3s ease;
 }
 
 .route-hero__overlay {
-  position: relative;
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(0,0,0,0.65) 0%, rgba(0,0,0,0.1) 60%, transparent 100%);
   z-index: 1;
-  padding: var(--space-xl) var(--space-md);
-  color: var(--color-white);
 }
 
-.route-hero__region {
+.route-hero__content {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 2;
+  padding: var(--space-xl) var(--space-lg);
+  max-width: var(--content-max-width);
+  margin: 0 auto;
+}
+
+.route-hero__eyebrow {
   font-family: var(--font-mono);
-  font-size: var(--text-sm);
+  font-size: var(--text-xs);
+  color: rgba(255,255,255,0.6);
   text-transform: uppercase;
-  letter-spacing: 0.05em;
-  opacity: 0.9;
-  margin-bottom: var(--space-sm);
+  letter-spacing: 0.1em;
+  margin: 0 0 var(--space-xs);
 }
 
 .route-hero__title {
-  color: var(--color-white); /* overschrijft de standaard donkergroene h1-kleur op de donkere hero */
-  font-size: var(--text-2xl);
+  font-size: clamp(1.75rem, 4vw, 2.5rem);
+  font-weight: 500;
+  color: var(--color-white);
+  margin: 0 0 var(--space-xs);
+  line-height: 1.15;
 }
 
-@media (min-width: 768px) {
-  .route-hero__title {
-    font-size: var(--text-3xl);
-  }
-  .route-hero__overlay {
-    padding: var(--space-2xl) var(--space-xl);
-  }
+.route-hero__location {
+  font-size: var(--text-sm);
+  color: rgba(255,255,255,0.75);
+  margin: 0 0 var(--space-sm);
 }
 
-/* -----------------------------------------------------------
-   2. STATS DASHBOARD
-   ----------------------------------------------------------- */
-.stats-dashboard {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: var(--space-lg);
-  padding: var(--space-xl) 0;
-  text-align: center;
-}
-
-@media (min-width: 600px) {
-  .stats-dashboard {
-    grid-template-columns: repeat(4, 1fr); /* desktop: alle 4 stats op één rij */
-  }
-}
-
-.stat-item {
+.route-hero__badges {
   display: flex;
-  flex-direction: column;
-  gap: var(--space-xs);
+  gap: var(--space-sm);
+  flex-wrap: wrap;
 }
 
-.stat-item .stat-value {
-  font-size: var(--text-xl);
+/* Badges in hero */
+.route-badge {
+  display: inline-block;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  padding: 3px 10px;
+  border-radius: 20px;
+  background: rgba(255,255,255,0.15);
+  color: var(--color-white);
+  backdrop-filter: blur(4px);
 }
 
-/* Badge krijgt hier iets meer ruimte t.o.v. de losse stat-cijfers */
-.stat-item .badge-difficulty {
-  justify-self: center;
-  margin-bottom: var(--space-xs);
-}
-
-/* -----------------------------------------------------------
-   3. INTERACTIVE MAP
-   ----------------------------------------------------------- */
-.route-map {
-  width: 100%;
-  height: 400px;
-  border-radius: var(--radius-md);
-  background-color: var(--color-line); /* placeholder-kleur zolang Leaflet nog niet geladen is */
-  margin-top: var(--space-md);
-}
-
-.elevation-profile {
-  width: 100%;
-  height: 160px;
-  margin-top: var(--space-md);
-  border-radius: var(--radius-md);
-  background-color: var(--color-white);
-  box-shadow: var(--shadow-card);
+.route-badge--difficulty {
+  background: rgba(44, 74, 59, 0.7);
 }
 
 /* -----------------------------------------------------------
-   4. STORY SECTIONS
-   Tekst/afbeelding blokken, afwisselend (magazine-gevoel)
+   3. CONTENT WRAPPER
    ----------------------------------------------------------- */
-.story-content {
+.route-content {
+  max-width: var(--content-narrow-width);
+  margin: 0 auto;
+  padding: var(--space-xl) var(--space-lg);
   display: flex;
   flex-direction: column;
   gap: var(--space-xl);
 }
 
-.story-block--text {
-  font-size: var(--text-lg);
-  color: var(--color-charcoal);
-}
-
-.story-block--image img {
-  border-radius: var(--radius-md);
-  box-shadow: var(--shadow-card);
-}
-
-.story-block--image figcaption {
-  margin-top: var(--space-sm);
-  font-size: var(--text-sm);
-  color: var(--color-charcoal-soft);
-  text-align: center;
-}
-
 /* -----------------------------------------------------------
-   5. PHOTO GALLERY (masonry via CSS columns)
+   4. SECTIES
    ----------------------------------------------------------- */
-.photo-gallery {
-  column-count: 2;
-  column-gap: var(--space-md);
-}
-
-@media (min-width: 768px) {
-  .photo-gallery {
-    column-count: 3;
-  }
-}
-
-.photo-gallery img {
-  width: 100%;
-  margin-bottom: var(--space-md);
-  border-radius: var(--radius-md);
-  break-inside: avoid; /* voorkomt dat een foto over twee kolommen gesplitst wordt */
-}
-
-/* -----------------------------------------------------------
-   6. PRAKTISCHE INFO (definition list)
-   ----------------------------------------------------------- */
-.practical-info {
-  display: grid;
-  grid-template-columns: max-content 1fr;
-  gap: var(--space-sm) var(--space-lg);
-}
-
-.practical-info dt {
-  font-family: var(--font-mono);
-  font-size: var(--text-sm);
-  color: var(--color-charcoal-soft);
-}
-
-.practical-info dd {
-  color: var(--color-charcoal);
-}
-
-/* -----------------------------------------------------------
-   7. TIPS LIST
-   ----------------------------------------------------------- */
-.tips-list {
-  list-style: none;
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-sm);
-}
-
-.tips-list li {
-  padding-left: var(--space-lg);
-  position: relative;
-}
-
-/* Klein bladsymbool i.p.v. standaard bullet — past bij outdoor-thema */
-.tips-list li::before {
-  content: '\1F343'; /* 🍃 */
-  position: absolute;
-  left: 0;
-}
-
-/* -----------------------------------------------------------
-   8. RATING SUMMARY
-   ----------------------------------------------------------- */
-.rating-summary {
+.route-section {
   display: flex;
   flex-direction: column;
   gap: var(--space-md);
 }
 
-.rating-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+.route-section__title {
+  font-size: var(--text-lg);
+  font-weight: 500;
+  color: var(--color-forest-dark);
+  margin: 0;
   padding-bottom: var(--space-sm);
   border-bottom: 1px solid var(--color-line);
 }
 
-.rating-item__label {
-  font-family: var(--font-body);
+/* -----------------------------------------------------------
+   5. STATS GRID
+   ----------------------------------------------------------- */
+.route-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+  gap: var(--space-sm);
+}
+
+.route-stat {
+  background: var(--color-cream);
+  border-radius: var(--radius-md);
+  padding: var(--space-sm) var(--space-md);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.route-stat__value {
+  font-size: var(--text-lg);
+  font-weight: 500;
   color: var(--color-charcoal);
 }
 
-.rating-item__value {
-  font-family: var(--font-mono);
-  color: var(--color-forest-dark);
-  font-weight: var(--weight-medium);
+.route-stat__label {
+  font-size: var(--text-xs);
+  color: var(--color-charcoal-soft);
+}
+
+/* -----------------------------------------------------------
+   6. WEERDATA
+   ----------------------------------------------------------- */
+.route-weather {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-md);
+  background: rgba(76, 122, 137, 0.06);
+  border: 1px solid rgba(76, 122, 137, 0.2);
+  border-radius: var(--radius-md);
+  padding: var(--space-md) var(--space-lg);
+}
+
+.route-weather__item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  font-size: var(--text-sm);
+  color: var(--color-charcoal-soft);
+}
+
+.route-weather__icon {
+  font-size: 1rem;
+}
+
+/* -----------------------------------------------------------
+   7. VERHAAL BLOKKEN
+   ----------------------------------------------------------- */
+.route-story {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-lg);
+}
+
+.route-story__text {
+  font-size: var(--text-base);
+  line-height: 1.8;
+  color: var(--color-charcoal);
+  margin: 0;
+}
+
+.route-story__photo {
+  width: 100%;
+  border-radius: var(--radius-md);
+  display: block;
+  object-fit: cover;
+  max-height: 480px;
+}
+
+/* Foto grid — 2 of 3 kolommen */
+.route-story__grid {
+  display: grid;
+  gap: var(--space-sm);
+}
+
+.route-story__grid-photo {
+  width: 100%;
+  aspect-ratio: 4/3;
+  object-fit: cover;
+  border-radius: var(--radius-md);
+  display: block;
+}
+
+/* Link blok */
+.route-story__link {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-sm);
+  color: var(--color-water);
+  font-size: var(--text-sm);
+  text-decoration: none;
+  padding: var(--space-sm) var(--space-md);
+  border: 1px solid rgba(76, 122, 137, 0.3);
+  border-radius: var(--radius-md);
+  background: rgba(76, 122, 137, 0.04);
+  transition: background 0.15s ease, border-color 0.15s ease;
+  align-self: flex-start;
+}
+
+.route-story__link:hover {
+  background: rgba(76, 122, 137, 0.1);
+  border-color: rgba(76, 122, 137, 0.5);
+  text-decoration: none;
+}
+
+.route-story__link-icon {
+  font-size: 1rem;
+}
+
+/* -----------------------------------------------------------
+   8. TIPS
+   ----------------------------------------------------------- */
+.route-tips {
+  background: rgba(140, 106, 79, 0.06);
+  border: 1px solid rgba(140, 106, 79, 0.2);
+  border-radius: var(--radius-md);
+  padding: var(--space-md) var(--space-lg);
+}
+
+.route-tips__text {
+  font-size: var(--text-base);
+  line-height: 1.7;
+  color: var(--color-charcoal);
+  margin: 0;
+}
+
+/* -----------------------------------------------------------
+   9. KAART
+   ----------------------------------------------------------- */
+.route-map {
+  height: 400px;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  border: 1px solid var(--color-line);
+}
+
+/* -----------------------------------------------------------
+   10. VERVOERSMIDDEL
+   ----------------------------------------------------------- */
+.route-transport {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-sm);
+}
+
+.route-transport__tag {
+  font-size: var(--text-sm);
+  padding: var(--space-xs) var(--space-md);
+  border-radius: 20px;
+  background: var(--color-cream);
+  border: 1px solid var(--color-line);
+  color: var(--color-charcoal-soft);
+}
+
+/* -----------------------------------------------------------
+   11. GALERIJ
+   ----------------------------------------------------------- */
+.route-gallery {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: var(--space-sm);
+}
+
+.route-gallery__photo {
+  width: 100%;
+  aspect-ratio: 4/3;
+  object-fit: cover;
+  border-radius: var(--radius-md);
+  display: block;
+  cursor: pointer;
+  transition: opacity 0.15s ease;
+}
+
+.route-gallery__photo:hover {
+  opacity: 0.9;
+}
+
+/* -----------------------------------------------------------
+   12. ACTIES
+   ----------------------------------------------------------- */
+.route-actions {
+  display: flex;
+  gap: var(--space-sm);
+  flex-wrap: wrap;
+  padding-top: var(--space-lg);
+  border-top: 1px solid var(--color-line);
+}
+
+.route-action-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+  font-family: var(--font-body);
+  font-size: var(--text-sm);
+  font-weight: 500;
+  padding: var(--space-sm) var(--space-lg);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-line);
+  background: var(--color-white);
+  color: var(--color-charcoal-soft);
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+
+.route-action-btn:hover {
+  background: var(--color-cream);
+  border-color: var(--color-charcoal-soft);
+  color: var(--color-charcoal);
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+  .route-hero {
+    height: 280px;
+  }
+  .route-content {
+    padding: var(--space-lg) var(--space-md);
+  }
+  .route-stats {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .route-gallery {
+    grid-template-columns: repeat(2, 1fr);
+  }
 }
