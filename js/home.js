@@ -7,7 +7,7 @@
 // =======================================================
 "use strict";
 
-const ROUTES_JSON_PATH = "data/routes.json";
+const ROUTES_JSON_PATH = "routes/routes.json";
 
 // SAC-schaal + achterwaartse compatibiliteit
 const DIFFICULTY_LABELS = {
