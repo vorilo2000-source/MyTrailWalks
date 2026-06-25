@@ -1,0 +1,56 @@
+{
+  "pageTitle": "Route — MyTrailWalks",
+  "notFound": "Route not found",
+  "loadError": "Route could not be loaded",
+  "stats": {
+    "distance": "Distance",
+    "duration": "Duration",
+    "elevationUp": "Elevation gain",
+    "elevationDown": "Elevation loss",
+    "avgSpeed": "Avg. speed",
+    "highestPoint": "Highest point",
+    "lowestPoint": "Lowest point"
+  },
+  "sections": {
+    "weather": "Weather",
+    "story": "Story",
+    "tips": "Tips",
+    "map": "Route on map",
+    "transport": "Transport",
+    "gallery": "Photos"
+  },
+  "actions": {
+    "openMap": "Open route",
+    "print": "Print",
+    "share": "Share",
+    "copied": "✓ Copied!"
+  },
+  "transport": {
+    "walking": "🚶 Walking",
+    "cycling": "🚴 Cycling",
+    "motorcycle": "🏍 Motorcycle",
+    "car": "🚗 Car",
+    "train": "🚆 Train",
+    "bus": "🚌 Bus",
+    "boat": "⛵ Boat",
+    "plane": "✈️ Plane"
+  },
+  "difficulty": {
+    "T1": "T1 — Hiking",
+    "T2": "T2 — Mountain hike",
+    "T3": "T3 — Demanding mountain hike",
+    "T4": "T4 — Alpine hike",
+    "T5": "T5 — Demanding alpine hike",
+    "T6": "T6 — Difficult alpine hike",
+    "easy": "Easy",
+    "medium": "Moderate",
+    "hard": "Hard"
+  },
+  "weather": {
+    "precipitation": "mm precipitation",
+    "wind": "km/h wind"
+  },
+  "map": {
+    "startPoint": "Start point"
+  }
+}
