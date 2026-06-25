@@ -2,7 +2,7 @@
   {
     "_meta_version": "2.0.0",
     "_meta_note": "Taal-onafhankelijk overzicht-schema. Bevat ALLEEN velden die op de homepage grid getoond worden. Volledige route-content staat in routes/<id>.json.",
-    "id": "grenspark-kalmthout",
+    "id": "Grenspark-Kalmthout",
     "language": "nl",
     "name": "Grenspark noord <> Brasserie de Wolf",
     "region": "Grenspark Kalmthout",
@@ -16,7 +16,7 @@
     "content_json": "routes/grenspark-kalmthout.json"
   },
   {
-    "id": "kalmthoutse-heide",
+    "id": "Kalmthoutse-Heide"
     "language": "nl",
     "name": "Kalmthoutse Heide -",
     "region": "Kalmthout, Antwerpen, België",
