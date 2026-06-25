@@ -1,0 +1,18 @@
+{
+  "pageTitle": "Wandelingen — MyTrailWalks",
+  "eyebrow": "MyTrailWalks",
+  "heading": "Wandelingen",
+  "loading": "Laden…",
+  "empty": "Nog geen wandelingen beschikbaar.",
+  "error": "Wandelingen konden niet worden geladen.",
+  "stats": {
+    "distance": "afstand",
+    "duration": "duur",
+    "elevation": "stijging"
+  },
+  "units": {
+    "km": " km",
+    "hours": " u",
+    "meters": " m"
+  }
+}
