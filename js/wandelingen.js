@@ -1,13 +1,16 @@
 // =======================================================
 // wandelingen.js — MyTrailWalks
 // Wandelingen overzicht pagina
-// Laadt data/routes.json en rendert alle wandelingen als
-// preview kaartjes. Klik → routes/route.html?id=[id]
+// v1.1.0: i18n via i18nModule (nl/en)
 // v1.0.0: initiële versie
 // =======================================================
 "use strict";
 
-const ROUTES_JSON_PATH = "data/routes.json";
+const ROUTES_JSON_PATH = "routes/routes.json";
+
+function t(key) {
+  try { return i18nModule.t(`wandelingen:${key}`); } catch (_) { return key; }
+}
 
 // -----------------------------------------------------------
 // MOEILIJKHEID LABELS (SAC-schaal + achterwaartse compat.)
@@ -95,9 +98,9 @@ function createRouteTile(route) {
   stats.className = "route-tile__stats";
 
   const statItems = [
-    { value: route.distance_km, unit: " km", label: "afstand" },
-    { value: route.duration_hours, unit: " u", label: "duur" },
-    { value: route.elevation_m, unit: " m", label: "stijging" },
+    { value: route.distance_km, unit: t("units.km"), label: t("stats.distance") },
+    { value: route.duration_hours, unit: t("units.hours"), label: t("stats.duration") },
+    { value: route.elevation_m, unit: t("units.meters"), label: t("stats.elevation") },
   ];
 
   statItems.forEach(({ value, unit, label }) => {
@@ -138,7 +141,7 @@ function renderGrid(routes, gridEl) {
   if (!routes?.length) {
     const p = document.createElement("p");
     p.className = "routes-grid__status";
-    p.textContent = "Nog geen wandelingen beschikbaar.";
+    p.textContent = t("empty");
     gridEl.appendChild(p);
     return;
   }
@@ -162,13 +165,18 @@ async function initWandelingen() {
   if (!gridEl) return;
 
   // Laad indicator
-  gridEl.innerHTML = `<p class="routes-grid__status">Laden\u2026</p>`;
+  gridEl.innerHTML = `<p class="routes-grid__status">${t("loading")}</p>`;
 
   await window.appReady;
 
+  // Paginatitel en heading
+  try { document.title = t("pageTitle"); } catch (_) {}
+  const heading = document.querySelector(".wandelingen-header__title");
+  if (heading) heading.textContent = t("heading");
+
   const routes = await loadRoutes();
   if (!routes) {
-    gridEl.innerHTML = `<p class="routes-grid__status routes-grid__status--error">Wandelingen konden niet worden geladen.</p>`;
+    gridEl.innerHTML = `<p class="routes-grid__status routes-grid__status--error">${t("error")}</p>`;
     return;
   }
 
