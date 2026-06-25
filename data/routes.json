@@ -1,47 +1,37 @@
 [
   {
     "_meta_version": "2.0.0",
-    "_meta_note": "Taal-onafhankelijk overzicht-schema. Bevat ALLEEN velden die op de homepage grid getoond worden. Volledige route-content (verhaal, tips, media) staat in data/content/<id>.json. Het language-veld bepaalt de taal van de route-content (user-generated, onafhankelijk van de actieve UI-taal — zie CLAUDE.md I18N-sectie).",
-
-sectie).",
-
-    "id": "ID",
-    "language": "nl",
-    "name": "NAAM",
-    "region": "Kalmthoutse heide, Antwerpen, België",
-    "date_walked": "",
-    "distance_km": 0,
-    "duration_hours": 0,
-    "elevation_m": 0,
-    "difficulty": "medium",
-    "tags": [ "bos", "zandpaden"],
-    "hero": "",
-    "content_json": "data/content/----.json"
-
-      "id": "20260618 - Grenspark Kalmthout",
-    "language": "nl",
-    "name": "Grenspark noord <> Brasserie de Wolf",
-    "region": "Kalmthoutse heide, Antwerpen, België",
-    "date_walked": "",
-    "distance_km": 0,
-    "duration_hours": 0,
-    "elevation_m": 0,
-    "difficulty": "medium",
-    "tags": [ "bos", "zandpaden"],
-    "hero": "https://res.cloudinary.com/dgzlcqdcc/image/upload/v1782207834/Grenspark_Kalmthoutse_Heide_wandelpad_xtmeln.webp",
-    "content_json": "data/content/20260618 - Grenspark Kalmthout.json.json"
-    
-    "id": "ninglinspo",
-    "language": "nl",
-    "name": "Ninglinspo",
-    "region": "Aywaille, Liège, België",
-    "date_walked": "",
-    "distance_km": 0,
-    "duration_hours": 0,
-    "elevation_m": 0,
-    "difficulty": "medium",
-    "tags": ["waterval", "bos", "ardennen"],
-    "hero": "assets/images/ninglinspo/hero.jpg",
-    "content_json": "data/content/ninglinspo.json"
+    "_meta_note": "Taal-onafhankelijk overzicht-schema. Bevat ALLEEN velden die op de homepage grid getoond worden. Volledige route-content (verhaal, tips, media) staat in data/content/<id>.json. Het language-veld bepaalt de taal van de route-content (user-generated, onafhankelijk van de actieve UI-taal — zie CLAUDE.md I18N-sectie).", sectie).",
   }
+  {
+  "id": "Grenspark Kalmthout",
+  "language": "nl",
+  "name": "Grenspark noord <> Brasserie de Wolf",
+  "region": "Grenspark Kalmthout",
+  "date_walked": "2026-06-18",
+  "distance_km": 6.9,
+  "duration_hours": 2.7,
+  "elevation_m": 423,
+  "difficulty": "T3",
+  "tags": [
+    "Zandpaden"
+  ],
+  "hero": "https://res.cloudinary.com/dgzlcqdcc/image/upload/w_400,f_auto/v1782207834/Grenspark_Kalmthoutse_Heide_wandelpad_xtmeln.webp",
+  "content_json": "data/content/Grenspark Kalmthout.json"
+}
+{
+  "id": "Kalmthoutse Heide",
+  "language": "nl",
+  "name": "Kalmthoutse Heide -",
+  "region": "Kalmthout, Antwerpen, België",
+  "date_walked": "2026-06-18",
+  "distance_km": 6.9,
+  "duration_hours": 2.7,
+  "elevation_m": 423,
+  "difficulty": null,
+  "tags": [],
+  "hero": "https://res.cloudinary.com/dgzlcqdcc/image/upload/w_400,f_auto/v1782414185/IMG_4789_ioohbh.jpg",
+  "content_json": "data/content/Kalmthoutse Heide.json"
+}
+  
 ]
