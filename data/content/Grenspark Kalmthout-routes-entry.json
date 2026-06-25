@@ -1,0 +1,16 @@
+{
+  "id": "Grenspark Kalmthout",
+  "language": "nl",
+  "name": "Grenspark noord <> Brasserie de Wolf",
+  "region": "Grenspark Kalmthout",
+  "date_walked": "2026-06-18",
+  "distance_km": 6.9,
+  "duration_hours": 2.7,
+  "elevation_m": 423,
+  "difficulty": "T3",
+  "tags": [
+    "Zandpaden"
+  ],
+  "hero": "https://res.cloudinary.com/dgzlcqdcc/image/upload/w_400,f_auto/v1782207834/Grenspark_Kalmthoutse_Heide_wandelpad_xtmeln.webp",
+  "content_json": "data/content/Grenspark Kalmthout.json"
+}

@@ -1,0 +1,56 @@
+{
+  "id": "Kalmthoutse Heide",
+  "status": "draft",
+  "published_date": "2026-06-18",
+  "transport": null,
+  "title": {
+    "nl": "Kalmthoutse Heide -",
+    "en": ""
+  },
+  "location": "Kalmthout, Antwerpen, België",
+  "region": "",
+  "difficulty": null,
+  "source_reference": "https://grensparkkalmthoutseheide.com/",
+  "tags": [],
+  "summary": {
+    "nl": "Grenspark\nKalmthoutse Heide\nGrenzeloos genieten doe je in Grenspark Kalmthoutse Heide! Dit diverse en dynamische natuurgebied ligt aan weerszijden van de Belgis",
+    "en": ""
+  },
+  "story": {
+    "nl": "",
+    "en": ""
+  },
+  "story_blocks": [],
+  "gallery": [],
+  "tips": {
+    "nl": "",
+    "en": ""
+  },
+  "photos": [
+    {
+      "url": "https://res.cloudinary.com/dgzlcqdcc/image/upload/w_1200,f_auto/v1782414185/IMG_4789_ioohbh.jpg",
+      "caption": ""
+    }
+  ],
+  "gpx_stats": {
+    "distance_km": 6.9,
+    "duration_hours": 2.7,
+    "elevation_up_m": 423,
+    "elevation_down_m": 432,
+    "avg_speed_kmh": 5.5,
+    "max_speed_kmh": 37.8,
+    "highest_point_m": 30,
+    "lowest_point_m": 16,
+    "start_lat": null,
+    "start_lon": null
+  },
+  "weather": {
+    "date": "2026-06-18",
+    "temperature_min": 14.9,
+    "temperature_max": 28.8,
+    "precipitation_mm": 0.6,
+    "wind_kmh": 13.1,
+    "condition": "Warme dag de route zoveel mogelijk in de schaduw van bomen gelopen",
+    "source": "Open-Meteo"
+  }
+}
