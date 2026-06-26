@@ -46,9 +46,10 @@ function createRouteTile(route) {
 
   const stats = route.gpx_stats || {};
 
-  const tile = document.createElement("a");
-  tile.className = "route-tile";
-  tile.href = `routes/route.html?id=${route.id}`;
+  const isDraft = route.status === "draft";
+  const tile = document.createElement(isDraft ? "div" : "a");
+  tile.className = "route-tile" + (isDraft ? " route-tile--draft" : "");
+  if (!isDraft) tile.href = `routes/route.html?id=${route.id}`;
   tile.setAttribute("role", "listitem");
   tile.setAttribute("aria-label", title);
 
@@ -71,6 +72,13 @@ function createRouteTile(route) {
     badge.className = "route-tile__difficulty-badge";
     badge.textContent = DIFFICULTY_LABELS[route.difficulty] || route.difficulty;
     heroWrap.appendChild(badge);
+  }
+
+  if (isDraft) {
+    const draftBadge = document.createElement("span");
+    draftBadge.className = "route-tile__draft-badge";
+    draftBadge.textContent = "Binnenkort";
+    heroWrap.appendChild(draftBadge);
   }
 
   tile.appendChild(heroWrap);
@@ -117,9 +125,8 @@ function renderGrid(routes, gridEl) {
     return;
   }
 
-  // Max 3 routes — gesorteerd op datum (meest recent eerst), enkel gepubliceerde
+  // Max 3 routes — gesorteerd op datum (meest recent eerst)
   const top3 = [...routes]
-    .filter((r) => r.status === "published")
     .sort((a, b) => new Date(b.published_date || 0) - new Date(a.published_date || 0))
     .slice(0, 3);
 
