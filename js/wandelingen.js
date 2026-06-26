@@ -1,21 +1,21 @@
 // =======================================================
 // wandelingen.js — MyTrailWalks
 // Wandelingen overzicht pagina
+// v1.3.0: betere foutafhandeling + draft zichtbaar
 // v1.2.0: laadt routes via routes-index.json + individuele [id].json
 // v1.1.0: i18n via i18nModule (nl/en)
 // v1.0.0: initiële versie
 // =======================================================
 "use strict";
 
-const ROUTES_INDEX_PATH = "routes/routes-index.json";
+function getBasePath() {
+  return window.getBasePath ? window.getBasePath() : "./";
+}
 
 function t(key) {
   try { return i18nModule.t(`wandelingen:${key}`); } catch (_) { return key; }
 }
 
-// -----------------------------------------------------------
-// MOEILIJKHEID LABELS (SAC-schaal + achterwaartse compat.)
-// -----------------------------------------------------------
 const DIFFICULTY_LABELS = {
   T1: "T1 — Wandelen",
   T2: "T2 — Bergwandeling",
@@ -28,36 +28,41 @@ const DIFFICULTY_LABELS = {
   hard: "Zwaar",
 };
 
-// -----------------------------------------------------------
-// ROUTES LADEN
-// -----------------------------------------------------------
 async function loadRoutes() {
+  const base = getBasePath();
+  const indexUrl = `${base}routes/routes-index.json`;
+  console.log("wandelingen.js: index laden van", indexUrl);
+
   try {
-    // Stap 1: laad de index
-    const indexResp = await fetch(ROUTES_INDEX_PATH);
+    const indexResp = await fetch(indexUrl);
     if (!indexResp.ok) throw new Error(`Index HTTP ${indexResp.status}`);
     const ids = await indexResp.json();
+    console.log("wandelingen.js: index geladen", ids);
 
-    // Stap 2: laad elke route parallel
     const results = await Promise.allSettled(
-      ids.map((id) => fetch(`routes/${id}.json`).then((r) => {
-        if (!r.ok) throw new Error(`HTTP ${r.status}`);
-        return r.json();
-      }))
+      ids.map((id) => {
+        const url = `${base}routes/${id}.json`;
+        console.log("wandelingen.js: route laden van", url);
+        return fetch(url).then((r) => {
+          if (!r.ok) throw new Error(`HTTP ${r.status} voor ${url}`);
+          return r.json();
+        });
+      })
     );
+
+    results.forEach((r, i) => {
+      if (r.status === "rejected") console.warn(`wandelingen.js: route ${ids[i]} mislukt:`, r.reason);
+    });
 
     return results
       .filter((r) => r.status === "fulfilled")
       .map((r) => r.value);
   } catch (err) {
-    console.error("wandelingen.js: routes laden mislukt", err);
+    console.error("wandelingen.js: laden mislukt", err);
     return null;
   }
 }
 
-// -----------------------------------------------------------
-// ROUTE KAARTJE AANMAKEN
-// -----------------------------------------------------------
 function createRouteTile(route) {
   const lang = (i18nModule?.language || "nl").substring(0, 2);
 
@@ -73,19 +78,14 @@ function createRouteTile(route) {
     null;
 
   const stats = route.gpx_stats || {};
-
-  // Draft routes: niet klikbaar, toon badge
   const isDraft = route.status === "draft";
 
   const el = document.createElement(isDraft ? "div" : "a");
   el.className = "route-tile" + (isDraft ? " route-tile--draft" : "");
-  if (!isDraft) {
-    el.href = `routes/route.html?id=${route.id}`;
-  }
+  if (!isDraft) el.href = `routes/route.html?id=${route.id}`;
   el.setAttribute("role", "listitem");
   el.setAttribute("aria-label", title);
 
-  // Hero foto
   const heroEl = document.createElement("div");
   heroEl.className = "route-tile__hero";
   if (hero) {
@@ -97,7 +97,6 @@ function createRouteTile(route) {
     heroEl.appendChild(img);
   }
 
-  // Moeilijkheid badge
   if (route.difficulty) {
     const badge = document.createElement("span");
     badge.className = "route-tile__difficulty-badge";
@@ -105,7 +104,6 @@ function createRouteTile(route) {
     heroEl.appendChild(badge);
   }
 
-  // Draft badge
   if (isDraft) {
     const draftBadge = document.createElement("span");
     draftBadge.className = "route-tile__draft-badge";
@@ -115,7 +113,6 @@ function createRouteTile(route) {
 
   el.appendChild(heroEl);
 
-  // Inhoud
   const content = document.createElement("div");
   content.className = "route-tile__content";
 
@@ -131,17 +128,14 @@ function createRouteTile(route) {
     content.appendChild(region);
   }
 
-  // Stats
   const statsEl = document.createElement("div");
   statsEl.className = "route-tile__stats";
 
-  const statItems = [
+  [
     { value: stats.distance_km, unit: t("units.km"), label: t("stats.distance") },
     { value: stats.duration_hours, unit: t("units.hours"), label: t("stats.duration") },
     { value: stats.elevation_up_m, unit: t("units.meters"), label: t("stats.elevation") },
-  ];
-
-  statItems.forEach(({ value, unit, label }) => {
+  ].forEach(({ value, unit, label }) => {
     const stat = document.createElement("div");
     stat.className = "route-tile__stat";
     stat.innerHTML = `
@@ -153,7 +147,6 @@ function createRouteTile(route) {
 
   content.appendChild(statsEl);
 
-  // Tags
   if (route.tags?.length) {
     const tags = document.createElement("div");
     tags.className = "route-tile__tags";
@@ -170,9 +163,6 @@ function createRouteTile(route) {
   return el;
 }
 
-// -----------------------------------------------------------
-// GRID RENDEREN
-// -----------------------------------------------------------
 function renderGrid(routes, gridEl) {
   gridEl.innerHTML = "";
 
@@ -184,7 +174,6 @@ function renderGrid(routes, gridEl) {
     return;
   }
 
-  // Sorteer: gepubliceerd eerst op datum, daarna drafts
   const sorted = [...routes].sort((a, b) => {
     if (a.status === "draft" && b.status !== "draft") return 1;
     if (a.status !== "draft" && b.status === "draft") return -1;
@@ -195,7 +184,6 @@ function renderGrid(routes, gridEl) {
   sorted.forEach((route) => fragment.appendChild(createRouteTile(route)));
   gridEl.appendChild(fragment);
 
-  // Aantal tonen (enkel gepubliceerde)
   const countEl = document.getElementById("wandelingen-count");
   if (countEl) {
     const published = routes.filter((r) => r.status === "published").length;
@@ -203,9 +191,6 @@ function renderGrid(routes, gridEl) {
   }
 }
 
-// -----------------------------------------------------------
-// INIT
-// -----------------------------------------------------------
 async function initWandelingen() {
   const gridEl = document.getElementById("routes-grid");
   if (!gridEl) return;
