@@ -1,41 +1,22 @@
 <!-- =======================================================
-     footer.html — v1.0.0
-     MyTrailWalks — footer component fragment
-     Gebaseerd op structuur MyFamTreeCollab footer v1.6
-     (referentie, bewust aangepast — zie CLAUDE.md).
-     Injectie via fetch() volgt in T0-006 (component-systeem).
-     Stijlen via css/footer.css (design tokens uit main.css).
+     footer.html — v1.1.0
+     v1.1.0: absolute paden voor logo en links (werkt vanuit alle submappen)
+     v1.0.0: initiële versie
      ======================================================= -->
 <footer class="site-footer">
-
-  <!-- -------------------------------------------------------
-       LOGO LINKS
-       Pad is relatief aan de root — fetch-injectie plaatst dit
-       fragment in pagina's op verschillende niveaus (root én
-       routes/). T0-006 lost dit op via een base-pad helper;
-       voorlopig werkt dit correct vanuit index.html (root).
-       ------------------------------------------------------- -->
   <div class="site-footer__logo">
-    <img src="assets/images/Logo1.png" alt="MyTrailWalks logo" class="site-footer__logo-img" />
+    <img src="/MyTrailWalks/assets/images/Logo1.png" alt="MyTrailWalks logo" class="site-footer__logo-img" />
   </div>
-
-  <!-- -------------------------------------------------------
-       COPYRIGHT + LINKS (MIDDEN)
-       Teksten via data-i18n (common:footer.*).
-       Disclaimer/privacy/terms zijn placeholders —
-       pagina's volgen in een latere fase.
-       ------------------------------------------------------- -->
   <div class="site-footer__center">
     <p class="site-footer__copyright">
       &copy; <span data-i18n="common:footer.copyright"></span>
     </p>
     <p class="site-footer__links">
-      <a href="docs/disclaimer.html" class="site-footer__link">Disclaimer</a>
+      <a href="/MyTrailWalks/docs/disclaimer.html" class="site-footer__link">Disclaimer</a>
       <span class="site-footer__link-divider" aria-hidden="true">|</span>
-      <a href="docs/privacy.html" class="site-footer__link">Privacy</a>
+      <a href="/MyTrailWalks/docs/privacy.html" class="site-footer__link">Privacy</a>
       <span class="site-footer__link-divider" aria-hidden="true">|</span>
-      <a href="docs/terms.html" class="site-footer__link">Terms</a>
+      <a href="/MyTrailWalks/docs/terms.html" class="site-footer__link">Terms</a>
     </p>
   </div>
-
 </footer>
