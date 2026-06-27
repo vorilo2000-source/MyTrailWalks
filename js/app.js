@@ -1,5 +1,5 @@
 // =======================================================
-// app.js — v3.2.0
+// app.js — v3.3.0
 // MyTrailWalks — centrale init: i18n + componenten
 // =======================================================
 // Wijziging v3.2.0: applyTranslations per component na injectie
@@ -89,6 +89,7 @@ async function initApp() {
   // 4. Vertalingen toepassen op hele pagina + nav links
   i18nModule.applyTranslations();
   setActiveNavLink();
+  setTimeout(() => i18nModule.applyTranslations(), 300);
 
   // 5. Taalwisselaar vullen
   const selectEl = document.getElementById("languageSwitcher");
