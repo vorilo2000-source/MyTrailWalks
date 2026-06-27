@@ -101,7 +101,7 @@ function createRouteTile(route) {
   }
 
   const statusBadge = document.createElement("span");
-  statusBadge.className = "route-tile__difficulty-badge";
+  statusBadge.className = isDraft ? "route-tile__status-badge route-tile__status-badge--draft" : "route-tile__status-badge route-tile__status-badge--final";
   statusBadge.textContent = isDraft ? "Draft" : "Final";
   heroEl.appendChild(statusBadge);
 
