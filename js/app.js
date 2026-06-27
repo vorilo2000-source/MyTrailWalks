@@ -1,7 +1,9 @@
 // =======================================================
-// app.js — v3.1.0
+// app.js — v3.2.0
 // MyTrailWalks — centrale init: i18n + componenten
 // =======================================================
+// Wijziging v3.2.0: applyTranslations per component na injectie
+// Wijziging v3.1.0: common namespace + wandelingen/route in getPageNamespace
 // Wijziging v3.0.0: robuuste init-volgorde
 //   1. i18next initialiseren met alle vaste namespaces
 //   2. topbar + footer injecteren
@@ -36,6 +38,10 @@ async function injectComponent(placeholderId, componentPath) {
     const html = await response.text();
     placeholder.innerHTML = html;
     placeholder.removeAttribute("aria-hidden");
+    // Vertalingen direct toepassen op nieuw geïnjecteerde HTML
+    if (window.i18nModule?.applyTranslations) {
+      i18nModule.applyTranslations(placeholder);
+    }
   } catch (error) {
     console.error(`app.js: fout bij laden van ${componentPath}`, error);
   }
@@ -76,12 +82,11 @@ async function initApp() {
   // 2. i18nReady resolven — topbar-auth.js wacht hierop
   if (window._i18nResolve) window._i18nResolve();
 
- // 3. Componenten injecteren
-await injectComponent("topbar-placeholder", `${base}components/topbar.html`);
-await injectComponent("footer-placeholder", `${base}components/footer.html`);
+  // 3. Componenten injecteren (sequentieel zodat vertalingen per component werken)
+  await injectComponent("topbar-placeholder", `${base}components/topbar.html`);
+  await injectComponent("footer-placeholder", `${base}components/footer.html`);
 
-
-  // 4. Vertalingen toepassen + nav links
+  // 4. Vertalingen toepassen op hele pagina + nav links
   i18nModule.applyTranslations();
   setActiveNavLink();
 
