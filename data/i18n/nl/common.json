@@ -2,7 +2,7 @@
   "_meta": {
     "language": "nl",
     "namespace": "common",
-    "version": "1.0.0",
+    "version": "1.1.0",
     "note": "Gedeelde UI-teksten voor alle pagina's."
   },
   "nav": {
@@ -14,6 +14,11 @@
   "footer": {
     "tagline": "Persoonlijke wandelverhalen uit het veld.",
     "copyright": "MyTrailWalks"
+  },
+  "construction": {
+    "title": "Binnenkort beschikbaar",
+    "text": "Deze pagina is momenteel in ontwikkeling. Kom later terug voor meer.",
+    "back": "← Terug naar home"
   },
   "route": {
     "distance": "Afstand",
