@@ -1,5 +1,5 @@
 // =======================================================
-// home.js — v2.4.1
+// home.js — v2.4.0
 // MyTrailWalks — homepage init
 // v2.4.0: laadt routes via routes-index.json + individuele [id].json
 // v2.3.0: max 3 routes tonen, link naar routes/route.html?id=
@@ -47,9 +47,9 @@ function createRouteTile(route) {
   const stats = route.gpx_stats || {};
 
   const isDraft = route.status === "draft";
-  const tile = document.createElement(isDraft ? "div" : "a");
+  const tile = document.createElement("a");
   tile.className = "route-tile" + (isDraft ? " route-tile--draft" : "");
-  if (!isDraft) tile.href = `routes/route.html?id=${route.id}`;
+  tile.href = `routes/route.html?id=${route.id}`;
   tile.setAttribute("role", "listitem");
   tile.setAttribute("aria-label", title);
 
@@ -75,9 +75,7 @@ function createRouteTile(route) {
   }
 
   const statusBadge = document.createElement("span");
-  statusBadge.className = isDraft
-    ? "route-tile__status-badge route-tile__status-badge--draft"
-    : "route-tile__status-badge route-tile__status-badge--final";
+  statusBadge.className = "route-tile__difficulty-badge";
   statusBadge.textContent = isDraft ? "Draft" : "Final";
   heroWrap.appendChild(statusBadge);
 
