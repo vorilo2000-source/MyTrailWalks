@@ -109,3 +109,24 @@
   border: 1px solid var(--color-line);
   color: var(--color-charcoal-soft);
 }
+.route-tile__status-badge {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  padding: 3px 10px;
+  border-radius: 4px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.route-tile__status-badge--draft {
+  background: var(--color-earth);
+  color: #fff;
+}
+
+.route-tile__status-badge--final {
+  background: var(--color-forest);
+  color: #fff;
+}
