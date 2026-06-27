@@ -980,6 +980,7 @@ function buildRouteJson() {
       lowest_point_m: state.gpx.lowest_point_m,
       start_lat: state.gpx.startLat || null,
       start_lon: state.gpx.startLon || null,
+      track_points: state.gpx.trackPoints || null,
     } : null,
     weather: state.weather ? {
       date: state.weather.date,
@@ -1209,4 +1210,4 @@ function showInlineError(inputEl, message) {
 window.appReady.then(() => {
   renderBlockEditor();
   updatePreview();
-});
+}); 
