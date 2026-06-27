@@ -1,5 +1,5 @@
 // =======================================================
-// app.js — v3.0.0
+// app.js — v3.1.0
 // MyTrailWalks — centrale init: i18n + componenten
 // =======================================================
 // Wijziging v3.0.0: robuuste init-volgorde
@@ -55,6 +55,8 @@ function setActiveNavLink() {
 function getPageNamespace() {
   const path = window.location.pathname;
   if (path.includes("creator")) return "creator";
+  if (path.includes("wandelingen")) return "wandelingen";
+  if (path.includes("route")) return "route";
   return "home";
 }
 
@@ -63,7 +65,7 @@ async function initApp() {
 
   // 1. i18next initialiseren — altijd common + auth + paginaspecifieke namespace
   const pageNs = getPageNamespace();
-  const namespaces = ["auth", pageNs];
+  const namespaces = ["common", "auth", pageNs];
 
   try {
     await i18nModule.init(namespaces);
