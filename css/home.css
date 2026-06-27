@@ -333,7 +333,6 @@
   padding: 3px 8px;
   border-radius: 20px;
   color: var(--color-white);
-  backdrop-filter: blur(4px);
 }
 
 .route-tile__status-badge--draft {
