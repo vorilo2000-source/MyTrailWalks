@@ -9,7 +9,7 @@
 "use strict";
 
 function getBasePath() {
-  return window.getBasePath ? window.getBasePath() : "./";
+  return "./";
 }
 
 function t(key) {
