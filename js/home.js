@@ -1,5 +1,5 @@
 // =======================================================
-// home.js — v2.4.0
+// home.js — v2.4.1
 // MyTrailWalks — homepage init
 // v2.4.0: laadt routes via routes-index.json + individuele [id].json
 // v2.3.0: max 3 routes tonen, link naar routes/route.html?id=
@@ -74,12 +74,12 @@ function createRouteTile(route) {
     heroWrap.appendChild(badge);
   }
 
-  if (isDraft) {
-    const draftBadge = document.createElement("span");
-    draftBadge.className = "route-tile__draft-badge";
-    draftBadge.textContent = "Binnenkort";
-    heroWrap.appendChild(draftBadge);
-  }
+  const statusBadge = document.createElement("span");
+  statusBadge.className = isDraft
+    ? "route-tile__status-badge route-tile__status-badge--draft"
+    : "route-tile__status-badge route-tile__status-badge--final";
+  statusBadge.textContent = isDraft ? "Draft" : "Final";
+  heroWrap.appendChild(statusBadge);
 
   tile.appendChild(heroWrap);
 
