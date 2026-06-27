@@ -76,9 +76,9 @@ function createRouteTile(route) {
   const stats = route.gpx_stats || {};
   const isDraft = route.status === "draft";
 
-  const el = document.createElement(isDraft ? "div" : "a");
+  const el = document.createElement("a");
   el.className = "route-tile" + (isDraft ? " route-tile--draft" : "");
-  if (!isDraft) el.href = `routes/route.html?id=${route.id}`;
+  el.href = `routes/route.html?id=${route.id}`;
   el.setAttribute("role", "listitem");
   el.setAttribute("aria-label", title);
 
@@ -101,9 +101,7 @@ function createRouteTile(route) {
   }
 
   const statusBadge = document.createElement("span");
-  statusBadge.className = isDraft
-    ? "route-tile__status-badge route-tile__status-badge--draft"
-    : "route-tile__status-badge route-tile__status-badge--final";
+  statusBadge.className = "route-tile__difficulty-badge";
   statusBadge.textContent = isDraft ? "Draft" : "Final";
   heroEl.appendChild(statusBadge);
 
