@@ -1,6 +1,7 @@
 <!-- =======================================================
-     construction.html — v1.0.0
-     MyTrailWalks — pagina onder constructie
+     construction.html — v1.1.0
+     v1.1.0: i18n data-attributen toegevoegd
+     v1.0.0: initiële versie
      ======================================================= -->
 <!DOCTYPE html>
 <html lang="nl" id="html-root">
@@ -8,19 +9,16 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Binnenkort — MyTrailWalks</title>
-
   <!-- Favicon -->
   <link rel="icon" type="image/x-icon" href="/MyTrailWalks/assets/images/favicon.ico">
   <link rel="icon" type="image/png" sizes="32x32" href="/MyTrailWalks/assets/images/favicon-32x32.png">
   <link rel="apple-touch-icon" sizes="180x180" href="/MyTrailWalks/assets/images/favicon-180x180.png">
   <link rel="icon" type="image/png" sizes="192x192" href="/MyTrailWalks/assets/images/favicon-192x192.png">
-
   <!-- CSS -->
   <link rel="stylesheet" href="/MyTrailWalks/css/main.css">
   <link rel="stylesheet" href="/MyTrailWalks/css/topbar.css">
   <link rel="stylesheet" href="/MyTrailWalks/css/footer.css">
-
-<!-- pagina style -->
+  <!-- pagina style -->
   <style>
     .construction {
       min-height: calc(100vh - 56px - 80px);
@@ -69,46 +67,37 @@
   </style>
 </head>
 <body>
-
   <!-- Eruda debugger — niet verwijderen -->
   <script src="https://cdn.jsdelivr.net/npm/eruda"></script>
   <script>eruda.init();</script>
-
-<!-- topbar  -->
+  <!-- topbar -->
   <div id="topbar-placeholder" class="topbar-placeholder" aria-hidden="true"></div>
-
-<!-- main content -->
+  <!-- main content -->
   <main id="main-content">
     <div class="construction">
       <div class="construction__inner">
         <span class="construction__icon">🏗</span>
-        <h1 class="construction__title">Binnenkort beschikbaar</h1>
-        <p class="construction__text">
-          Deze pagina is momenteel in ontwikkeling.<br>
-          Kom later terug voor meer.
+        <h1 class="construction__title" data-i18n="common:construction.title">Binnenkort beschikbaar</h1>
+        <p class="construction__text" data-i18n="common:construction.text">
+          Deze pagina is momenteel in ontwikkeling. Kom later terug voor meer.
         </p>
-        <a href="/MyTrailWalks/" class="construction__back">← Terug naar home</a>
+        <a href="/MyTrailWalks/" class="construction__back" data-i18n="common:construction.back">← Terug naar home</a>
       </div>
     </div>
   </main>
-
-<!-- footer -->
+  <!-- footer -->
   <div id="footer-placeholder" class="footer-placeholder" aria-hidden="true"></div>
-
   <!-- Supabase SDK -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-
   <!-- i18next CDN -->
   <script src="https://cdn.jsdelivr.net/npm/i18next@23/i18next.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/i18next-http-backend@2/i18nextHttpBackend.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/i18next-browser-languagedetector@7/i18nextBrowserLanguageDetector.min.js"></script>
-
   <!-- Scripts -->
   <script src="/MyTrailWalks/js/i18n.js"></script>
   <script src="/MyTrailWalks/js/auth.js?v=1.1.0"></script>
   <script src="/MyTrailWalks/js/topbar-auth.js?v=1.3.0"></script>
   <script src="/MyTrailWalks/js/analytics.js?v=1.1.0"></script>
   <script src="/MyTrailWalks/js/app.js?v=3.2.0"></script>
-
 </body>
 </html>
