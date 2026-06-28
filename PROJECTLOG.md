@@ -1,6 +1,6 @@
 # MyTrailWalks — PROJECTLOG.md
-## Bijgewerkt: 25-06-2026
-> Versie: v1.4.0 · Projectlog — chronologisch overzicht van sessies en wijzigingen
+## Bijgewerkt: 28-06-2026
+> Versie: v1.5.0 · Projectlog — chronologisch overzicht van sessies en wijzigingen
 
 ---
 
@@ -103,60 +103,6 @@
 **Onderwerp:** Cloudinary opzetten + creator uitbreiden + route detail pagina + wandelingen overzicht + bestandsstructuur
 **Status aan einde sessie:** T0-007 ✅ Done · T1-002 ✅ Done · T1-004 ✅ Done · T1-005 ✅ Done · T1-009 ✅ Done · T2-001 ✅ Done · T2-003 🔄 Gedeeltelijk
 
-### Uitgevoerde taken
-
-**Cloudinary (T0-007):**
-- Account aangemaakt, cloud name: `dgzlcqdcc`
-- Workflow gedocumenteerd in `data/docs/cloudinary-workflow.md`
-- URL structuur: Hero `w_1200,f_auto`, Galerij `w_800,f_auto`, Thumbnail `w_400,f_auto`
-- Auto-fix in creator: URL's worden automatisch voorzien van transformaties bij blur
-
-**Creator uitbreidingen (T1-006 v2.0.0 → v2.1.0):**
-- Ruwe JSON preview vervangen door visuele route preview
-- Blokken-editor: tekst, foto (volledig breed), fotogrid (2 of 3 kolommen), link
-- JSON import: bestaande route laden en bewerken
-- Leaflet kaart in preview met GPX route getekend
-- Moeilijkheid automatisch berekend via SAC-schaal T1-T6 (afstand + stijging + weer)
-- Vervoersmiddel multi-select (wandelen, fietsen, motor, auto, trein, bus, boot, vliegtuig)
-- Galerij sectie onderaan
-- Twee JSON exports: volledige content + routes.json entry
-- Knoppen in header leesbaar gemaakt op donkere achtergrond
-- startLat/startLon opgeslagen in JSON export voor kaart bij import
-
-**Route detail pagina (T1-002):**
-- `routes/route.html` + `js/route.js` + `css/route.css`
-- Laadt via `?id=` query parameter
-- Hero, stats (7 velden), weerdata, verhaal blokken, tips, Leaflet kaart, vervoersmiddel, galerij, acties
-- Deel-knop via Web Share API + clipboard fallback
-- Print-knop via window.print()
-- i18n NL + EN
-
-**Wandelingen overzicht (T1-009):**
-- `wandelingen.html` + `js/wandelingen.js` + `css/wandelingen.css`
-- Alle routes als preview kaartjes
-- Klik → `routes/route.html?id=[id]`
-- i18n NL + EN
-
-**Homepage update (T1-001):**
-- `index.html` v2.5.0: wandelingen sectie met top 3 meest recente routes
-- "Alle wandelingen →" link naar `wandelingen.html`
-- `home.js` v2.3.0: sorteert op date_walked, max 3 routes, links naar route detail
-- `home.css` v2.2.0: routes-section__header layout
-
-**Bestandsstructuur (TD-009, TD-010):**
-- Route JSON bestanden verplaatst naar `routes/`
-- `routes.json` verplaatst naar `routes/routes.json`
-- Route IDs gecorrigeerd: geen spaties, koppeltekens
-- Alle paden aangepast in route.js, wandelingen.js, home.js, creator.js
-
-**i18n bestanden:**
-- `data/i18n/nl/creator.json` v1.0.0
-- `data/i18n/en/creator.json` v1.0.0
-- `data/i18n/nl/route.json` v1.0.0
-- `data/i18n/en/route.json` v1.0.0
-- `data/i18n/nl/wandelingen.json` v1.0.0
-- `data/i18n/en/wandelingen.json` v1.0.0
-
 ### Aangeleverde bestanden
 
 | Bestand | Versie | Omschrijving |
@@ -182,26 +128,68 @@
 | `data/i18n/nl/wandelingen.json` | v1.0.0 | Wandelingen i18n NL |
 | `data/i18n/en/wandelingen.json` | v1.0.0 | Wandelingen i18n EN |
 
-### Architectuurbeslissingen sessie 05
+---
+
+## Sessie 06 — 28-06-2026
+**Onderwerp:** Routes index systeem · Route detail lay-out redesign · Filters wandelingen · Creator uitbreidingen · Standaard template · Footer i18n bug
+
+**Status aan einde sessie:**
+- T1-001 ✅ Done (v2.4.0) — draft/final badge, alle tiles klikbaar
+- T1-002 ✅ Done (v2.0.0) — nieuwe 2-koloms lay-out
+- T1-003 ✅ Done — routes-index.json systeem
+- T1-008 ✅ Done — draft management
+- T1-009 ✅ Done (v1.3.0) — filters toegevoegd
+- T2-003 ✅ Done — track_points in route detail kaart
+- T3-002 ✅ Done — foto's rechts, tekst links in route detail
+- T3-003 ✅ Done — slideshow galerij
+- T3-007 ✅ Done — bronvermelding
+- T4-001 ✅ Done — filters moeilijkheid/land/regio/plaats
+- T7-001 🔄 Gedeeltelijk — galerij verborgen bij print
+- T0-010 ✅ Done — construction.html standaard template
+- TD-011 ✅ Done — absolute paden in alle HTML
+- TD-012 🔴 Open — footer i18n bug onopgelost
+
+### Aangeleverde bestanden
+
+| Bestand | Versie | Omschrijving |
+|---------|--------|--------------|
+| `js/app.js` | v3.3.0 | common namespace + getPageNamespace uitgebreid + applyTranslations per component + setTimeout fallback |
+| `js/home.js` | v2.4.0 | routes-index.json + draft/final badge + alle tiles klikbaar |
+| `js/wandelingen.js` | v1.3.0 | routes-index.json + filters (moeilijkheid, land, regio, plaats) |
+| `js/route.js` | v2.0.0 | 2-koloms lay-out + slideshow + bronvermelding + status badge + track_points polyline |
+| `js/creator.js` | v2.2.0 | country/region/place via Nominatim + track_points bij JSON import |
+| `css/route.css` | v2.0.0 | 2-koloms lay-out + slideshow + print CSS |
+| `css/wandelingen.css` | v1.1.0 | Filter balk CSS |
+| `routes/route.html` | v2.0.0 | Nieuwe lay-out + absolute paden |
+| `wandelingen.html` | v1.1.0 | Filter balk toegevoegd + absolute paden |
+| `components/topbar.html` | v2.3.0 | Absolute paden voor logo en home link |
+| `components/footer.html` | v1.1.0 | Absolute paden voor logo en links |
+| `construction.html` | v1.1.0 | Standaard template + i18n data-attributen |
+| `data/i18n/nl/common.json` | v1.1.0 | construction vertalingen toegevoegd |
+| `data/i18n/en/common.json` | v1.1.0 | construction vertalingen toegevoegd |
+| `routes/routes-index.json` | v1.0.0 | Vervangt routes.json als index |
+| `creator.html` (snippet) | — | Stap 2: land/regio/plaats velden. Stap 3: regio veld verwijderd |
+
+### Architectuurbeslissingen sessie 06
 
 | Onderwerp | Beslissing |
 |-----------|-----------|
-| **Bestandsstructuur** | Route JSON bestanden in `routes/`. Geen aparte `data/content/` map. |
-| **Route IDs** | Altijd lowercase met koppeltekens, geen spaties |
-| **Moeilijkheid** | SAC-wandelschaal T1-T6. Score = afstand(km) + stijging(/100m) + weerfactoren |
-| **Cloudinary** | Auto-fix bij import en blur: w_1200 hero, w_800 galerij/blokken, w_400 thumbnail |
-| **Leaflet CDN** | jsdelivr zonder integrity check (unpkg blokkeerde op GitHub Pages) |
-| **Routes overzicht** | `wandelingen.html` als generiek patroon — later ook `hikes.html`, `ritten.html` |
-| **Homepage** | Top 3 meest recente routes. "Alle wandelingen →" naar `wandelingen.html` |
-| **Twee JSON exports** | Creator exporteert (1) volledige route JSON en (2) routes.json entry apart |
+| **Routes index** | `routes-index.json` vervangt `routes.json`. Array van IDs. Manueel beheerd. |
+| **Paden** | Alle HTML bestanden gebruiken absolute paden `/MyTrailWalks/...` |
+| **Categorieën** | Dagtrips + Trails als nieuwe categorieën. Zelfde JSON structuur als wandelingen. |
+| **Meerdere GPX** | `segments` array in JSON voor meerdere vervoerstypes. Toekomstige implementatie. |
+| **Foto verdeling** | Tekst/link blokken links, foto blokken altijd rechts in route detail |
+| **country/region/place** | Aparte velden in JSON via Nominatim. Basis voor filters. |
+| **Standaard template** | `construction.html` als basis voor nieuwe pagina's |
 
-### Openstaande punten na sessie 05
-- GPX route tekenen op kaart in route.html (trackPoints aanwezig in JSON maar niet gebruikt)
+### Openstaande punten na sessie 06
+- Footer i18n bug (TD-012) — onopgelost
 - Route kaartpagina (T1-007)
-- Draft management (T1-008)
-- Print CSS (T7-001)
-- Analytics dashboard (T6-005)
-- Filters op wandelingen.html (T4-001)
+- Hoogteprofiel (T2-004)
+- Meerdere GPX segmenten (T2-007)
+- Dagtrips categorie (T1-010)
+- Trails categorie (T1-011)
+- Print CSS volledig (T7-001)
 
 ---
 
