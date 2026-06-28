@@ -233,11 +233,13 @@ function renderGrid(routes, gridEl) {
   gridEl.appendChild(fragment);
 
   updateCount(routes.filter((r) => r.status === "published").length);
+  updateCount(routes.filter((r) => b.status === "draft").length);
 }
 
 function updateCount(n) {
   const countEl = document.getElementById("wandelingen-count");
   if (countEl) countEl.textContent = `${n} wandeling${n !== 1 ? "en" : ""}`;
+  
 }
 
 // -----------------------------------------------------------
