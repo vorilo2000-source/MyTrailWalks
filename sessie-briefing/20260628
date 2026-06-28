@@ -1,0 +1,208 @@
+# MyTrailWalks — Sessie 07 Inbrief
+## Datum: volgende sessie na 28-06-2026
+> Doel: Categorieën dagtrips + trails · Meerdere GPX segmenten · Footer i18n bug · Backlog opkuisen
+
+---
+
+## Context
+
+MyTrailWalks is een persoonlijk visueel outdoor storytelling platform. Vanilla HTML/CSS/JS, geen frameworks. i18next voor vertalingen. Foto's via Cloudinary (extern). Statische site op GitHub Pages.
+
+---
+
+## Wat er klaar is na sessie 06
+
+| Bestand | Versie | Status |
+|---------|--------|--------|
+| `js/app.js` | v3.3.0 | ✅ common namespace + getPageNamespace + applyTranslations per component + setTimeout fallback |
+| `js/home.js` | v2.4.0 | ✅ routes-index.json + draft/final badge + alle tiles klikbaar |
+| `js/wandelingen.js` | v1.3.0 | ✅ routes-index.json + filters (moeilijkheid, land, regio, plaats) |
+| `js/route.js` | v2.0.0 | ✅ nieuwe 2-koloms lay-out + slideshow + bronvermelding + status badge |
+| `js/creator.js` | v2.2.0 | ✅ country/region/place via Nominatim + track_points bij JSON import |
+| `css/route.css` | v2.0.0 | ✅ 2-koloms lay-out + slideshow + print (galerij verborgen) |
+| `css/wandelingen.css` | v1.1.0 | ✅ filter balk CSS |
+| `routes/route.html` | v2.0.0 | ✅ nieuwe lay-out + absolute paden |
+| `wandelingen.html` | v1.1.0 | ✅ filter balk toegevoegd |
+| `components/topbar.html` | v2.3.0 | ✅ absolute paden |
+| `components/footer.html` | v1.1.0 | ✅ absolute paden |
+| `construction.html` | v1.1.0 | ✅ standaard template voor pagina's onder constructie |
+| `data/i18n/nl/common.json` | v1.1.0 | ✅ construction vertalingen toegevoegd |
+| `data/i18n/en/common.json` | v1.1.0 | ✅ construction vertalingen toegevoegd |
+| `routes/routes-index.json` | v1.0.0 | ✅ vervangt routes.json |
+
+### Creator HTML aanpassingen (manueel door te voeren)
+- **Stap 2** — `step-meta.html` snippet: land, regio, plaats velden toegevoegd na datum+locatie
+- **Stap 3** — `step-info.html` snippet: `input-region` verwijderd (staat nu in stap 2)
+
+### Route JSON structuur (v2.2.0)
+```json
+{
+  "id": "...",
+  "status": "draft|published",
+  "country": "België",
+  "region": "Antwerpen",
+  "place": "Kalmthout",
+  "published_date": "2026-06-18",
+  "transport": ["walking"],
+  "title": { "nl": "...", "en": "" },
+  "location": "...",
+  "difficulty": "T2",
+  "source_reference": null,
+  "tags": [],
+  "summary": { "nl": "...", "en": "" },
+  "story": { "nl": "...", "en": "" },
+  "story_blocks": [...],
+  "gallery": [...],
+  "tips": { "nl": "...", "en": "" },
+  "photos": [...],
+  "gpx_stats": {
+    "distance_km": 6.9,
+    "start_lat": 51.418,
+    "start_lon": 4.418,
+    "track_points": [[lat, lon], ...]
+  },
+  "weather": { ... }
+}
+```
+
+---
+
+## Open bug — Footer i18n (ONOPGELOST)
+
+**Probleem:** Op `route.html` en `wandelingen.html` toont de footer `© common.footer.copyright` in plaats van `© MyTrailWalks`.
+
+**Vaststellingen:**
+- Werkt correct op `index.html` en `construction.html`
+- `i18next.isInitialized` → `true`
+- `i18next.t("common:footer.copyright")` → `"MyTrailWalks"` ✓
+- `i18next.getResourceBundle("nl", "common")` → correct object ✓
+- Manueel `textContent` instellen werkt ✓
+- `applyTranslations()` in console geeft `undefined` maar werkt niet
+- Footer span bevat de sleutel als tekst: `<span data-i18n="common:footer.copyright">common.footer.copyright</span>`
+- Hard refresh heeft geen effect
+- Meerdere fixes geprobeerd in `app.js` zonder succes
+
+**Waarschijnlijke oorzaak:** Iets schrijft de sleutel als tekst in de span NADAT `applyTranslations()` al uitgevoerd is. Nog te onderzoeken of `injectComponent` meer dan één keer aangeroepen wordt.
+
+**Bestanden gewijzigd zonder succes:** `app.js` v3.1.0 → v3.2.0 → v3.3.0
+
+---
+
+## Prioriteiten sessie 07
+
+### 1. Nieuwe categorieën: Dagtrips + Trails
+
+**Architectuur:**
+- `dagtrips/dagtrips-index.json` + `dagtrips/[id].json`
+- `trails/trails-index.json` + `trails/[id].json`
+- `dagtrips.html` + `js/dagtrips.js` + `css/dagtrips.css`
+- `trails.html` + `js/trails.js` + `css/trails.css`
+- Homepage: drie secties (Wandelingen, Dagtrips, Trails)
+- Creator: categorie selector voor export naar juiste map
+
+**Definitie:**
+- **Dagtrips** — bezoeken aan toeristische attracties, grotten, musea, … Zelfde JSON structuur als wandelingen, meerdere vervoersopties mogelijk
+- **Trails** — zwaarder wandelen, meerdere dagen mogelijk, obstakels (bv. Duivelskloof Eifel). Zelfde JSON structuur als wandelingen
+
+### 2. Meerdere GPX segmenten per route
+
+**Probleem:** Huidige structuur heeft één `gpx_stats` met één `track_points`. Voor routes met meerdere vervoersmiddelen (bv. trein + wandeling + fiets) is een array nodig.
+
+**Voorgestelde structuur:**
+```json
+"segments": [
+  {
+    "transport": "train",
+    "label": "Naar startpunt",
+    "gpx_stats": { ... },
+    "track_points": [ ... ]
+  },
+  {
+    "transport": "walking",
+    "label": "Wandeling",
+    "gpx_stats": { ... },
+    "track_points": [ ... ]
+  }
+]
+```
+
+**Impact:** `creator.js`, `route.js`, `route.html` — meerdere GPX uploads + kleurcode per vervoerstype op kaart.
+
+### 3. Footer i18n bug oplossen
+
+Zie open bug hierboven.
+
+### 4. Route kaartpagina (T1-007) — optioneel
+
+`routes/[id]-map.html` — aparte fullscreen Leaflet kaart pagina per route.
+
+---
+
+## Architectuurafspraken (bevestigd sessie 06)
+
+| Onderwerp | Afspraak |
+|-----------|---------|
+| **Script volgorde** | Eruda → Supabase SDK → i18next CDN → i18n.js → auth.js → topbar-auth.js → analytics.js → app.js → Leaflet (indien nodig) → [pagina].js |
+| **Paden** | Altijd absolute paden (`/MyTrailWalks/...`) in HTML bestanden |
+| **Cache busting** | `?v=x.x.x` aan script tags bij elke deploy |
+| **Standaard pagina template** | `construction.html` als basis voor nieuwe pagina's |
+| **Routes index** | `routes/routes-index.json` — array van IDs |
+| **Categorieën** | Elke categorie krijgt eigen map, index, HTML, JS, CSS |
+| **JSON structuur** | `country`, `region`, `place` als aparte velden (nieuw in v2.2.0) |
+| **Track points** | Opgeslagen in `gpx_stats.track_points` |
+| **Leaflet CDN** | `https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.min.js` |
+| **Cloudinary** | Hero w_1200,f_auto · Galerij w_800,f_auto · Thumbnail w_400,f_auto |
+| **Eruda** | Nooit verwijderen uit HTML pagina's |
+
+---
+
+## Design tokens (uit main.css)
+
+```
+--color-forest: #2C4A3B
+--color-forest-dark: #1C3328
+--color-earth: #8C6A4F
+--color-water: #4C7A89
+--color-cream: #F6F1E7
+--color-charcoal: #2B2926
+--color-charcoal-soft: #5C5752
+--color-line: #DDD4C2
+--font-display: Fraunces
+--font-body: Inter
+--font-mono: JetBrains Mono
+--content-max-width: 1200px
+--content-narrow-width: 720px
+```
+
+---
+
+## Supabase project
+
+| Gegeven | Waarde |
+|---------|--------|
+| **URL** | `https://bzcevvfesushlorymszd.supabase.co` |
+| **Site URL** | `https://vorilo2000-source.github.io/MyTrailWalks` |
+
+---
+
+## GitHub Pages
+
+| Gegeven | Waarde |
+|---------|--------|
+| **URL** | `https://vorilo2000-source.github.io/MyTrailWalks/` |
+| **Repo** | vorilo2000-source/MyTrailWalks |
+
+---
+
+## Werkwijze
+
+1. Vraag altijd toestemming vóór uitvoering
+2. Check of gebruiker informatie heeft voordat je zelf zoekt
+3. Bouw in kleine iteraties
+4. Geef korte uitleg ná elke taak
+5. Eruda niet verwijderen uit HTML pagina's
+6. Absolute paden in alle HTML bestanden
+
+---
+
+# END OF SESSIE_07_INBRIEF.md
