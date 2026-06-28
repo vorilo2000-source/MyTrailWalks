@@ -209,13 +209,17 @@ function renderMap(route) {
 }
 
 // -----------------------------------------------------------
-// RENDER VERHAAL
+// RENDER VERHAAL — alleen tekst en link blokken
+// Foto blokken gaan altijd naar de foto grid (rechterkolom)
 // -----------------------------------------------------------
 function renderStory(route) {
   const blocks = route.story_blocks;
-  if (!blocks?.length) return;
-
   const container = $("route-story");
+
+  // Altijd tonen, ook als leeg
+  $("section-story").hidden = false;
+
+  if (!blocks?.length) return;
 
   blocks.forEach((block) => {
     if (block.type === "text" && block.value) {
@@ -223,28 +227,6 @@ function renderStory(route) {
       p.className = "route-story__text";
       p.textContent = block.value;
       container.appendChild(p);
-    } else if (block.type === "photo" && block.value) {
-      const img = document.createElement("img");
-      img.className = "route-story__photo";
-      img.src = block.value;
-      img.alt = "";
-      img.loading = "lazy";
-      img.onerror = () => img.remove();
-      container.appendChild(img);
-    } else if (block.type === "photo-grid" && block.photos?.length) {
-      const grid = document.createElement("div");
-      grid.className = "route-story__grid";
-      grid.style.gridTemplateColumns = `repeat(${block.cols || 2}, 1fr)`;
-      block.photos.filter(Boolean).forEach((url) => {
-        const img = document.createElement("img");
-        img.className = "route-story__grid-photo";
-        img.src = url;
-        img.alt = "";
-        img.loading = "lazy";
-        img.onerror = () => img.remove();
-        grid.appendChild(img);
-      });
-      container.appendChild(grid);
     } else if (block.type === "link" && block.url) {
       const a = document.createElement("a");
       a.className = "route-story__link";
@@ -254,46 +236,62 @@ function renderStory(route) {
       a.innerHTML = `<span>🔗</span><span>${block.name || block.url}</span>`;
       container.appendChild(a);
     }
+    // foto en photo-grid blokken worden genegeerd hier — gaan naar renderPhotoGrid
   });
-
-  $("section-story").hidden = false;
 }
 
 // -----------------------------------------------------------
-// RENDER TIPS
+// RENDER TIPS — altijd tonen, ook als leeg
 // -----------------------------------------------------------
 function renderTips(route) {
   const lang = i18nModule?.language?.substring(0, 2) || "nl";
   const tips = route.tips?.[lang] || route.tips?.nl || route.tips;
+
+  // Altijd tonen
+  $("section-tips").hidden = false;
+
   if (!tips) return;
 
   const p = document.createElement("p");
   p.className = "route-tips__text";
   p.textContent = tips;
   $("route-tips").appendChild(p);
-  $("section-tips").hidden = false;
 }
 
 // -----------------------------------------------------------
 // RENDER FOTO GRID (rechterkolom verhaal)
+// Combineert foto blokken uit story_blocks + photos[1+]
+// Altijd tonen
 // -----------------------------------------------------------
 function renderPhotoGrid(route) {
-  const photos = route.photos?.slice(1) || [];
-  if (!photos.length) return;
-
   const container = $("route-photo-grid");
-  photos.forEach((photo) => {
-    if (!photo.url) return;
+  $("section-photos").hidden = false;
+
+  const urls = new Set();
+
+  // Foto blokken uit story_blocks
+  (route.story_blocks || []).forEach((block) => {
+    if (block.type === "photo" && block.value) {
+      urls.add(block.value);
+    } else if (block.type === "photo-grid" && block.photos?.length) {
+      block.photos.filter(Boolean).forEach((url) => urls.add(url));
+    }
+  });
+
+  // Extra photos (index 1+)
+  (route.photos || []).slice(1).forEach((p) => {
+    if (p.url) urls.add(p.url);
+  });
+
+  urls.forEach((url) => {
     const img = document.createElement("img");
     img.className = "route-photo-grid__img";
-    img.src = photo.url;
-    img.alt = photo.caption || "";
+    img.src = url;
+    img.alt = "";
     img.loading = "lazy";
     img.onerror = () => img.remove();
     container.appendChild(img);
   });
-
-  $("section-photos").hidden = false;
 }
 
 // -----------------------------------------------------------
