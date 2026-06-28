@@ -500,3 +500,12 @@
     grid-template-columns: repeat(2, 1fr);
   }
 }
+
+/* -----------------------------------------------------------
+   16. PRINT
+   ----------------------------------------------------------- */
+@media print {
+  #section-gallery {
+    display: none !important;
+  }
+}
