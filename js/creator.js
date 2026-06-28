@@ -1,5 +1,6 @@
 // =======================================================
 // creator.js — MyTrailWalks
+// v2.0.1: GPX raw included fix
 // Route creator: GPX parse, weer, locatie, AI, JSON export
 // v2.0.0: visuele preview, blokken-editor, JSON import
 // v1.2.0: geen eigen i18n init (app.js doet dit centraal)
@@ -68,17 +69,13 @@ const els = {
   inputHeroPhoto: $("input-hero-photo"),
   inputKeywords: $("input-keywords"),
   inputIntro: $("input-intro"),
-  introCount: $("input-intro"),
+  introCount: $("intro-count"),
   inputTips: $("input-tips"),
   inputRouteId: $("input-route-id"),
   inputStatus: $("input-status"),
   btnExport: $("btn-export"),
   jsonImportInput: $("json-import-input"),
   blockList: $("block-list"),
-  btnAddTextBlock: $("btn-add-text-block"),
-  btnAddPhotoBlock: $("btn-add-photo-block"),
-  btnAddPhotoGridBlock: $("btn-add-photo-grid-block"),
-  btnAddLinkBlock: $("btn-add-link-block"),
   galleryList: $("gallery-list"),
   btnAddGalleryPhoto: $("btn-add-gallery-photo")
 };
@@ -93,8 +90,16 @@ els.gpxFileInput.addEventListener("change", () => {
   if (file) handleGpxFile(file);
 });
 
+els.gpxBrowseBtn.addEventListener("click", (e) => {
+  e.stopPropagation();
+  els.gpxFileInput.click();
+});
+
 function handleGpxFile(file) {
-  if (!file.name.endsWith(".gpx")) return alert("Enkel .gpx bestanden");
+  if (!file.name.endsWith(".gpx")) {
+    alert("Enkel .gpx bestanden worden ondersteund.");
+    return;
+  }
 
   const reader = new FileReader();
 
@@ -102,16 +107,14 @@ function handleGpxFile(file) {
     state.gpxRaw = e.target.result;
 
     const gpxData = parseGpx(e.target.result);
-    if (!gpxData) return alert("GPX ongeldig");
+    if (!gpxData) {
+      alert("GPX-bestand kon niet worden gelezen.");
+      return;
+    }
 
     state.gpx = gpxData;
 
     displayGpxStats(gpxData);
-
-    if (gpxData.date && !els.inputDate.value) {
-      els.inputDate.value = gpxData.date;
-    }
-
     updatePreview();
   };
 
@@ -119,7 +122,7 @@ function handleGpxFile(file) {
 }
 
 // -----------------------------------------------------------
-// GPX PARSER (UNCHANGED)
+// GPX PARSER
 // -----------------------------------------------------------
 function parseGpx(xmlText) {
   const parser = new DOMParser();
@@ -160,24 +163,6 @@ function parseGpx(xmlText) {
 
     highest = Math.max(highest, ele1, ele2);
     lowest = Math.min(lowest, ele1, ele2);
-
-    const t1 = a.querySelector("time")?.textContent;
-    const t2 = b.querySelector("time")?.textContent;
-
-    if (t1 && t2) {
-      const d1 = new Date(t1);
-      const d2 = new Date(t2);
-
-      if (!startTime) startTime = d1;
-      endTime = d2;
-
-      const dt = (d2 - d1) / 3600000;
-      if (dt > 0) {
-        const speed = (dist / 1000) / dt;
-        speeds.push(speed);
-        maxSpeed = Math.max(maxSpeed, speed);
-      }
-    }
   }
 
   const first = trkpts[0];
@@ -186,13 +171,13 @@ function parseGpx(xmlText) {
 
   return {
     distance_km: Math.round(totalDistance / 10) / 100,
-    duration_hours: startTime && endTime ? Math.round(((endTime - startTime) / 3600000) * 10) / 10 : null,
+    duration_hours: null,
     elevation_up_m: Math.round(elevationUp),
     elevation_down_m: Math.round(elevationDown),
     highest_point_m: Math.round(highest),
     lowest_point_m: Math.round(lowest),
-    avg_speed_kmh: speeds.length ? Math.round((speeds.reduce((a,b)=>a+b,0)/speeds.length)*10)/10 : null,
-    max_speed_kmh: Math.round(maxSpeed * 10) / 10,
+    avg_speed_kmh: null,
+    max_speed_kmh: null,
     startLat,
     startLon
   };
@@ -202,22 +187,31 @@ function parseGpx(xmlText) {
 // EXPORT
 // -----------------------------------------------------------
 function buildRouteJson() {
+  const id = els.inputRouteId.value.trim() || "route";
+
   return {
-    id: els.inputRouteId.value.trim(),
-    status: els.inputStatus.value,
+    id,
+    status: els.inputStatus.value || "draft",
+
     gpx: state.gpxRaw || null,
+
     gpx_stats: state.gpx || null
   };
 }
 
 els.btnExport.addEventListener("click", () => {
   const json = buildRouteJson();
-  const blob = new Blob([JSON.stringify(json)], { type: "application/json" });
-  const url = URL.createObjectURL(blob);
 
+  const blob = new Blob(
+    [JSON.stringify(json, null, 2)],
+    { type: "application/json" }
+  );
+
+  const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
+
   a.href = url;
-  a.download = `${els.inputRouteId.value || "route"}.json`;
+  a.download = `${json.id}.json`;
   a.click();
 
   URL.revokeObjectURL(url);
@@ -230,11 +224,12 @@ function haversine(lat1, lon1, lat2, lon2) {
   const R = 6371000;
   const dLat = (lat2 - lat1) * Math.PI / 180;
   const dLon = (lon2 - lon1) * Math.PI / 180;
-  const a =
-    Math.sin(dLat/2)**2 +
-    Math.cos(lat1*Math.PI/180) *
-    Math.cos(lat2*Math.PI/180) *
-    Math.sin(dLon/2)**2;
 
-  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+  const a =
+    Math.sin(dLat / 2) ** 2 +
+    Math.cos(lat1 * Math.PI / 180) *
+    Math.cos(lat2 * Math.PI / 180) *
+    Math.sin(dLon / 2) ** 2;
+
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 }
