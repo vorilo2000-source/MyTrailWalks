@@ -1,6 +1,6 @@
 # MyTrailWalks — BACKLOG.md
-## Bijgewerkt: 28-06-2026
-> Versie: v2.8.0 · MVP backlog structure
+## Bijgewerkt: 29-06-2026
+> Versie: v2.9.0 · MVP backlog structure
 
 ---
 
@@ -34,7 +34,7 @@
 | T1-003 | routes | JSON loader | routes-index.json inladen en per ID de volledige JSON ophalen | Feature | 🔴 High | ✅ Done — sessie 06. |
 | T1-004 | routes | Routing logic | Navigatie via `?id=` query parameter. `wandelingen.html` als overzicht. `routes/route.html` als detail. | Feature | 🔴 High | ✅ Done — sessie 05 (25-06-2026). |
 | T1-005 | routes | Eerste route entry | Kalmthoutse Heide + Grenspark Kalmthout aangemaakt. JSON in `routes/`. | Feature | 🔴 High | ✅ Done — sessie 05 (25-06-2026). |
-| T1-006 | routes, ui, ai | Route creator | `creator.html` v2.0.0 + `js/creator.js` v2.2.0. country/region/place via Nominatim. track_points bij JSON import. Meerdere GPX segmenten: toekomstig. | Feature | 🔴 High | ✅ Done — sessie 06 (28-06-2026). |
+| T1-006 | routes, ui, ai | Route creator | `creator.html` v2.0.0 + `js/creator.js` v2.2.0. country/region/place via Nominatim. gpx_raw embed in JSON export + herstel bij import. GPS-ruis filtering: hoogte-drempel 2m, koude-start skip 10 punten, snelheidspieken waarschuwing ≥ 3× gemiddelde. Meerdere GPX segmenten: toekomstig. | Feature | 🔴 High | ✅ Done — sessie 06 (28-06-2026) + patch 29-06-2026. |
 | T1-007 | routes, ui | Route kaartpagina | `routes/[id]-map.html`: interactieve Leaflet kaart + GPX overlay. Apart tabblad. | Feature | 🟡 Medium | 📋 Open |
 | T1-008 | routes, ux | Draft management | Draft/Final badge op route tiles. Alle tiles klikbaar. | Feature | 🟡 Medium | ✅ Done — sessie 06 (28-06-2026). |
 | T1-009 | routes | Wandelingen overzicht | `wandelingen.html` + `js/wandelingen.js` v1.3.0 + `css/wandelingen.css` v1.1.0. Filters: moeilijkheid, land, regio, plaats. | Feature | 🔴 High | ✅ Done — sessie 06 (28-06-2026). |
@@ -48,10 +48,10 @@
 | ID | Tags | Taak | Omschrijving | Type | Prioriteit | Status |
 |----|------|------|--------------|------|-----------|--------|
 | T2-001 | maps | Leaflet setup | Leaflet.js via jsdelivr CDN. Kaart in creator preview + route detail pagina. | Feature | 🔴 High | ✅ Done — sessie 05 (25-06-2026). |
-| T2-002 | maps | GPX parser | GPX bestand client-side parsen: coördinaten, tijdstempels, hoogte, snelheid. trackPoints opgeslagen voor routetekening. startLat/startLon opgeslagen in JSON export. | Feature | 🔴 High | ✅ Done — sessie 03 + sessie 05. |
+| T2-002 | maps | GPX parser | GPX bestand client-side parsen: coördinaten, tijdstempels, hoogte, snelheid. trackPoints opgeslagen voor routetekening. startLat/startLon opgeslagen in JSON export. GPS-ruis filtering toegevoegd (29-06-2026). | Feature | 🔴 High | ✅ Done — sessie 03 + sessie 05 + patch 29-06-2026. |
 | T2-003 | maps | Route overlay | GPX track overlay in creator preview + route detail pagina via Leaflet polyline. track_points in gpx_stats. | Feature | 🔴 High | ✅ Done — sessie 06 (28-06-2026). |
 | T2-004 | maps | Elevation profile | Hoogteprofiel genereren uit GPX data. Placeholder aanwezig in route detail lay-out. | Feature | 🟡 Medium | 📋 Open |
-| T2-005 | maps | GPX upload | GPX-bestand inladen in creator. trackPoints samplen tot max 500 voor performantie. | Feature | 🟡 Medium | ✅ Done — sessie 05. |
+| T2-005 | maps | GPX upload | GPX-bestand inladen in creator. trackPoints samplen tot max 500 voor performantie. gpx_raw opgeslagen als string in JSON export. | Feature | 🟡 Medium | ✅ Done — sessie 05 + patch 29-06-2026. |
 | T2-006 | maps, print | Statische kaartafbeelding | Bij afdrukken: interactieve kaart vervangen door statische kaartafbeelding. | Feature | 🟡 Medium | 📋 Open |
 | T2-007 | maps | Meerdere GPX segmenten | Meerdere GPX bestanden per route, elk met eigen vervoerstype. `segments` array in JSON. Kleurcode per vervoerstype op kaart. | Feature | 🟡 Medium | 📋 Open |
 
@@ -170,7 +170,7 @@
 
 ---
 
-## STANDAARD AFSPRAKEN (bijgewerkt sessie 06)
+## STANDAARD AFSPRAKEN (bijgewerkt 29-06-2026)
 
 | Onderwerp | Afspraak |
 |-----------|---------|
@@ -188,6 +188,7 @@
 | **Categorieën** | Elke categorie krijgt eigen map, index, HTML, JS, CSS |
 | **JSON structuur** | `country`, `region`, `place` als aparte velden (v2.2.0) |
 | **Track points** | Opgeslagen in `gpx_stats.track_points` |
+| **gpx_raw** | Volledige GPX-tekst als string in JSON export (v2.2.0) |
 | **Leaflet CDN** | `https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.min.js` (geen integrity check) |
 
 ---
