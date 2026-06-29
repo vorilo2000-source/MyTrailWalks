@@ -606,6 +606,18 @@ function handleGpxFile(file) {
 // Ondersteunt GPX 1.1 van OsmAnd en Open GPX Tracker (iOS)
 // Beide schrijven standaard trkpt/ele/time — geen extensions nodig
 // -----------------------------------------------------------
+/**
+ * Verwerk een GPX XML-string naar een stats-object.
+ *
+ * Stille filters (altijd actief, geen gebruikersinteractie nodig):
+ *   - Hoogte: eleDiff < 2m wordt genegeerd → filtert GPS-ruis uit stijging/daling
+ *   - Snelheid: eerste 10 trackpunten worden overgeslagen → filtert koude GPS-start
+ *
+ * Twijfelgeval (niet-blokkerende waarschuwing in UI):
+ *   - Snelheidspieken die ≥ 3× het gemiddelde zijn worden gedetecteerd
+ *   - Gebruiker kan kiezen: negeren (piek weggooien) of bewaren
+ *   - showSpeedWarning() toont de keuze, past state.gpx daarna aan
+ */
 function parseGpx(xmlText) {
   try {
     const parser = new DOMParser();
@@ -618,10 +630,13 @@ function parseGpx(xmlText) {
     let elevationDown = 0;
     let highestPoint = -Infinity;
     let lowestPoint = Infinity;
-    let maxSpeed = 0;
-    const speeds = [];
+    const speeds = [];       // alle geldige snelheden (na koude-start skip)
+    const speedPeaks = [];   // pieken ≥ 3× gemiddelde — voor waarschuwing
     let startTime = null;
     let endTime = null;
+
+    // GPS koude-start: sla de eerste 10 punten over voor snelheidsberekening
+    const WARMUP_SKIP = 10;
 
     for (let i = 1; i < trkpts.length; i++) {
       const prev = trkpts[i - 1];
@@ -634,11 +649,14 @@ function parseGpx(xmlText) {
       const ele2 = parseFloat(curr.querySelector("ele")?.textContent || 0);
       const dist = haversine(lat1, lon1, lat2, lon2);
       totalDistance += dist;
+
+      // Hoogte: drempel van 2m filtert GPS-ruis — min/max blijft ongefilterd
       const eleDiff = ele2 - ele1;
-      if (eleDiff > 0) elevationUp += eleDiff;
-      else elevationDown += Math.abs(eleDiff);
+      if (eleDiff > 2) elevationUp += eleDiff;
+      else if (eleDiff < -2) elevationDown += Math.abs(eleDiff);
       highestPoint = Math.max(highestPoint, ele1, ele2);
       lowestPoint = Math.min(lowestPoint, ele1, ele2);
+
       const timeEl1 = prev.querySelector("time");
       const timeEl2 = curr.querySelector("time");
       if (timeEl1 && timeEl2) {
@@ -647,19 +665,48 @@ function parseGpx(xmlText) {
         if (!startTime) startTime = t1;
         endTime = t2;
         const timeDiff = (t2 - t1) / 3600000;
-        if (timeDiff > 0) {
+        if (timeDiff > 0 && i >= WARMUP_SKIP) {
+          // Snelheid in km/u
           const speed = (dist / 1000) / timeDiff;
           speeds.push(speed);
-          maxSpeed = Math.max(maxSpeed, speed);
         }
       }
     }
 
+    // Detecteer snelheidspieken: waarden ≥ 3× het gemiddelde
+    const avgSpeedRaw = speeds.length > 0
+      ? speeds.reduce((a, b) => a + b, 0) / speeds.length
+      : null;
+    const peakThreshold = avgSpeedRaw ? avgSpeedRaw * 3 : null;
+    const filteredSpeeds = [];
+    speeds.forEach((s) => {
+      if (peakThreshold && s >= peakThreshold) {
+        speedPeaks.push(Math.round(s * 10) / 10);
+      } else {
+        filteredSpeeds.push(s);
+      }
+    });
+
     const firstPt = trkpts[0];
     const startLat = parseFloat(firstPt.getAttribute("lat"));
     const startLon = parseFloat(firstPt.getAttribute("lon"));
-    const durationHours = startTime && endTime ? ((endTime - startTime) / 3600000) : null;
-    const avgSpeed = speeds.length > 0 ? speeds.reduce((a, b) => a + b, 0) / speeds.length : null;
+    const durationHours = startTime && endTime
+      ? ((endTime - startTime) / 3600000)
+      : null;
+
+    // Gemiddelde op gefilterde speeds (pieken al eruit)
+    const avgSpeed = filteredSpeeds.length > 0
+      ? filteredSpeeds.reduce((a, b) => a + b, 0) / filteredSpeeds.length
+      : null;
+
+    // Max op gefilterde speeds
+    const maxSpeedFiltered = filteredSpeeds.length > 0
+      ? Math.max(...filteredSpeeds)
+      : 0;
+
+    // Max inclusief pieken — voor de waarschuwing tonen we dit verschil
+    const maxSpeedRaw = speeds.length > 0 ? Math.max(...speeds) : 0;
+
     let date = null;
     const firstTime = trkpts[0].querySelector("time");
     if (firstTime) date = firstTime.textContent.split("T")[0];
@@ -675,7 +722,7 @@ function parseGpx(xmlText) {
       ]);
     }
 
-    return {
+    const result = {
       distance_km: Math.round(totalDistance / 10) / 100,
       duration_hours: durationHours ? Math.round(durationHours * 10) / 10 : null,
       elevation_up_m: Math.round(elevationUp),
@@ -683,16 +730,72 @@ function parseGpx(xmlText) {
       highest_point_m: Math.round(highestPoint),
       lowest_point_m: Math.round(lowestPoint),
       avg_speed_kmh: avgSpeed ? Math.round(avgSpeed * 10) / 10 : null,
-      max_speed_kmh: Math.round(maxSpeed * 10) / 10,
+      max_speed_kmh: Math.round(maxSpeedFiltered * 10) / 10,
       startLat,
       startLon,
       trackPoints,
       date,
     };
+
+    // Toon waarschuwing als er verdachte snelheidspieken gevonden zijn
+    if (speedPeaks.length > 0) {
+      // Sla ook de ruwe max op zodat gebruiker kan kiezen om die te bewaren
+      result._maxSpeedRaw = Math.round(maxSpeedRaw * 10) / 10;
+      result._speedPeaks = speedPeaks;
+      showSpeedWarning(result);
+    }
+
+    return result;
   } catch (err) {
     console.error("GPX parse fout:", err);
     return null;
   }
+}
+
+/**
+ * Toont een niet-blokkerende waarschuwing onder de GPX-stats
+ * als er onwaarschijnlijke snelheidspieken gedetecteerd zijn.
+ * Gebruiker kan kiezen: negeren (piek weggooien) of bewaren.
+ * @param {object} gpxData - Het al ingevulde gpx-resultaatobject
+ */
+function showSpeedWarning(gpxData) {
+  // Verwijder eerder toongestelde waarschuwing
+  const existing = document.getElementById("gpx-speed-warning");
+  if (existing) existing.remove();
+
+  const maxRaw = gpxData._maxSpeedRaw;
+  const maxFiltered = gpxData.max_speed_kmh;
+
+  const warning = document.createElement("div");
+  warning.id = "gpx-speed-warning";
+  warning.className = "gpx-warning";
+  warning.innerHTML = `
+    <p class="gpx-warning__text">
+      ⚠️ Verdachte snelheidspiek gevonden: <strong>${maxRaw} km/u</strong>
+      (gem. ${gpxData.avg_speed_kmh} km/u). Waarschijnlijk GPS-ruis bij opstarten.
+      Huidig maximum na filtering: <strong>${maxFiltered} km/u</strong>.
+    </p>
+    <div class="gpx-warning__actions">
+      <button class="btn btn--primary btn--sm" id="gpx-warn-ignore">Negeren (${maxFiltered} km/u bewaren)</button>
+      <button class="btn btn--ghost btn--sm" id="gpx-warn-keep">Toch bewaren (${maxRaw} km/u)</button>
+    </div>
+  `;
+
+  // Voeg toe onder de GPX stats sectie
+  els.gpxStats.appendChild(warning);
+
+  // Negeren: piek verwijderd, gefilterde waarde al in state.gpx — sluit waarschuwing
+  document.getElementById("gpx-warn-ignore").addEventListener("click", () => {
+    warning.remove();
+  });
+
+  // Bewaren: zet de ruwe max terug in state.gpx en update UI
+  document.getElementById("gpx-warn-keep").addEventListener("click", () => {
+    state.gpx.max_speed_kmh = maxRaw;
+    els.statMaxSpeed.textContent = `${maxRaw} km/u`;
+    warning.remove();
+    updatePreview();
+  });
 }
 
 function haversine(lat1, lon1, lat2, lon2) {
@@ -1251,9 +1354,33 @@ function showInlineError(inputEl, message) {
 }
 
 // -----------------------------------------------------------
-// INIT — v2.1.0
+// INIT — v2.2.0
 // -----------------------------------------------------------
 window.appReady.then(() => {
+  // Injecteer stijlen voor GPX snelheidswaarschuwing
+  const style = document.createElement("style");
+  style.textContent = `
+    .gpx-warning {
+      margin-top: 12px;
+      padding: 10px 12px;
+      background: var(--color-warning-bg, #fff8e1);
+      border: 1px solid var(--color-warning-border, #f0c040);
+      border-radius: 6px;
+    }
+    .gpx-warning__text {
+      margin: 0 0 8px;
+      font-size: var(--text-sm, 0.875rem);
+      color: var(--color-charcoal, #333);
+      line-height: 1.4;
+    }
+    .gpx-warning__actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+  `;
+  document.head.appendChild(style);
+
   renderBlockEditor();
   updatePreview();
 });
