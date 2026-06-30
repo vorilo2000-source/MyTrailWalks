@@ -1,14 +1,14 @@
-<!-- ======================= creator.html v2.0.0 =======================
+<!-- ======================= creator.html v2.1.0 =======================
      Route creator pagina — MyTrailWalks
      Bouwt stap voor stap een route-JSON op en exporteert deze.
 
      Stappen:
-       1. GPX uploaden → automatisch berekende stats (Haversine)
-       2. Datum + locatie (auto via Nominatim) + weerdata (Open-Meteo)
-       3. Route-informatie (titel, moeilijkheid, regio, bron)
-       4. Foto's (hero + extra Cloudinary URLs)
-       5. Verhaal & tips — blokken-editor (tekst + foto blokken, vrije volgorde)
-       6. Export → downloadt [id].json
+       1. Segmenten — GPX + datum/locatie + weer per vervoersmiddel
+          (herhaalbaar via "+ Segment toevoegen")
+       2. Route-informatie (titel, moeilijkheid, regio, bron)
+       3. Foto's (hero)
+       4. Verhaal & tips — blokken-editor (tekst + foto blokken, vrije volgorde)
+       5. Export → downloadt [id].json
 
      Modi:
        - Handmatig: geen AI, alles zelf invullen
@@ -20,6 +20,8 @@
      Scripts: alle scripts onderaan <body> — standaard MyTrailWalks volgorde:
        Eruda → Supabase SDK → i18next → i18n.js → auth.js → topbar-auth.js → app.js → creator.js
 
+     v2.1.0: stap 1+2 samengevoegd tot herhaalbare segmenten (GPX + datum/locatie
+             per vervoersmiddel). Eén vervoersmiddel per segment i.p.v. checkboxlijst.
      v2.0.0: visuele preview, blokken-editor, JSON upload/import
      v1.0.1: scripts verplaatst naar onderaan <body> conform standaard
      v1.0.0: initiële versie
@@ -98,149 +100,40 @@
       <!-- LINKER KOLOM: stap-voor-stap formulier -->
       <div class="creator-form-col">
 
-        <!-- STAP 1: GPX -->
-        <section class="creator-step" id="step-gpx">
+        <!-- ===================================================================
+             STAP 1: Route segmenten (GPX + datum/locatie + weer per segment)
+             Vervangt de vroegere losse stappen "GPX-bestand" en "Datum & locatie".
+             De inhoud van #segment-list wordt volledig gerenderd door
+             renderSegments() in creator.js — hier staat enkel de buitenste
+             structuur en de "+ Segment toevoegen" knop.
+             =================================================================== -->
+        <section class="creator-step" id="step-segments">
           <div class="creator-step__header">
             <span class="creator-step__num">1</span>
-            <h2 class="creator-step__title">GPX-bestand</h2>
-            <span class="creator-step__status" id="gpx-status"></span>
+            <h2 class="creator-step__title">Route segmenten</h2>
+            <span class="creator-step__hint">GPX + datum/locatie per vervoersmiddel</span>
           </div>
           <div class="creator-step__body">
-            <div class="drop-zone" id="gpx-drop-zone">
-              <input type="file" id="gpx-file-input" accept=".gpx" hidden>
-              <div class="drop-zone__inner" id="gpx-drop-inner">
-                <span class="drop-zone__icon">↑</span>
-                <p class="drop-zone__text">Sleep je GPX-bestand hierheen</p>
-                <p class="drop-zone__sub">of <button class="link-btn" id="gpx-browse-btn">kies een bestand</button></p>
-              </div>
-            </div>
-            <div class="gpx-stats" id="gpx-stats" hidden>
-              <div class="stat-grid">
-                <div class="stat-item">
-                  <span class="stat-value" id="stat-distance">—</span>
-                  <span class="stat-label">Afstand</span>
-                </div>
-                <div class="stat-item">
-                  <span class="stat-value" id="stat-duration">—</span>
-                  <span class="stat-label">Duur</span>
-                </div>
-                <div class="stat-item">
-                  <span class="stat-value" id="stat-ele-up">—</span>
-                  <span class="stat-label">Stijging</span>
-                </div>
-                <div class="stat-item">
-                  <span class="stat-value" id="stat-ele-down">—</span>
-                  <span class="stat-label">Daling</span>
-                </div>
-                <div class="stat-item">
-                  <span class="stat-value" id="stat-highest">—</span>
-                  <span class="stat-label">Hoogste punt</span>
-                </div>
-                <div class="stat-item">
-                  <span class="stat-value" id="stat-lowest">—</span>
-                  <span class="stat-label">Laagste punt</span>
-                </div>
-                <div class="stat-item">
-                  <span class="stat-value" id="stat-avg-speed">—</span>
-                  <span class="stat-label">Gem. snelheid</span>
-                </div>
-                <div class="stat-item">
-                  <span class="stat-value" id="stat-max-speed">—</span>
-                  <span class="stat-label">Max. snelheid</span>
-                </div>
-              </div>
-              <button class="link-btn link-btn--small" id="gpx-reset-btn">Ander bestand kiezen</button>
-            </div>
+            <p class="field__help" style="margin-bottom: 14px;">
+              Eén segment per vervoersmiddel. Voor een route met bijvoorbeeld trein + wandeling:
+              voeg een tweede segment toe en upload de bijhorende GPX.
+            </p>
+
+            <!-- Wordt volledig gevuld door renderSegments() in creator.js -->
+            <div id="segment-list"></div>
+
+            <button class="btn btn--ghost" id="btn-add-segment">
+              <span class="btn-icon">+</span> Segment toevoegen
+            </button>
           </div>
         </section>
 
         <hr class="step-divider">
 
-<!-- STAP 2: Datum + locatie + weer -->
-        <section class="creator-step" id="step-meta">
-          <div class="creator-step__header">
-            <span class="creator-step__num">2</span>
-            <h2 class="creator-step__title">Datum &amp; locatie</h2>
-          </div>
-          <div class="creator-step__body">
-            <div class="field-row">
-              <div class="field">
-                <label class="field__label" for="input-date">Wandeldatum</label>
-                <input type="date" id="input-date" class="input">
-              </div>
-              <div class="field field--grow">
-                <label class="field__label" for="input-location">Locatie</label>
-                <div class="input-with-action">
-                  <input type="text" id="input-location" class="input" placeholder="Automatisch via GPX of handmatig">
-                  <button class="btn btn--ghost btn--sm" id="btn-fetch-location" title="Locatie ophalen via GPX-coördinaten">↺</button>
-                </div>
-              </div>
-            </div>
-            <div class="field-row">
-              <div class="field">
-                <label class="field__label" for="input-country">Land</label>
-                <input type="text" id="input-country" class="input" placeholder="Automatisch via GPX">
-              </div>
-              <div class="field">
-                <label class="field__label" for="input-region">Regio / Provincie</label>
-                <input type="text" id="input-region" class="input" placeholder="Automatisch via GPX">
-              </div>
-              <div class="field">
-                <label class="field__label" for="input-place">Plaats</label>
-                <input type="text" id="input-place" class="input" placeholder="Automatisch via GPX">
-              </div>
-            </div>
-            <div class="field">
-              <label class="field__label">Vervoersmiddel</label>
-              <div class="transport-select" id="transport-select">
-                <label class="transport-option"><input type="checkbox" value="walking"> 🚶 Wandelen</label>
-                <label class="transport-option"><input type="checkbox" value="cycling"> 🚴 Fietsen</label>
-                <label class="transport-option"><input type="checkbox" value="motorcycle"> 🏍 Motor</label>
-                <label class="transport-option"><input type="checkbox" value="car"> 🚗 Auto</label>
-                <label class="transport-option"><input type="checkbox" value="train"> 🚆 Trein</label>
-                <label class="transport-option"><input type="checkbox" value="bus"> 🚌 Bus</label>
-                <label class="transport-option"><input type="checkbox" value="boat"> ⛵ Boot</label>
-                <label class="transport-option"><input type="checkbox" value="plane"> ✈️ Vliegtuig</label>
-              </div>
-              <span class="field__help">Meerdere opties mogelijk</span>
-            </div>
-            <div class="weather-block" id="weather-block" hidden>
-              <div class="weather-block__header">
-                <span class="weather-block__label">Weerdata — Open-Meteo</span>
-                <button class="link-btn link-btn--small" id="btn-refetch-weather">Opnieuw ophalen</button>
-              </div>
-              <div class="weather-grid">
-                <div class="weather-item">
-                  <span class="stat-value" id="w-temp-min">—</span>
-                  <span class="stat-label">Min. temp</span>
-                </div>
-                <div class="weather-item">
-                  <span class="stat-value" id="w-temp-max">—</span>
-                  <span class="stat-label">Max. temp</span>
-                </div>
-                <div class="weather-item">
-                  <span class="stat-value" id="w-precip">—</span>
-                  <span class="stat-label">Neerslag</span>
-                </div>
-                <div class="weather-item">
-                  <span class="stat-value" id="w-wind">—</span>
-                  <span class="stat-label">Wind</span>
-                </div>
-              </div>
-              <div class="field field--inline">
-                <label class="field__label" for="input-weather-condition">Omschrijving</label>
-                <input type="text" id="input-weather-condition" class="input" placeholder="zonnig, bewolkt, regenachtig…">
-              </div>
-            </div>
-            <button class="btn btn--secondary btn--sm" id="btn-fetch-weather">Weerdata ophalen</button>
-          </div>
-        </section>
-        <hr class="step-divider">
-
-        <!-- STAP 3: Route info -->
+        <!-- STAP 2: Route info -->
         <section class="creator-step" id="step-info">
           <div class="creator-step__header">
-            <span class="creator-step__num">3</span>
+            <span class="creator-step__num">2</span>
             <h2 class="creator-step__title">Route-informatie</h2>
           </div>
           <div class="creator-step__body">
@@ -259,7 +152,7 @@
                 <option value="T5">T5 — Veeleisende alpine wandeling (bergschoenen)</option>
                 <option value="T6">T6 — Moeilijke alpine wandeling (klimgedeeltes)</option>
               </select>
-              <span class="field__help">Automatisch berekend na GPX + weerdata. Aanpasbaar.</span>
+              <span class="field__help">Automatisch berekend na GPX + weerdata van het eerste segment. Aanpasbaar.</span>
             </div>
             <div class="field">
               <label class="field__label" for="input-source">Bronvermelding (optioneel)</label>
@@ -268,11 +161,11 @@
           </div>
         </section>
         <hr class="step-divider">
-           
-        <!-- STAP 4: Foto's -->
+
+        <!-- STAP 3: Foto's -->
         <section class="creator-step" id="step-photos">
           <div class="creator-step__header">
-            <span class="creator-step__num">4</span>
+            <span class="creator-step__num">3</span>
             <h2 class="creator-step__title">Hero-foto</h2>
             <span class="creator-step__hint">Cloudinary URL</span>
           </div>
@@ -287,10 +180,10 @@
 
         <hr class="step-divider">
 
-        <!-- STAP 5: Verhaal & tips — blokken-editor -->
+        <!-- STAP 4: Verhaal & tips — blokken-editor -->
         <section class="creator-step" id="step-story">
           <div class="creator-step__header">
-            <span class="creator-step__num">5</span>
+            <span class="creator-step__num">4</span>
             <h2 class="creator-step__title">Verhaal &amp; tips</h2>
             <span class="creator-step__hint ai-hint" id="ai-story-hint" hidden>AI kan dit genereren</span>
           </div>
@@ -347,10 +240,10 @@
 
         <hr class="step-divider">
 
-        <!-- STAP 6: Export -->
+        <!-- STAP 5: Export -->
         <section class="creator-step" id="step-export">
           <div class="creator-step__header">
-            <span class="creator-step__num">6</span>
+            <span class="creator-step__num">5</span>
             <h2 class="creator-step__title">Exporteren</h2>
           </div>
           <div class="creator-step__body">
@@ -439,7 +332,7 @@
               <!-- Verhaal blokken preview -->
               <div class="rp-story" id="rp-story"></div>
 
-              <!-- Kaart -->
+              <!-- Kaart — toont alle segmenten met kleurcode per vervoersmiddel -->
               <div class="rp-map" id="rp-map" hidden>
                 <p class="rp-map__label">Locatie op kaart</p>
                 <div class="rp-map__frame" id="rp-map-frame"></div>
@@ -472,7 +365,7 @@
   <script src="js/analytics.js"></script>
   <script src="js/app.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.min.js"></script>
-  <script src="js/creator.js?v=2.1.0"></script>
+  <script src="js/creator.js?v=2.3.0"></script>
 
 </body>
 </html>
