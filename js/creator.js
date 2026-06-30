@@ -1,6 +1,8 @@
 // =======================================================
 // creator.js — MyTrailWalks
 // Route creator: GPX parse, weer, locatie, AI, JSON export
+// v2.4.1: track_points toegevoegd aan segments[].gpx_stats export (bug fix)
+//         track_points toegevoegd aan root-level gpx_stats export (bug fix)
 // v2.4.0: hike/trail vervoersmiddel + moeilijkheidsschaal per vervoersmiddel
 //         (walking W1-W3, hike SAC T1-T6, cycling/motorcycle/car
 //          klim+bochtigheid uit GPX + kasseien-override)
@@ -1658,6 +1660,7 @@ function buildRouteJson() {
       lowest_point_m: s.gpx.lowest_point_m,
       start_lat: s.gpx.startLat || null,
       start_lon: s.gpx.startLon || null,
+      track_points: s.gpx.trackPoints || null,
     } : null,
     gpx_raw: s.gpxRaw || null,
     weather: s.weather ? {
@@ -1718,6 +1721,7 @@ function buildRouteJson() {
       lowest_point_m: seg0.gpx.lowest_point_m,
       start_lat: seg0.gpx.startLat || null,
       start_lon: seg0.gpx.startLon || null,
+      track_points: seg0.gpx.trackPoints || null,
     } : null,
     gpx_raw: seg0?.gpxRaw || null,
     weather: seg0?.weather ? {
