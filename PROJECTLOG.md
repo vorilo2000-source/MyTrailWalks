@@ -1,6 +1,6 @@
 # MyTrailWalks — PROJECTLOG.md
-## Bijgewerkt: 29-06-2026
-> Versie: v1.6.0 · Projectlog — chronologisch overzicht van sessies en wijzigingen
+## Bijgewerkt: 29-06-2026 (patch-sessie)
+> Versie: v1.7.0 · Projectlog — chronologisch overzicht van sessies en wijzigingen
 
 ---
 
@@ -232,6 +232,62 @@
 | **gpx_raw** | Volledige GPX-tekst als string in JSON export. Veld `gpx_raw` in route JSON. |
 | **GPS filtering** | Drempel 2m voor hoogte. Koude-start skip 10 punten. Pieken ≥ 3× gemiddelde → waarschuwing. |
 | **Vervoersmiddel** | Geen drempelwaarden per vervoersmiddel — puur statistisch filteren. |
+
+---
+
+## Patch 29-06-2026 (vervolg) — Meerdere segmenten + moeilijkheidsschaal per vervoersmiddel
+
+**Onderwerp:** creator.js segmenten-systeem (T2-007) + hike/trail vervoersmiddel + moeilijkheidsschaal per vervoersmiddel (T2-008) + route.js kaart-uitbreiding
+
+**Status:**
+- T2-007 ✅ Done — meerdere GPX segmenten, vervroegd afgerond t.o.v. sessie 07 planning
+- T2-008 ✅ Done (nieuw item) — moeilijkheidsschaal per vervoersmiddel
+- T1-002 ✅ Uitgebreid — route.js kaart toont alle segmenten met kleurcode
+- T1-006 ✅ Uitgebreid — creator.js volledig herbouwd rond segmenten
+
+### Aangeleverde bestanden
+
+| Bestand | Versie | Omschrijving |
+|---------|--------|--------------|
+| `js/creator.js` | v2.3.0 → v2.4.0 | Segmenten-systeem + hike/trail + moeilijkheidsschaal per vervoersmiddel |
+| `creator.html` | v2.1.0 | Segmenten-sectie vervangt GPX/datum-stappen, stappen hernummerd |
+| `js/route.js` | v2.1.0 | Kaart toont alle segmenten met kleurcode per vervoersmiddel |
+| `routes/route.html` | v2.0.0 | Cache-busting bijgewerkt naar route.js v2.1.0 |
+
+### Wijzigingen in detail
+
+**Segmenten-systeem (creator.js v2.3.0):**
+- `state.segments` array vervangt de enkelvoudige GPX/datum/weer state
+- Elk segment: eigen vervoersmiddel (dropdown, één keuze), GPX upload, datum, locatie/land/regio/plaats, weerdata
+- "+ Segment toevoegen" knop voegt identiek blok toe; vanaf segment 2 verwijderbaar
+- Export: nieuw veld `segments`, root-level velden (`gpx_stats`, `gpx_raw`, `weather`, `location`, `transport`) blijven gevuld vanuit eerste segment — achterwaartse compatibiliteit met route.js
+- Import: herkent zowel `segments` array (nieuw) als losse root-velden (legacy, wordt als één segment ingeladen)
+
+**Hike/Trail vervoersmiddel + moeilijkheidsschaal per vervoersmiddel (creator.js v2.4.0):**
+- Nieuw vervoersmiddel "Hike / Trail" naast "Wandelen", met eigen kleur
+- SAC T1-T6 schaal verschoven van algemeen "Walking" naar specifiek "Hike/Trail" (bergwandelen)
+- Walking krijgt eigen vlakke schaal W1-W3 (stijging per km, geen SAC)
+- Cycling (C1-C4), Motorcycle (M1-M4), Car (A1-A4): automatisch berekend uit klimintensiteit (m/km) + bochtigheid (scherpe bochten/km, via bearing-berekening op trackpunten)
+- Handmatige "kasseien/onverhard" checkbox voor motorcycle/car — tilt resultaat minimaal naar niveau 2
+- Train/Bus/Boat/Plane: geen schaal
+- Per-segment dropdown, automatische berekening overschrijfbaar; bij vervoerswissel of nieuwe GPX wordt herberekend tenzij gebruiker al handmatig koos
+
+**Route detail kaart (route.js v2.1.0):**
+- `renderMap()` herschreven: checkt eerst op `route.segments`, tekent per segment een polyline in de vervoersmiddel-kleur met popup-label
+- Fallback op oude enkelvoudige `gpx_stats`-tekening voor routes zonder `segments` array
+- `TRANSPORT_COLORS`/`TRANSPORT_LABELS` gedupliceerd in route.js, identiek aan creator.js, voor consistente kleuren tussen creator-preview en gepubliceerde pagina
+
+**Bijgevangen fout:** `hike` ontbrak aanvankelijk in `TRANSPORT_COLORS` (wel in labels/schalen) — gecorrigeerd in beide bestanden.
+
+### Architectuurbeslissingen patch 29-06-2026 (vervolg)
+
+| Onderwerp | Beslissing |
+|-----------|-----------|
+| **Segmenten** | Eén vervoersmiddel per segment, geen checkboxlijst meer. Herhaalbaar via "+ Segment toevoegen". |
+| **Achterwaartse compatibiliteit** | Root-level GPX/weer/locatie-velden blijven bestaan, gevuld vanuit eerste segment — route.js hoeft niet alles tegelijk aangepast te worden. |
+| **SAC-schaal scope** | SAC T1-T6 is specifiek voor bergwandelen (Hike/Trail), niet voor vlakke wandelingen (Walking, eigen W1-W3 schaal). |
+| **Wegvoertuig-moeilijkheid** | Klimintensiteit + bochtigheid uit GPX, geen afstand. Wegdektype (kasseien) niet uit GPX afleidbaar — handmatige checkbox als override. |
+| **Kaart-kleurcode** | Vaste kleur per vervoersmiddel, gedeeld tussen creator en route detail pagina voor consistentie. |
 
 ---
 
