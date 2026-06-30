@@ -1,6 +1,6 @@
 # MyTrailWalks — BACKLOG.md
-## Bijgewerkt: 29-06-2026
-> Versie: v2.9.0 · MVP backlog structure
+## Bijgewerkt: 29-06-2026 (patch-sessie)
+> Versie: v3.0.0 · MVP backlog structure
 
 ---
 
@@ -30,11 +30,11 @@
 | ID | Tags | Taak | Omschrijving | Type | Prioriteit | Status |
 |----|------|------|--------------|------|-----------|--------|
 | T1-001 | routes | Homepage grid | Route-overzicht met tiles (foto + stats + titel). Top 3 meest recente routes per categorie. Link naar wandelingen.html. | Feature | 🔴 High | ✅ Done — sessie 02 + sessie 05 + sessie 06. |
-| T1-002 | routes | Route detail page | `routes/route.html` v2.0.0 + `js/route.js` v2.0.0 + `css/route.css` v2.0.0. 2-koloms lay-out: stats+kaart links/rechts, verhaal+foto's links/rechts, slideshow galerij. Bronvermelding. Status badge. | Feature | 🔴 High | ✅ Done — sessie 06 (28-06-2026). |
+| T1-002 | routes | Route detail page | `routes/route.html` v2.0.0 + `js/route.js` v2.1.0 + `css/route.css` v2.0.0. 2-koloms lay-out: stats+kaart links/rechts, verhaal+foto's links/rechts, slideshow galerij. Bronvermelding. Status badge. Kaart toont alle segmenten met kleurcode per vervoersmiddel (achterwaarts compatibel met routes zonder segments array). | Feature | 🔴 High | ✅ Done — sessie 06 (28-06-2026) + patch 29-06-2026. |
 | T1-003 | routes | JSON loader | routes-index.json inladen en per ID de volledige JSON ophalen | Feature | 🔴 High | ✅ Done — sessie 06. |
 | T1-004 | routes | Routing logic | Navigatie via `?id=` query parameter. `wandelingen.html` als overzicht. `routes/route.html` als detail. | Feature | 🔴 High | ✅ Done — sessie 05 (25-06-2026). |
 | T1-005 | routes | Eerste route entry | Kalmthoutse Heide + Grenspark Kalmthout aangemaakt. JSON in `routes/`. | Feature | 🔴 High | ✅ Done — sessie 05 (25-06-2026). |
-| T1-006 | routes, ui, ai | Route creator | `creator.html` v2.0.0 + `js/creator.js` v2.2.0. country/region/place via Nominatim. gpx_raw embed in JSON export + herstel bij import. GPS-ruis filtering: hoogte-drempel 2m, koude-start skip 10 punten, snelheidspieken waarschuwing ≥ 3× gemiddelde. Meerdere GPX segmenten: toekomstig. | Feature | 🔴 High | ✅ Done — sessie 06 (28-06-2026) + patch 29-06-2026. |
+| T1-006 | routes, ui, ai | Route creator | `creator.html` v2.1.0 + `js/creator.js` v2.4.0. Meerdere segmenten (GPX + datum/locatie + weer per vervoersmiddel), herhaalbaar via "+ Segment toevoegen". Vervoersmiddel "Hike/Trail" toegevoegd naast Wandelen. Moeilijkheidsschaal per vervoersmiddel: Walking (W1-W3, stijging/km), Hike (SAC T1-T6), Cycling/Motorcycle/Car (klim+bochtigheid uit GPX + kasseien-override), Train/Bus/Boat/Plane (geen schaal). country/region/place via Nominatim, per segment. gpx_raw embed in JSON export + herstel bij import. GPS-ruis filtering: hoogte-drempel 2m, koude-start skip 10 punten, snelheidspieken waarschuwing ≥ 3× gemiddelde. | Feature | 🔴 High | ✅ Done — sessie 06 (28-06-2026) + patches 29-06-2026. |
 | T1-007 | routes, ui | Route kaartpagina | `routes/[id]-map.html`: interactieve Leaflet kaart + GPX overlay. Apart tabblad. | Feature | 🟡 Medium | 📋 Open |
 | T1-008 | routes, ux | Draft management | Draft/Final badge op route tiles. Alle tiles klikbaar. | Feature | 🟡 Medium | ✅ Done — sessie 06 (28-06-2026). |
 | T1-009 | routes | Wandelingen overzicht | `wandelingen.html` + `js/wandelingen.js` v1.3.0 + `css/wandelingen.css` v1.1.0. Filters: moeilijkheid, land, regio, plaats. | Feature | 🔴 High | ✅ Done — sessie 06 (28-06-2026). |
@@ -48,12 +48,13 @@
 | ID | Tags | Taak | Omschrijving | Type | Prioriteit | Status |
 |----|------|------|--------------|------|-----------|--------|
 | T2-001 | maps | Leaflet setup | Leaflet.js via jsdelivr CDN. Kaart in creator preview + route detail pagina. | Feature | 🔴 High | ✅ Done — sessie 05 (25-06-2026). |
-| T2-002 | maps | GPX parser | GPX bestand client-side parsen: coördinaten, tijdstempels, hoogte, snelheid. trackPoints opgeslagen voor routetekening. startLat/startLon opgeslagen in JSON export. GPS-ruis filtering toegevoegd (29-06-2026). | Feature | 🔴 High | ✅ Done — sessie 03 + sessie 05 + patch 29-06-2026. |
+| T2-002 | maps | GPX parser | GPX bestand client-side parsen: coördinaten, tijdstempels, hoogte, snelheid. trackPoints opgeslagen voor routetekening. startLat/startLon opgeslagen in JSON export. GPS-ruis filtering toegevoegd (29-06-2026). Bochtigheid-detectie (bearing/hoekverschil tussen trackpunten) toegevoegd voor wegvoertuig-moeilijkheidsschaal (29-06-2026). | Feature | 🔴 High | ✅ Done — sessie 03 + sessie 05 + patches 29-06-2026. |
 | T2-003 | maps | Route overlay | GPX track overlay in creator preview + route detail pagina via Leaflet polyline. track_points in gpx_stats. | Feature | 🔴 High | ✅ Done — sessie 06 (28-06-2026). |
 | T2-004 | maps | Elevation profile | Hoogteprofiel genereren uit GPX data. Placeholder aanwezig in route detail lay-out. | Feature | 🟡 Medium | 📋 Open |
 | T2-005 | maps | GPX upload | GPX-bestand inladen in creator. trackPoints samplen tot max 500 voor performantie. gpx_raw opgeslagen als string in JSON export. | Feature | 🟡 Medium | ✅ Done — sessie 05 + patch 29-06-2026. |
 | T2-006 | maps, print | Statische kaartafbeelding | Bij afdrukken: interactieve kaart vervangen door statische kaartafbeelding. | Feature | 🟡 Medium | 📋 Open |
-| T2-007 | maps | Meerdere GPX segmenten | Meerdere GPX bestanden per route, elk met eigen vervoerstype. `segments` array in JSON. Kleurcode per vervoerstype op kaart. | Feature | 🟡 Medium | 📋 Open |
+| T2-007 | maps | Meerdere GPX segmenten | Meerdere GPX bestanden per route, elk met eigen vervoerstype. `segments` array in JSON (creator.js v2.3.0). Kleurcode per vervoerstype op kaart (creator preview + route.js v2.1.0). Achterwaarts compatibel met routes zonder segments array. | Feature | 🟡 Medium | ✅ Done — patch 29-06-2026. |
+| T2-008 | maps, ux | Moeilijkheidsschaal per vervoersmiddel | Eigen moeilijkheidsschaal per segment, afhankelijk van vervoersmiddel: Walking (W1-W3), Hike/Trail (SAC T1-T6), Cycling (C1-C4), Motorcycle (M1-M4), Car (A1-A4) — automatisch berekend uit klimintensiteit + bochtigheid, met handmatige "kasseien/onverhard" override voor motor/auto. Train/Bus/Boat/Plane: geen schaal. Gebruiker kan automatische berekening overschrijven. | Feature | 🟡 Medium | ✅ Done — patch 29-06-2026. |
 
 ---
 
@@ -163,14 +164,15 @@
 
 1. **T1-010** — Dagtrips categorie
 2. **T1-011** — Trails categorie
-3. **T2-007** — Meerdere GPX segmenten
-4. **TD-012** — Footer i18n bug
-5. **T1-007** — Route kaartpagina
-6. **T2-004** — Hoogteprofiel
+3. **TD-012** — Footer i18n bug
+4. **T1-007** — Route kaartpagina
+5. **T2-004** — Hoogteprofiel
+
+> T2-007 (meerdere GPX segmenten) en T2-008 (moeilijkheidsschaal per vervoersmiddel) zijn vervroegd afgerond in een tussensessie op 29-06-2026, buiten de oorspronkelijke sessie 07 planning om.
 
 ---
 
-## STANDAARD AFSPRAKEN (bijgewerkt 29-06-2026)
+## STANDAARD AFSPRAKEN (bijgewerkt 29-06-2026, patch-sessie)
 
 | Onderwerp | Afspraak |
 |-----------|---------|
@@ -186,9 +188,12 @@
 | **Cloudinary URL's** | Hero: w_1200,f_auto · Galerij/blokken: w_800,f_auto · Thumbnail: w_400,f_auto |
 | **Routes index** | `routes/routes-index.json` — array van IDs |
 | **Categorieën** | Elke categorie krijgt eigen map, index, HTML, JS, CSS |
-| **JSON structuur** | `country`, `region`, `place` als aparte velden (v2.2.0) |
-| **Track points** | Opgeslagen in `gpx_stats.track_points` |
-| **gpx_raw** | Volledige GPX-tekst als string in JSON export (v2.2.0) |
+| **JSON structuur** | `country`, `region`, `place` als aparte velden (v2.2.0). `segments` array voor meerdere vervoersmiddelen per route (v2.3.0) — root-level `gpx_stats`/`gpx_raw`/`weather`/`location` blijven gevuld vanuit eerste segment voor achterwaartse compatibiliteit |
+| **Track points** | Opgeslagen in `gpx_stats.track_points` (legacy) en per segment in `segments[].gpx_stats.track_points` (v2.3.0) |
+| **gpx_raw** | Volledige GPX-tekst als string in JSON export (v2.2.0), per segment vanaf v2.3.0 |
+| **Vervoersmiddelen** | walking, hike, cycling, motorcycle, car, train, bus, boat, plane. Eén vervoersmiddel per segment (geen checkboxlijst meer, v2.3.0) |
+| **Kleurcode vervoersmiddel** | Vaste kleuren per vervoersmiddel (`TRANSPORT_COLORS`), identiek in creator.js en route.js, gebruikt voor kaart-polylines en segment-headers |
+| **Moeilijkheidsschaal** | Per vervoersmiddel een eigen schaal (v2.4.0): Walking W1-W3, Hike/Trail SAC T1-T6, Cycling C1-C4, Motorcycle M1-M4, Car A1-A4. Train/Bus/Boat/Plane: geen schaal. Automatisch berekend uit GPX (klim + bochtigheid), handmatig overschrijfbaar |
 | **Leaflet CDN** | `https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.min.js` (geen integrity check) |
 
 ---
