@@ -17,6 +17,7 @@
 // -----------------------------------------------------------
 const TRANSPORT_COLORS = {
   walking:    "#2C4A3B",  // forest groen
+  hike:       "#6B8E4E",  // lichter groen — onderscheidt van walking
   cycling:    "#4C7A89",  // water blauw
   motorcycle: "#8C6A4F",  // earth bruin
   car:        "#5C5752",  // charcoal
