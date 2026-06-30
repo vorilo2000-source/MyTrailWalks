@@ -1,12 +1,36 @@
 // =======================================================
 // route.js — MyTrailWalks
 // Route detail pagina: laadt JSON en rendert route
+// v2.1.0: kaart toont alle segmenten met kleurcode per vervoersmiddel
+//         (achterwaarts compatibel met routes zonder segments array)
 // v2.0.0: nieuwe lay-out — 2-koloms, slideshow galerij, status badge
 // v1.2.0: dubbele code verwijderd, schone versie
 // =======================================================
 "use strict";
 
 const $ = (id) => document.getElementById(id);
+
+// -----------------------------------------------------------
+// KLEURCODE PER VERVOERSMIDDEL — identiek aan creator.js
+// zodat segment-kleuren consistent zijn tussen creator en route detail
+// -----------------------------------------------------------
+const TRANSPORT_COLORS = {
+  walking:    "#2C4A3B",  // forest groen
+  hike:       "#6B8E4E",  // lichter groen — onderscheidt van walking
+  cycling:    "#4C7A89",  // water blauw
+  motorcycle: "#8C6A4F",  // earth bruin
+  car:        "#5C5752",  // charcoal
+  train:      "#3A5FA0",  // blauw
+  bus:        "#A07A3A",  // geel-bruin
+  boat:       "#2E86AB",  // zee blauw
+  plane:      "#6B4FA0",  // paars
+};
+
+const TRANSPORT_LABELS = {
+  walking: "🚶 Wandelen", hike: "🥾 Hike / Trail", cycling: "🚴 Fietsen",
+  motorcycle: "🏍 Motor", car: "🚗 Auto", train: "🚆 Trein",
+  bus: "🚌 Bus", boat: "⛵ Boot", plane: "✈️ Vliegtuig",
+};
 
 function t(key) {
   try { return i18nModule.t(`route:${key}`); } catch (_) { return key; }
@@ -141,14 +165,10 @@ function renderWeather(route) {
 function renderTransport(route) {
   if (!route.transport?.length) return;
   const container = $("route-transport");
-  const labels = {
-    walking: "🚶 Wandelen", cycling: "🚴 Fietsen", motorcycle: "🏍 Motor",
-    car: "🚗 Auto", train: "🚆 Trein", bus: "🚌 Bus", boat: "⛵ Boot", plane: "✈️ Vliegtuig",
-  };
   route.transport.forEach((tr) => {
     const span = document.createElement("span");
     span.className = "route-transport__tag";
-    span.textContent = labels[tr] || tr;
+    span.textContent = TRANSPORT_LABELS[tr] || tr;
     container.appendChild(span);
   });
   $("section-transport").hidden = false;
@@ -173,9 +193,21 @@ function renderSource(route) {
 // -----------------------------------------------------------
 // RENDER KAART
 // -----------------------------------------------------------
+// Ondersteunt twee scenario's:
+//   A) route.segments aanwezig (v2.3+ creator export) — elk segment
+//      wordt getekend als eigen polyline in de kleur van zijn
+//      vervoersmiddel, met een popup-label per startmarker.
+//   B) route.segments ontbreekt (legacy export) — fallback op het
+//      enkelvoudige route.gpx_stats zoals voorheen, in de standaard
+//      forest-groene kleur.
+// -----------------------------------------------------------
 function renderMap(route) {
-  const g = route.gpx_stats;
-  if (!g?.start_lat || !g?.start_lon) return;
+  // Bepaal welke data-bron we hebben: segmenten of legacy gpx_stats
+  const segments = route.segments?.filter((s) => s.gpx_stats?.start_lat) || [];
+  const hasSegments = segments.length > 0;
+  const legacy = route.gpx_stats;
+
+  if (!hasSegments && !legacy?.start_lat) return;
 
   $("section-map").hidden = false;
 
@@ -186,24 +218,67 @@ function renderMap(route) {
       maxZoom: 18,
     }).addTo(map);
 
+    const allBounds = [];
+    // Voor de "Route openen" knop gebruiken we altijd het eerste punt
+    let firstLat = null;
+    let firstLon = null;
+
+    if (hasSegments) {
+      // -------- Scenario A: meerdere segmenten met kleurcode --------
+      segments.forEach((seg) => {
+        const g = seg.gpx_stats;
+        if (!g?.start_lat || !g?.start_lon) return;
+
+        const color = TRANSPORT_COLORS[seg.transport] || "#2C4A3B";
+        const label = seg.label || TRANSPORT_LABELS[seg.transport] || seg.transport || "Segment";
+
+        if (firstLat === null) { firstLat = g.start_lat; firstLon = g.start_lon; }
+
+        // Route als polyline tekenen, indien trackpunten aanwezig
+        if (g.track_points?.length > 1) {
+          L.polyline(g.track_points, { color, weight: 3, opacity: 0.85 }).addTo(map);
+          allBounds.push(...g.track_points);
+        } else {
+          allBounds.push([g.start_lat, g.start_lon]);
+        }
+
+        // Startmarker met label in de kleur van het vervoersmiddel
+        L.circleMarker([g.start_lat, g.start_lon], {
+          radius: 7, fillColor: color, color: "#fff", weight: 2, fillOpacity: 1,
+        }).addTo(map).bindPopup(label);
+      });
+    } else {
+      // -------- Scenario B: legacy enkelvoudige gpx_stats --------
+      firstLat = legacy.start_lat;
+      firstLon = legacy.start_lon;
+
+      L.circleMarker([legacy.start_lat, legacy.start_lon], {
+        radius: 7, fillColor: "#2C4A3B", color: "#fff", weight: 2, fillOpacity: 1,
+      }).addTo(map).bindPopup("Startpunt");
+
+      if (legacy.track_points?.length > 1) {
+        L.polyline(legacy.track_points, { color: "#2C4A3B", weight: 3, opacity: 0.85 }).addTo(map);
+        allBounds.push(...legacy.track_points);
+      } else {
+        allBounds.push([legacy.start_lat, legacy.start_lon]);
+      }
+    }
+
+    // Kaart fitten op alle getekende segmenten samen
+    if (allBounds.length > 1) {
+      map.fitBounds(allBounds, { padding: [16, 16] });
+    } else if (firstLat !== null) {
+      map.setView([firstLat, firstLon], 13);
+    }
+
+    // "Route openen" knop wijst naar het startpunt van het eerste segment
     const btnMap = $("btn-open-map");
-    if (btnMap) {
+    if (btnMap && firstLat !== null) {
       btnMap.hidden = false;
       btnMap.innerHTML = `<span>🗺</span> Route openen`;
       btnMap.addEventListener("click", () =>
-        window.open(`https://www.openstreetmap.org/#map=13/${g.start_lat}/${g.start_lon}`, "_blank")
+        window.open(`https://www.openstreetmap.org/#map=13/${firstLat}/${firstLon}`, "_blank")
       );
-    }
-
-    L.circleMarker([g.start_lat, g.start_lon], {
-      radius: 7, fillColor: "#2C4A3B", color: "#fff", weight: 2, fillOpacity: 1,
-    }).addTo(map).bindPopup("Startpunt");
-
-    if (g.track_points?.length > 1) {
-      const polyline = L.polyline(g.track_points, { color: "#2C4A3B", weight: 3, opacity: 0.85 }).addTo(map);
-      map.fitBounds(polyline.getBounds(), { padding: [16, 16] });
-    } else {
-      map.setView([g.start_lat, g.start_lon], 13);
     }
   }, 50);
 }
