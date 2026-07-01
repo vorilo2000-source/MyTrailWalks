@@ -1,11 +1,11 @@
 // =======================================================
 // route.js — MyTrailWalks
 // Route detail pagina: laadt JSON en rendert route
-// v2.2.0: gpx_raw fallback voor ontbrekende track_points (bug fix creator < v2.4.1)
-//         stats.maxSpeed i18n fallback
-// v2.1.0: kaart toont alle segmenten met kleurcode per vervoersmiddel
+// v2.3.0: segmenten-sectie met compacte tabel per segment,
+//         heldere kleurenpalet voor vervoersmiddelen
+// v2.2.0: gpx_raw fallback voor ontbrekende track_points
+// v2.1.0: kaart toont alle segmenten met kleurcode
 // v2.0.0: nieuwe lay-out — 2-koloms, slideshow galerij, status badge
-// v1.2.0: dubbele code verwijderd, schone versie
 // =======================================================
 "use strict";
 
@@ -16,15 +16,15 @@ const $ = (id) => document.getElementById(id);
 // zodat segment-kleuren consistent zijn tussen creator en route detail
 // -----------------------------------------------------------
 const TRANSPORT_COLORS = {
-  walking:    "#2C4A3B",  // forest groen
-  hike:       "#6B8E4E",  // lichter groen — onderscheidt van walking
-  cycling:    "#4C7A89",  // water blauw
-  motorcycle: "#8C6A4F",  // earth bruin
-  car:        "#5C5752",  // charcoal
-  train:      "#3A5FA0",  // blauw
-  bus:        "#A07A3A",  // geel-bruin
-  boat:       "#2E86AB",  // zee blauw
-  plane:      "#6B4FA0",  // paars
+  walking:    "#E8800A",  // oranje
+  hike:       "#9B59B6",  // paars
+  cycling:    "#2980B9",  // blauw
+  motorcycle: "#E74C3C",  // rood
+  car:        "#16A085",  // teal
+  train:      "#F39C12",  // geel-oranje
+  bus:        "#8E44AD",  // violet
+  boat:       "#1ABC9C",  // turquoise
+  plane:      "#2C3E50",  // donkerblauw
 };
 
 const TRANSPORT_LABELS = {
@@ -190,6 +190,86 @@ function renderSource(route) {
   a.innerHTML = `<span>🔗</span><span>${route.source_reference.replace(/^https?:\/\//, "")}</span>`;
   container.appendChild(a);
   $("section-source").hidden = false;
+}
+
+// -----------------------------------------------------------
+// RENDER SEGMENTEN
+// Toont alle segmenten als compacte tabellen met vervoer-badge,
+// GPX-stats en weerdata. Alleen zichtbaar als er meerdere segmenten
+// zijn of als segments array aanwezig is.
+// Startpunt van elk segment = referentie voor de weerdata.
+// -----------------------------------------------------------
+function renderSegments(route) {
+  const segments = route.segments;
+  if (!segments?.length) return;
+
+  const container = $("route-segments");
+  if (!container) return;
+
+  segments.forEach((seg, idx) => {
+    const color = TRANSPORT_COLORS[seg.transport] || "#2980B9";
+    const transportLabel = TRANSPORT_LABELS[seg.transport] || seg.transport || "—";
+    const g = seg.gpx_stats;
+    const w = seg.weather;
+    const diffLabel = seg.difficulty || "—";
+    const label = seg.label || transportLabel;
+
+    // GPX rijen — alleen tonen als waarde aanwezig
+    const gpxRows = [
+      g?.distance_km     ? `<tr><td>Afstand</td><td>${g.distance_km} km</td></tr>` : "",
+      g?.duration_hours  ? `<tr><td>Duur</td><td>${g.duration_hours} u</td></tr>` : "",
+      g?.elevation_up_m  ? `<tr><td>Stijging</td><td>+${g.elevation_up_m} m</td></tr>` : "",
+      g?.elevation_down_m ? `<tr><td>Daling</td><td>-${g.elevation_down_m} m</td></tr>` : "",
+      g?.avg_speed_kmh   ? `<tr><td>Gem. snelheid</td><td>${g.avg_speed_kmh} km/u</td></tr>` : "",
+      g?.max_speed_kmh   ? `<tr><td>Max. snelheid</td><td>${g.max_speed_kmh} km/u</td></tr>` : "",
+      g?.highest_point_m ? `<tr><td>Hoogste punt</td><td>${g.highest_point_m} m</td></tr>` : "",
+      g?.lowest_point_m  ? `<tr><td>Laagste punt</td><td>${g.lowest_point_m} m</td></tr>` : "",
+      seg.difficulty     ? `<tr><td>Moeilijkheid</td><td>${diffLabel}</td></tr>` : "",
+    ].filter(Boolean).join("");
+
+    // Weerdata rijen — referentie = startpunt van dit segment
+    const weatherRows = w ? [
+      `<tr><td>🌡 Temperatuur</td><td>${w.temperature_min ?? "—"}° – ${w.temperature_max ?? "—"}°C</td></tr>`,
+      w.precipitation_mm != null ? `<tr><td>💧 Neerslag</td><td>${w.precipitation_mm} mm</td></tr>` : "",
+      w.wind_kmh != null ? `<tr><td>🍃 Wind</td><td>${w.wind_kmh} km/u</td></tr>` : "",
+      w.condition ? `<tr><td>☀️ Conditie</td><td>${w.condition}</td></tr>` : "",
+    ].filter(Boolean).join("") : "";
+
+    const hasGpx = gpxRows.length > 0;
+    const hasWeather = weatherRows.length > 0;
+
+    const div = document.createElement("div");
+    div.className = "route-segment-block";
+    div.style.borderLeftColor = color;
+    div.innerHTML = `
+      <div class="route-segment-block__header" style="background:${color};">
+        <span class="route-segment-block__num">${idx + 1}</span>
+        <span class="route-segment-block__label">${label}</span>
+      </div>
+      <div class="route-segment-block__tables">
+        ${hasGpx ? `
+          <div class="route-segment-block__col">
+            <table class="route-segment-table">
+              <tbody>${gpxRows}</tbody>
+            </table>
+          </div>
+        ` : ""}
+        ${hasWeather ? `
+          <div class="route-segment-block__col">
+            <p class="route-segment-table__title">Weerdata</p>
+            <table class="route-segment-table">
+              <tbody>${weatherRows}</tbody>
+            </table>
+          </div>
+        ` : ""}
+        ${!hasGpx && !hasWeather ? `<p class="route-segment-block__empty">Geen data beschikbaar voor dit segment.</p>` : ""}
+      </div>
+    `;
+
+    container.appendChild(div);
+  });
+
+  $("section-segments").hidden = false;
 }
 
 // -----------------------------------------------------------
@@ -472,6 +552,7 @@ window.appReady.then(async () => {
   renderStats(route);
   renderWeather(route);
   renderTransport(route);
+  renderSegments(route);
   renderSource(route);
   renderMap(route);
   renderStory(route);
