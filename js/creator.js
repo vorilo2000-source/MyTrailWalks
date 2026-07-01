@@ -1,7 +1,9 @@
 // =======================================================
 // creator.js — MyTrailWalks
 // Route creator: GPX parse, weer, locatie, AI, JSON export
-// v2.4.1: track_points toegevoegd aan segments[].gpx_stats export (bug fix)
+// v2.4.2: datum-validatie bij weerdata ophalen (toekomstige datum)
+//         resp.ok check + betere foutmeldingen Open-Meteo
+// v2.4.1: track_points toegevoegd aan segments[].gpx_stats export
 //         track_points toegevoegd aan root-level gpx_stats export (bug fix)
 // v2.4.0: hike/trail vervoersmiddel + moeilijkheidsschaal per vervoersmiddel
 //         (walking W1-W3, hike SAC T1-T6, cycling/motorcycle/car
