@@ -1,6 +1,6 @@
 # MyTrailWalks — BACKLOG.md
-## Bijgewerkt: 29-06-2026 (patch-sessie)
-> Versie: v3.0.0 · MVP backlog structure
+## Bijgewerkt: 29-06-2026 (patch-sessie, vervolg)
+> Versie: v3.1.0 · MVP backlog structure
 
 ---
 
@@ -30,11 +30,11 @@
 | ID | Tags | Taak | Omschrijving | Type | Prioriteit | Status |
 |----|------|------|--------------|------|-----------|--------|
 | T1-001 | routes | Homepage grid | Route-overzicht met tiles (foto + stats + titel). Top 3 meest recente routes per categorie. Link naar wandelingen.html. | Feature | 🔴 High | ✅ Done — sessie 02 + sessie 05 + sessie 06. |
-| T1-002 | routes | Route detail page | `routes/route.html` v2.0.0 + `js/route.js` v2.1.0 + `css/route.css` v2.0.0. 2-koloms lay-out: stats+kaart links/rechts, verhaal+foto's links/rechts, slideshow galerij. Bronvermelding. Status badge. Kaart toont alle segmenten met kleurcode per vervoersmiddel (achterwaarts compatibel met routes zonder segments array). | Feature | 🔴 High | ✅ Done — sessie 06 (28-06-2026) + patch 29-06-2026. |
+| T1-002 | routes | Route detail page | `routes/route.html` v2.0.0 + `js/route.js` v2.3.0 + `css/route.css` v2.0.0. 2-koloms lay-out: stats+kaart links/rechts, verhaal+foto's links/rechts, slideshow galerij. Bronvermelding. Status badge. Kaart toont alle segmenten met kleurcode per vervoersmiddel. Segmenten-sectie: compacte tabel per segment met vervoer-badge, GPX-stats en weerdata naast elkaar. gpx_raw fallback voor ontbrekende track_points. Heldere kleurenpalet (oranje, paars, blauw, rood, teal, …). | Feature | 🔴 High | ✅ Done — sessie 06 (28-06-2026) + patches 29-06-2026. |
 | T1-003 | routes | JSON loader | routes-index.json inladen en per ID de volledige JSON ophalen | Feature | 🔴 High | ✅ Done — sessie 06. |
 | T1-004 | routes | Routing logic | Navigatie via `?id=` query parameter. `wandelingen.html` als overzicht. `routes/route.html` als detail. | Feature | 🔴 High | ✅ Done — sessie 05 (25-06-2026). |
 | T1-005 | routes | Eerste route entry | Kalmthoutse Heide + Grenspark Kalmthout aangemaakt. JSON in `routes/`. | Feature | 🔴 High | ✅ Done — sessie 05 (25-06-2026). |
-| T1-006 | routes, ui, ai | Route creator | `creator.html` v2.1.0 + `js/creator.js` v2.4.0. Meerdere segmenten (GPX + datum/locatie + weer per vervoersmiddel), herhaalbaar via "+ Segment toevoegen". Vervoersmiddel "Hike/Trail" toegevoegd naast Wandelen. Moeilijkheidsschaal per vervoersmiddel: Walking (W1-W3, stijging/km), Hike (SAC T1-T6), Cycling/Motorcycle/Car (klim+bochtigheid uit GPX + kasseien-override), Train/Bus/Boat/Plane (geen schaal). country/region/place via Nominatim, per segment. gpx_raw embed in JSON export + herstel bij import. GPS-ruis filtering: hoogte-drempel 2m, koude-start skip 10 punten, snelheidspieken waarschuwing ≥ 3× gemiddelde. | Feature | 🔴 High | ✅ Done — sessie 06 (28-06-2026) + patches 29-06-2026. |
+| T1-006 | routes, ui, ai | Route creator | `creator.html` v2.1.0 + `js/creator.js` v2.4.2. Meerdere segmenten (GPX + datum/locatie + weer per vervoersmiddel), herhaalbaar via "+ Segment toevoegen". Vervoersmiddel "Hike/Trail" toegevoegd naast Wandelen. Moeilijkheidsschaal per vervoersmiddel: Walking (W1-W3), Hike (SAC T1-T6), Cycling/Motorcycle/Car (klim+bochtigheid + kasseien-override), Train/Bus/Boat/Plane (geen schaal). country/region/place via Nominatim per segment. gpx_raw embed + herstel bij import. GPS-ruis filtering. track_points in segmenten-export. Datum-validatie weerdata (toekomstige datum gedetecteerd). resp.ok check + betere foutmeldingen Open-Meteo. Heldere kleurenpalet voor vervoersmiddelen. | Feature | 🔴 High | ✅ Done — sessie 06 (28-06-2026) + patches 29-06-2026. |
 | T1-007 | routes, ui | Route kaartpagina | `routes/[id]-map.html`: interactieve Leaflet kaart + GPX overlay. Apart tabblad. | Feature | 🟡 Medium | 📋 Open |
 | T1-008 | routes, ux | Draft management | Draft/Final badge op route tiles. Alle tiles klikbaar. | Feature | 🟡 Medium | ✅ Done — sessie 06 (28-06-2026). |
 | T1-009 | routes | Wandelingen overzicht | `wandelingen.html` + `js/wandelingen.js` v1.3.0 + `css/wandelingen.css` v1.1.0. Filters: moeilijkheid, land, regio, plaats. | Feature | 🔴 High | ✅ Done — sessie 06 (28-06-2026). |
@@ -192,7 +192,7 @@
 | **Track points** | Opgeslagen in `gpx_stats.track_points` (legacy) en per segment in `segments[].gpx_stats.track_points` (v2.3.0) |
 | **gpx_raw** | Volledige GPX-tekst als string in JSON export (v2.2.0), per segment vanaf v2.3.0 |
 | **Vervoersmiddelen** | walking, hike, cycling, motorcycle, car, train, bus, boat, plane. Eén vervoersmiddel per segment (geen checkboxlijst meer, v2.3.0) |
-| **Kleurcode vervoersmiddel** | Vaste kleuren per vervoersmiddel (`TRANSPORT_COLORS`), identiek in creator.js en route.js, gebruikt voor kaart-polylines en segment-headers |
+| **Kleurcode vervoersmiddel** | Heldere kleuren per vervoersmiddel (`TRANSPORT_COLORS`), identiek in creator.js en route.js: walking oranje, hike paars, cycling blauw, motorcycle rood, car teal, train geel-oranje, bus violet, boat turquoise, plane donkerblauw. Gebruikt voor kaart-polylines, segment-headers creator en segmenten-sectie route detail. |
 | **Moeilijkheidsschaal** | Per vervoersmiddel een eigen schaal (v2.4.0): Walking W1-W3, Hike/Trail SAC T1-T6, Cycling C1-C4, Motorcycle M1-M4, Car A1-A4. Train/Bus/Boat/Plane: geen schaal. Automatisch berekend uit GPX (klim + bochtigheid), handmatig overschrijfbaar |
 | **Leaflet CDN** | `https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.min.js` (geen integrity check) |
 
