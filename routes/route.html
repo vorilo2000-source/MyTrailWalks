@@ -72,6 +72,13 @@
             <div class="route-transport" id="route-transport"></div>
           </section>
 
+          <!-- Segmenten: compacte tabel per segment met vervoer-badge,
+               GPX-stats en weerdata. Verborgen als geen segments array. -->
+          <section class="route-section" id="section-segments" hidden>
+            <h2 class="route-section__title">Segmenten</h2>
+            <div id="route-segments"></div>
+          </section>
+
           <section class="route-section" id="section-source" hidden>
             <h2 class="route-section__title">Bronvermelding</h2>
             <div id="route-source"></div>
@@ -178,7 +185,7 @@
   <script src="/MyTrailWalks/js/topbar-auth.js?v=2.1.0"></script>
   <script src="/MyTrailWalks/js/analytics.js?v=1.1.0"></script>
   <script src="/MyTrailWalks/js/app.js?v=3.3.0"></script>
-  <script src="/MyTrailWalks/js/route.js?v=2.2.0"></script>
+  <script src="/MyTrailWalks/js/route.js?v=2.3.0"></script>
 
 </body>
 </html>
