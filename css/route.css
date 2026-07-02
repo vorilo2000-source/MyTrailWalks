@@ -1,5 +1,10 @@
 /* ===========================================================
-   route.css — MyTrailWalks v2.0.0
+   route.css — MyTrailWalks v2.1.0
+   v2.1.0: CSS voor stats-grid/weerdata/vervoer-tags verwijderd —
+           die secties zijn uit route.html gehaald (dubbel op met
+           de segmenten-sectie, die per segment al stats + weer +
+           vervoer toont). route-segment-block__label kreeg icoon-
+           spacing zodat "🚶 Wandelen — label" netjes wrapt op mobiel.
    v2.0.0: 2-koloms lay-out, slideshow galerij
    =========================================================== */
 
@@ -158,79 +163,7 @@
 }
 
 /* -----------------------------------------------------------
-   4. STATS GRID
-   ----------------------------------------------------------- */
-.route-stats {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: var(--space-sm);
-}
-
-.route-stat {
-  background: var(--color-cream);
-  border-radius: var(--radius-md);
-  padding: var(--space-sm) var(--space-md);
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
-.route-stat__value {
-  font-size: var(--text-lg);
-  font-weight: 500;
-  color: var(--color-charcoal);
-}
-
-.route-stat__label {
-  font-size: var(--text-xs);
-  color: var(--color-charcoal-soft);
-}
-
-/* -----------------------------------------------------------
-   5. WEERDATA
-   ----------------------------------------------------------- */
-.route-weather {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-md);
-  background: rgba(76, 122, 137, 0.06);
-  border: 1px solid rgba(76, 122, 137, 0.2);
-  border-radius: var(--radius-md);
-  padding: var(--space-md) var(--space-lg);
-}
-
-.route-weather__item {
-  display: flex;
-  align-items: center;
-  gap: var(--space-xs);
-  font-size: var(--text-sm);
-  color: var(--color-charcoal-soft);
-}
-
-.route-weather__icon {
-  font-size: 1rem;
-}
-
-/* -----------------------------------------------------------
-   6. VERVOER
-   ----------------------------------------------------------- */
-.route-transport {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-sm);
-}
-
-.route-transport__tag {
-  font-size: var(--text-sm);
-  padding: var(--space-xs) var(--space-md);
-  border-radius: 20px;
-  background: var(--color-cream);
-  border: 1px solid var(--color-line);
-  color: var(--color-charcoal-soft);
-}
-
-/* -----------------------------------------------------------
-   7. BRONVERMELDING
+   4. BRONVERMELDING
    ----------------------------------------------------------- */
 .route-source__link {
   display: inline-flex;
@@ -253,7 +186,7 @@
 }
 
 /* -----------------------------------------------------------
-   8. KAART
+   5. KAART
    ----------------------------------------------------------- */
 .route-map {
   height: 320px;
@@ -263,7 +196,7 @@
 }
 
 /* -----------------------------------------------------------
-   9. HOOGTEDIAGRAM PLACEHOLDER
+   6. HOOGTEDIAGRAM PLACEHOLDER
    ----------------------------------------------------------- */
 .route-elevation-placeholder {
   height: 80px;
@@ -277,7 +210,7 @@
 }
 
 /* -----------------------------------------------------------
-   10. VERHAAL
+   7. VERHAAL
    ----------------------------------------------------------- */
 .route-story {
   display: flex;
@@ -334,7 +267,7 @@
 }
 
 /* -----------------------------------------------------------
-   11. TIPS
+   8. TIPS
    ----------------------------------------------------------- */
 .route-tips {
   background: rgba(140, 106, 79, 0.06);
@@ -351,7 +284,7 @@
 }
 
 /* -----------------------------------------------------------
-   12. FOTO GRID (verhaal rechterkolom)
+   9. FOTO GRID (verhaal rechterkolom)
    ----------------------------------------------------------- */
 .route-photo-grid {
   display: grid;
@@ -374,7 +307,7 @@
 }
 
 /* -----------------------------------------------------------
-   13. SLIDESHOW GALERIJ
+   10. SLIDESHOW GALERIJ
    ----------------------------------------------------------- */
 .route-slideshow {
   display: flex;
@@ -448,7 +381,7 @@
 }
 
 /* -----------------------------------------------------------
-   14. ACTIES
+   11. ACTIES
    ----------------------------------------------------------- */
 .route-actions {
   display: flex;
@@ -481,7 +414,7 @@
 }
 
 /* -----------------------------------------------------------
-   15. RESPONSIVE
+   12. RESPONSIVE
    ----------------------------------------------------------- */
 @media (max-width: 768px) {
   .route-hero {
@@ -493,25 +426,22 @@
   .route-content {
     padding: var(--space-lg) var(--space-md);
   }
-  .route-stats {
-    grid-template-columns: repeat(2, 1fr);
-  }
   .route-photo-grid {
     grid-template-columns: repeat(2, 1fr);
   }
 }
 
 /* -----------------------------------------------------------
-   16. PRINT
+   13. PRINT
    ----------------------------------------------------------- */
 @media print {
   #section-gallery {
     display: none !important;
   }
 }
+
 /* =======================================================
-   route-segment-block — toe te voegen aan route.css
-   Compacte segmenten-tabel per vervoersmiddel
+   route-segment-block — compacte segmenten-tabel per segment
    ======================================================= */
 
 .route-segment-block {
@@ -542,10 +472,16 @@
   flex-shrink: 0;
 }
 
+/* v2.1.0: label bevat nu altijd "<icoon> <vervoer> — <label>" (of enkel
+   vervoer zonder apart label). min-width: 0 + word-break zorgen dat de
+   combinatie netjes wrapt in de flex-header op smalle (mobiele) schermen
+   i.p.v. de rij te laten overflowen. */
 .route-segment-block__label {
   font-size: var(--text-sm, 0.875rem);
   font-weight: 600;
   letter-spacing: 0.02em;
+  min-width: 0;
+  word-break: break-word;
 }
 
 .route-segment-block__tables {
