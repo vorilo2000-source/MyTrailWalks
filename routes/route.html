@@ -1,7 +1,9 @@
-<!-- ======================= routes/route.html v2.0.0 =======================
+<!-- ======================= routes/route.html v2.1.0 =======================
      Route detail pagina — MyTrailWalks
-     Gebruikt route.js v2.1.0: kaart toont alle segmenten met kleurcode
+     Gebruikt route.js v2.4.0: kaart toont alle segmenten met kleurcode
      per vervoersmiddel (achterwaarts compatibel met routes zonder segments).
+     v2.1.0: rood-omcirkeld stats/weer/vervoer-blok verwijderd (dubbel met
+             segmenten-sectie) — vervoer + label nu in segment-header (route.js v2.4.0)
      v2.0.0: nieuwe lay-out — 2-koloms grid, galerij slideshow
      v1.1.0: absolute paden + cache busters
      ======================================================================= -->
@@ -56,24 +58,13 @@
     <div class="route-content">
       <div class="route-grid">
 
-        <!-- Links: stats, weer, vervoer, bronvermelding -->
+        <!-- Links: segmenten (incl. vervoer + stats + weer per segment), bronvermelding -->
         <div class="route-col route-col--left">
 
-          <section class="route-section" id="section-stats">
-            <div class="route-stats" id="route-stats"></div>
-          </section>
-
-          <section class="route-section" id="section-weather" hidden>
-            <div class="route-weather" id="route-weather"></div>
-          </section>
-
-          <section class="route-section" id="section-transport" hidden>
-            <h2 class="route-section__title">Vervoer</h2>
-            <div class="route-transport" id="route-transport"></div>
-          </section>
-
-          <!-- Segmenten: compacte tabel per segment met vervoer-badge,
-               GPX-stats en weerdata. Verborgen als geen segments array. -->
+          <!-- Segmenten: compacte tabel per segment met vervoer-badge in de
+               gekleurde header, GPX-stats en weerdata. Verborgen als geen
+               segments array aanwezig is. Vervangt het vroegere aparte
+               stats/weer/vervoer-blok bovenaan (nu dubbel op met segmenten). -->
           <section class="route-section" id="section-segments" hidden>
             <h2 class="route-section__title">Segmenten</h2>
             <div id="route-segments"></div>
@@ -185,7 +176,7 @@
   <script src="/MyTrailWalks/js/topbar-auth.js?v=2.1.0"></script>
   <script src="/MyTrailWalks/js/analytics.js?v=1.1.0"></script>
   <script src="/MyTrailWalks/js/app.js?v=3.3.0"></script>
-  <script src="/MyTrailWalks/js/route.js?v=2.3.0"></script>
+  <script src="/MyTrailWalks/js/route.js?v=2.4.0"></script>
 
 </body>
 </html>
