@@ -1,0 +1,162 @@
+/* ===========================================================
+   dagtrips.css — MyTrailWalks v1.0.0
+   Kopie van wandelingen.css v1.1.0 — identieke styling.
+   Gebruikt home.css route-tile stijlen als basis.
+   =========================================================== */
+
+/* PAGINA HEADER */
+.wandelingen-header {
+  background-color: var(--color-forest);
+  padding: var(--space-xl) 0 var(--space-lg);
+}
+.wandelingen-header__inner {
+  max-width: var(--content-max-width);
+  margin: 0 auto;
+  padding: 0 var(--space-lg);
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--space-md);
+}
+.wandelingen-header__eyebrow {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  color: rgba(255,255,255,0.5);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin: 0 0 var(--space-xs);
+}
+.wandelingen-header__title {
+  font-size: clamp(1.75rem, 4vw, 2.5rem);
+  font-weight: 500;
+  color: var(--color-white);
+  margin: 0 0 var(--space-xs);
+}
+.wandelingen-header__sub {
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  color: rgba(255,255,255,0.5);
+  margin: 0;
+}
+
+/* CONTENT */
+.wandelingen-content {
+  padding: var(--space-xl) var(--space-lg);
+  max-width: var(--content-max-width);
+  margin: 0 auto;
+}
+
+/* ROUTE TILE UITBREIDINGEN */
+.route-tile__hero {
+  position: relative;
+  height: 200px;
+  overflow: hidden;
+  background: linear-gradient(135deg, var(--color-forest) 0%, var(--color-water) 100%);
+  border-radius: var(--radius-md) var(--radius-md) 0 0;
+}
+.route-tile__hero img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.3s ease;
+}
+.route-tile:hover .route-tile__hero img {
+  transform: scale(1.03);
+}
+.route-tile__difficulty-badge {
+  position: absolute;
+  bottom: var(--space-sm);
+  left: var(--space-sm);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  padding: 3px 8px;
+  border-radius: 20px;
+  background: rgba(44, 74, 59, 0.85);
+  color: var(--color-white);
+  backdrop-filter: blur(4px);
+}
+.route-tile__tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: var(--space-xs);
+}
+.route-tile__tag {
+  font-size: 11px;
+  padding: 2px 8px;
+  border-radius: 20px;
+  background: var(--color-cream);
+  border: 1px solid var(--color-line);
+  color: var(--color-charcoal-soft);
+}
+
+/* FILTERS */
+.wandelingen-filters {
+  padding: var(--space-md) var(--space-lg) 0;
+  max-width: var(--content-max-width);
+  margin: 0 auto;
+}
+.filters-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-md);
+  align-items: flex-end;
+  padding: var(--space-md) var(--space-lg);
+  background: var(--color-cream);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-line);
+}
+.filter-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 140px;
+  flex: 1;
+}
+.filter-label {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--color-charcoal-soft);
+}
+.filter-select {
+  font-family: var(--font-body);
+  font-size: var(--text-sm);
+  color: var(--color-charcoal);
+  background: var(--color-white);
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-md);
+  padding: 6px 10px;
+  cursor: pointer;
+  transition: border-color 0.15s ease;
+  appearance: none;
+  -webkit-appearance: none;
+}
+.filter-select:focus {
+  outline: none;
+  border-color: var(--color-forest);
+}
+.filter-reset {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--color-charcoal-soft);
+  background: none;
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-md);
+  padding: 6px 14px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.15s ease, color 0.15s ease;
+  align-self: flex-end;
+}
+.filter-reset:hover {
+  background: var(--color-white);
+  color: var(--color-charcoal);
+}
+
+@media (max-width: 640px) {
+  .filters-bar { gap: var(--space-sm); }
+  .filter-group { min-width: calc(50% - var(--space-sm)); }
+}
