@@ -1,6 +1,11 @@
 // =======================================================
-// home.js — v2.4.0
+// home.js — v2.5.0
 // MyTrailWalks — homepage init
+// v2.5.0: loadRoutes() veralgemeend tot loadItems(indexPath, folder)
+//         zodat wandelingen én dagtrips dezelfde laad/render-logica
+//         delen. Dagtrips-grid (#dagtrips-grid) wordt nu ook gevuld
+//         met de top 3 meest recente dagtrips uit
+//         dagtrips/dagtrips-index.json + dagtrips/[id].json.
 // v2.4.0: laadt routes via routes-index.json + individuele [id].json
 // v2.3.0: max 3 routes tonen, link naar routes/route.html?id=
 // v2.2.0: i18nModule.init() verwijderd — app.js initialiseert centraal
@@ -8,6 +13,10 @@
 "use strict";
 
 const ROUTES_INDEX_PATH = "routes/routes-index.json";
+const ROUTES_FOLDER = "routes";
+
+const DAGTRIPS_INDEX_PATH = "dagtrips/dagtrips-index.json";
+const DAGTRIPS_FOLDER = "dagtrips";
 
 // SAC-schaal + achterwaartse compatibiliteit
 const DIFFICULTY_LABELS = {
@@ -49,6 +58,7 @@ function createRouteTile(route) {
   const isDraft = route.status === "draft";
   const tile = document.createElement("a");
   tile.className = "route-tile" + (isDraft ? " route-tile--draft" : "");
+  // routes/route.html wordt hergebruikt voor alle categorieën (identiek JSON-schema)
   tile.href = `routes/route.html?id=${route.id}`;
   tile.setAttribute("role", "listitem");
   tile.setAttribute("aria-label", title);
@@ -116,14 +126,15 @@ function createRouteTile(route) {
   return tile;
 }
 
-function renderGrid(routes, gridEl) {
+// emptyMessage laat toe om per categorie een eigen lege-staat tekst te tonen
+function renderGrid(routes, gridEl, emptyMessage = "Nog geen wandelingen beschikbaar.") {
   gridEl.innerHTML = "";
   if (!routes?.length) {
-    showStatus(gridEl, "Nog geen wandelingen beschikbaar.");
+    showStatus(gridEl, emptyMessage);
     return;
   }
 
-  // Max 3 routes — gesorteerd op datum (meest recent eerst)
+  // Max 3 items — gesorteerd op datum (meest recent eerst)
   const top3 = [...routes]
     .sort((a, b) => new Date(b.published_date || 0) - new Date(a.published_date || 0))
     .slice(0, 3);
@@ -133,16 +144,18 @@ function renderGrid(routes, gridEl) {
   gridEl.appendChild(fragment);
 }
 
-async function loadRoutes() {
+// Generieke laadfunctie: werkt voor elke categorie met dezelfde
+// index.json + [id].json structuur (routes, dagtrips, later trails).
+async function loadItems(indexPath, folder) {
   try {
     // Stap 1: laad de index
-    const indexResp = await fetch(ROUTES_INDEX_PATH);
+    const indexResp = await fetch(indexPath);
     if (!indexResp.ok) throw new Error(`Index HTTP ${indexResp.status}`);
     const ids = await indexResp.json();
 
-    // Stap 2: laad elke route parallel
+    // Stap 2: laad elk item parallel
     const results = await Promise.allSettled(
-      ids.map((id) => fetch(`routes/${id}.json`).then((r) => {
+      ids.map((id) => fetch(`${folder}/${id}.json`).then((r) => {
         if (!r.ok) throw new Error(`HTTP ${r.status}`);
         return r.json();
       }))
@@ -152,16 +165,20 @@ async function loadRoutes() {
       .filter((r) => r.status === "fulfilled")
       .map((r) => r.value);
   } catch (err) {
-    console.error("home.js: routes laden mislukt", err);
+    console.error(`home.js: laden mislukt voor ${indexPath}`, err);
     return null;
   }
 }
 
 async function initHomePage() {
-  const gridEl = document.getElementById("routes-grid");
-  if (!gridEl) return;
+  const routesGridEl = document.getElementById("routes-grid");
+  const dagtripsGridEl = document.getElementById("dagtrips-grid");
 
-  showStatus(gridEl, "Laden…");
+  // Als geen van beide grids aanwezig is, niets te doen op deze pagina
+  if (!routesGridEl && !dagtripsGridEl) return;
+
+  if (routesGridEl) showStatus(routesGridEl, "Laden…");
+  if (dagtripsGridEl) showStatus(dagtripsGridEl, "Laden…");
 
   if (window.appReady) await window.appReady;
 
@@ -169,13 +186,25 @@ async function initHomePage() {
     document.title = i18nModule.t("home:page.title");
   } catch (_) {}
 
-  const routes = await loadRoutes();
-  if (!routes) {
-    showStatus(gridEl, "Wandelingen konden niet worden geladen.", true);
-    return;
+  // Wandelingen en dagtrips onafhankelijk van elkaar laden — een
+  // mislukte fetch voor de ene categorie mag de andere niet blokkeren.
+  if (routesGridEl) {
+    const routes = await loadItems(ROUTES_INDEX_PATH, ROUTES_FOLDER);
+    if (!routes) {
+      showStatus(routesGridEl, "Wandelingen konden niet worden geladen.", true);
+    } else {
+      renderGrid(routes, routesGridEl, "Nog geen wandelingen beschikbaar.");
+    }
   }
 
-  renderGrid(routes, gridEl);
+  if (dagtripsGridEl) {
+    const dagtrips = await loadItems(DAGTRIPS_INDEX_PATH, DAGTRIPS_FOLDER);
+    if (!dagtrips) {
+      showStatus(dagtripsGridEl, "Dagtrips konden niet worden geladen.", true);
+    } else {
+      renderGrid(dagtrips, dagtripsGridEl, "Nog geen dagtrips beschikbaar.");
+    }
+  }
 }
 
 document.addEventListener("DOMContentLoaded", initHomePage);
