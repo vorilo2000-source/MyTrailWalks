@@ -1,0 +1,101 @@
+<!-- ======================= dagtrips.html v1.0.0 =======================
+     Dagtrips overzicht pagina — MyTrailWalks
+     Identieke opbouw aan wandelingen.html v1.1.0: filters (moeilijkheid,
+     land, regio, plaats) + routes-grid. Laadt uit dagtrips/dagtrips-index.json.
+     Route detail hergebruikt routes/route.html + route.js (geen wijziging).
+     ======================================================================= -->
+<!DOCTYPE html>
+<html lang="nl" id="html-root">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dagtrips — MyTrailWalks</title>
+  <!-- Favicon -->
+  <link rel="icon" type="image/x-icon" href="/MyTrailWalks/assets/images/favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="/MyTrailWalks/assets/images/favicon-32x32.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/MyTrailWalks/assets/images/favicon-180x180.png">
+  <link rel="icon" type="image/png" sizes="192x192" href="/MyTrailWalks/assets/images/favicon-192x192.png">
+  <!-- CSS -->
+  <link rel="stylesheet" href="/MyTrailWalks/css/main.css">
+  <link rel="stylesheet" href="/MyTrailWalks/css/topbar.css">
+  <link rel="stylesheet" href="/MyTrailWalks/css/home.css">
+  <link rel="stylesheet" href="/MyTrailWalks/css/dagtrips.css">
+  <link rel="stylesheet" href="/MyTrailWalks/css/footer.css">
+</head>
+<body>
+  <!-- Eruda debugger — niet verwijderen -->
+  <script src="https://cdn.jsdelivr.net/npm/eruda"></script>
+  <script>eruda.init();</script>
+  <div id="topbar-placeholder" class="topbar-placeholder" aria-hidden="true"></div>
+  <main id="main-content">
+    <!-- Pagina header -->
+    <header class="wandelingen-header">
+      <div class="wandelingen-header__inner">
+        <div>
+          <p class="wandelingen-header__eyebrow">MyTrailWalks</p>
+          <h1 class="wandelingen-header__title">Dagtrips</h1>
+          <p class="wandelingen-header__sub" id="wandelingen-count"></p>
+        </div>
+      </div>
+    </header>
+
+    <!-- Filters -->
+    <section class="wandelingen-filters container">
+      <div class="filters-bar">
+        <div class="filter-group">
+          <label class="filter-label" for="filter-difficulty">Moeilijkheid</label>
+          <select id="filter-difficulty" class="filter-select">
+            <option value="">Alle</option>
+            <option value="T1">T1 — Wandelen</option>
+            <option value="T2">T2 — Bergwandeling</option>
+            <option value="T3">T3 — Veeleisend</option>
+            <option value="T4">T4 — Alpien</option>
+            <option value="T5">T5 — Veeleisend alpien</option>
+            <option value="T6">T6 — Moeilijk alpien</option>
+          </select>
+        </div>
+        <div class="filter-group">
+          <label class="filter-label" for="filter-country">Land</label>
+          <select id="filter-country" class="filter-select">
+            <option value="">Alle</option>
+          </select>
+        </div>
+        <div class="filter-group">
+          <label class="filter-label" for="filter-region">Regio</label>
+          <select id="filter-region" class="filter-select">
+            <option value="">Alle</option>
+          </select>
+        </div>
+        <div class="filter-group">
+          <label class="filter-label" for="filter-place">Plaats</label>
+          <select id="filter-place" class="filter-select">
+            <option value="">Alle</option>
+          </select>
+        </div>
+        <button class="filter-reset" id="filter-reset">Wis filters</button>
+      </div>
+    </section>
+
+    <!-- Routes grid -->
+    <section class="wandelingen-content container">
+      <div id="routes-grid" class="routes-grid" role="list">
+        <!-- Kaartjes worden dynamisch ingevuld -->
+      </div>
+    </section>
+  </main>
+  <div id="footer-placeholder" class="footer-placeholder" aria-hidden="true"></div>
+  <!-- Supabase SDK -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <!-- i18next CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/i18next@23/i18next.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/i18next-http-backend@2/i18nextHttpBackend.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/i18next-browser-languagedetector@7/i18nextBrowserLanguageDetector.min.js"></script>
+  <!-- Scripts: volgorde conform architectuurafspraken -->
+  <script src="/MyTrailWalks/js/i18n.js"></script>
+  <script src="/MyTrailWalks/js/auth.js?v=1.1.0"></script>
+  <script src="/MyTrailWalks/js/topbar-auth.js?v=2.1.0"></script>
+  <script src="/MyTrailWalks/js/analytics.js?v=1.1.0"></script>
+  <script src="/MyTrailWalks/js/app.js?v=3.3.0"></script>
+  <script src="/MyTrailWalks/js/dagtrips.js?v=1.0.0"></script>
+</body>
+</html>
