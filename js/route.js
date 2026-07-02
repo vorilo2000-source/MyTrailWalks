@@ -1,6 +1,10 @@
 // =======================================================
 // route.js — MyTrailWalks
 // Route detail pagina: laadt JSON en rendert route
+// v2.4.0: rood-omcirkeld stats/weer/vervoer-blok verwijderd (dubbel met
+//         segmenten-sectie) — vervoer + label nu altijd samen in de
+//         gekleurde segment-header (voorheen ontbrak vervoer soms per
+//         segment als er geen apart "label" veld was ingevuld)
 // v2.3.0: segmenten-sectie met compacte tabel per segment,
 //         heldere kleurenpalet voor vervoersmiddelen
 // v2.2.0: gpx_raw fallback voor ontbrekende track_points
@@ -109,74 +113,6 @@ function renderHero(route) {
 }
 
 // -----------------------------------------------------------
-// RENDER STATS
-// -----------------------------------------------------------
-function renderStats(route) {
-  const g = route.gpx_stats;
-  if (!g) return;
-
-  const stats = [
-    { value: g.distance_km ? `${g.distance_km} km` : "—", label: t("stats.distance") },
-    { value: g.duration_hours ? `${g.duration_hours} u` : "—", label: t("stats.duration") },
-    { value: g.elevation_up_m ? `+${g.elevation_up_m} m` : "—", label: t("stats.elevationUp") },
-    { value: g.elevation_down_m ? `-${g.elevation_down_m} m` : "—", label: t("stats.elevationDown") },
-    { value: g.avg_speed_kmh ? `${g.avg_speed_kmh} km/u` : "—", label: t("stats.avgSpeed") },
-    { value: g.highest_point_m ? `${g.highest_point_m} m` : "—", label: t("stats.highestPoint") },
-    { value: g.lowest_point_m ? `${g.lowest_point_m} m` : "—", label: t("stats.lowestPoint") },
-    // Fallback "Max. snelheid" voor het geval stats.maxSpeed ontbreekt in de i18n bestanden
-    { value: g.max_speed_kmh ? `${g.max_speed_kmh} km/u` : "—", label: t("stats.maxSpeed") === "stats.maxSpeed" ? "Max. snelheid" : t("stats.maxSpeed") },
-  ];
-
-  const container = $("route-stats");
-  stats.forEach(({ value, label }) => {
-    const div = document.createElement("div");
-    div.className = "route-stat";
-    div.innerHTML = `<span class="route-stat__value">${value}</span><span class="route-stat__label">${label}</span>`;
-    container.appendChild(div);
-  });
-}
-
-// -----------------------------------------------------------
-// RENDER WEER
-// -----------------------------------------------------------
-function renderWeather(route) {
-  const w = route.weather;
-  if (!w) return;
-
-  const items = [
-    { icon: "🌡", text: `${w.temperature_min ?? "—"}° – ${w.temperature_max ?? "—"}°C` },
-    { icon: "💧", text: `${w.precipitation_mm ?? "—"} mm` },
-    { icon: "🍃", text: `${w.wind_kmh ?? "—"} km/u` },
-  ];
-  if (w.condition) items.push({ icon: "☀️", text: w.condition });
-
-  const container = $("route-weather");
-  items.forEach(({ icon, text }) => {
-    const div = document.createElement("div");
-    div.className = "route-weather__item";
-    div.innerHTML = `<span class="route-weather__icon">${icon}</span><span>${text}</span>`;
-    container.appendChild(div);
-  });
-
-  $("section-weather").hidden = false;
-}
-
-// -----------------------------------------------------------
-// RENDER VERVOER
-// -----------------------------------------------------------
-function renderTransport(route) {
-  if (!route.transport?.length) return;
-  const container = $("route-transport");
-  route.transport.forEach((tr) => {
-    const span = document.createElement("span");
-    span.className = "route-transport__tag";
-    span.textContent = TRANSPORT_LABELS[tr] || tr;
-    container.appendChild(span);
-  });
-  $("section-transport").hidden = false;
-}
-
-// -----------------------------------------------------------
 // RENDER BRONVERMELDING
 // -----------------------------------------------------------
 function renderSource(route) {
@@ -198,6 +134,16 @@ function renderSource(route) {
 // GPX-stats en weerdata. Alleen zichtbaar als er meerdere segmenten
 // zijn of als segments array aanwezig is.
 // Startpunt van elk segment = referentie voor de weerdata.
+//
+// v2.4.0: vervoersmiddel staat nu ALTIJD in de gekleurde header, ook
+// als het segment geen eigen "label" heeft. Voorheen viel de header
+// terug op enkel de transportLabel als tekst wanneer seg.label
+// ontbrak — dat werkte, maar zodra seg.label WEL gezet was, toonde
+// de header enkel dat label en verdween het vervoersmiddel uit
+// beeld (zichtbaar op segment 2 in de screenshot: "Naar Grenspark
+// Noord parking" zonder vervoersicoon). Nu wordt vervoer + label
+// altijd samen getoond: "🚶 Wandelen — <label>" of enkel
+// "🚶 Wandelen" als er geen apart label is.
 // -----------------------------------------------------------
 function renderSegments(route) {
   const segments = route.segments;
@@ -212,7 +158,12 @@ function renderSegments(route) {
     const g = seg.gpx_stats;
     const w = seg.weather;
     const diffLabel = seg.difficulty || "—";
-    const label = seg.label || transportLabel;
+
+    // Vervoer + label combineren i.p.v. label alleen te tonen zodat
+    // het vervoersmiddel nooit uit de header verdwijnt.
+    const headerText = (seg.label && seg.label !== transportLabel)
+      ? `${transportLabel} — ${seg.label}`
+      : transportLabel;
 
     // GPX rijen — alleen tonen als waarde aanwezig
     const gpxRows = [
@@ -244,7 +195,7 @@ function renderSegments(route) {
     div.innerHTML = `
       <div class="route-segment-block__header" style="background:${color};">
         <span class="route-segment-block__num">${idx + 1}</span>
-        <span class="route-segment-block__label">${label}</span>
+        <span class="route-segment-block__label">${headerText}</span>
       </div>
       <div class="route-segment-block__tables">
         ${hasGpx ? `
@@ -540,6 +491,10 @@ $("btn-share").addEventListener("click", async () => {
 
 // -----------------------------------------------------------
 // INIT
+// v2.4.0: renderStats / renderWeather / renderTransport verwijderd —
+// die vulden het rood-omcirkelde blok bovenaan de pagina, dat dubbel
+// op was met de segmenten-sectie (elk segment toont al zijn eigen
+// stats + weer + vervoer in de gekleurde header).
 // -----------------------------------------------------------
 window.appReady.then(async () => {
   const id = getRouteId();
@@ -549,9 +504,6 @@ window.appReady.then(async () => {
   if (!route) { $("route-title").textContent = t("loadError"); return; }
 
   renderHero(route);
-  renderStats(route);
-  renderWeather(route);
-  renderTransport(route);
   renderSegments(route);
   renderSource(route);
   renderMap(route);
