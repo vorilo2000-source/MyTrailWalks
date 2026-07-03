@@ -1,7 +1,9 @@
 <!-- =======================================================
-     index.html — v2.6.0
+     index.html — v2.7.0
      MyTrailWalks — homepage
-     Structuur: topbar → hero → wandelingen sectie → dagtrips sectie → footer
+     Structuur: topbar → hero → wandelingen → dagtrips → adventure → footer
+     v2.7.0: adventure sectie toegevoegd (voorheen gepland als "Trails"),
+             identiek qua opbouw aan wandelingen/dagtrips
      v2.6.0: dagtrips sectie toegevoegd, identiek qua opbouw aan wandelingen
      v2.5.0: wandelingen sectie met 3 recente routes + link naar wandelingen.html
      v2.4.0: alle scripts verplaatst naar onderaan <body>
@@ -64,6 +66,16 @@
           <!-- Top 3 dagtrips worden dynamisch ingevuld door js/home.js -->
         </div>
       </section>
+      <!-- Adventure sectie: 3 meest recente adventure items, identieke opbouw -->
+      <section class="routes-section container" id="adventure" aria-labelledby="adventure-heading">
+        <div class="routes-section__header">
+          <h2 id="adventure-heading" class="routes-section__heading">Adventure</h2>
+          <a href="adventure.html" class="routes-section__meer">Alle adventure →</a>
+        </div>
+        <div id="adventure-grid" class="routes-grid" role="list">
+          <!-- Top 3 adventure items worden dynamisch ingevuld door js/home.js -->
+        </div>
+      </section>
     </main>
     <div id="footer-placeholder" class="footer-placeholder" aria-hidden="true"></div>
     <!-- Supabase SDK -->
@@ -78,6 +90,6 @@
     <script src="js/topbar-auth.js?v=1.3.0"></script>
     <script src="js/analytics.js?v=1.1.0"></script>
     <script src="js/app.js"></script>
-    <script src="js/home.js?v=2.5.0"></script>
+    <script src="js/home.js?v=2.6.0"></script>
   </body>
 </html>
