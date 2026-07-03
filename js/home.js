@@ -1,11 +1,14 @@
 // =======================================================
-// home.js — v2.5.0
+// home.js — v2.6.0
 // MyTrailWalks — homepage init
+// v2.6.0: adventure-grid (#adventure-grid) toegevoegd — hergebruikt
+//         de generieke loadItems(indexPath, folder) uit v2.5.0.
+//         Laadt top 3 uit adventure/adventure-index.json +
+//         adventure/[id].json. Voorheen gepland als "Trails" —
+//         hernoemd naar "Adventure".
 // v2.5.0: loadRoutes() veralgemeend tot loadItems(indexPath, folder)
 //         zodat wandelingen én dagtrips dezelfde laad/render-logica
-//         delen. Dagtrips-grid (#dagtrips-grid) wordt nu ook gevuld
-//         met de top 3 meest recente dagtrips uit
-//         dagtrips/dagtrips-index.json + dagtrips/[id].json.
+//         delen.
 // v2.4.0: laadt routes via routes-index.json + individuele [id].json
 // v2.3.0: max 3 routes tonen, link naar routes/route.html?id=
 // v2.2.0: i18nModule.init() verwijderd — app.js initialiseert centraal
@@ -17,6 +20,9 @@ const ROUTES_FOLDER = "routes";
 
 const DAGTRIPS_INDEX_PATH = "dagtrips/dagtrips-index.json";
 const DAGTRIPS_FOLDER = "dagtrips";
+
+const ADVENTURE_INDEX_PATH = "adventure/adventure-index.json";
+const ADVENTURE_FOLDER = "adventure";
 
 // SAC-schaal + achterwaartse compatibiliteit
 const DIFFICULTY_LABELS = {
@@ -145,7 +151,7 @@ function renderGrid(routes, gridEl, emptyMessage = "Nog geen wandelingen beschik
 }
 
 // Generieke laadfunctie: werkt voor elke categorie met dezelfde
-// index.json + [id].json structuur (routes, dagtrips, later trails).
+// index.json + [id].json structuur (routes, dagtrips, adventure).
 async function loadItems(indexPath, folder) {
   try {
     // Stap 1: laad de index
@@ -173,12 +179,14 @@ async function loadItems(indexPath, folder) {
 async function initHomePage() {
   const routesGridEl = document.getElementById("routes-grid");
   const dagtripsGridEl = document.getElementById("dagtrips-grid");
+  const adventureGridEl = document.getElementById("adventure-grid");
 
-  // Als geen van beide grids aanwezig is, niets te doen op deze pagina
-  if (!routesGridEl && !dagtripsGridEl) return;
+  // Als geen enkele grid aanwezig is, niets te doen op deze pagina
+  if (!routesGridEl && !dagtripsGridEl && !adventureGridEl) return;
 
   if (routesGridEl) showStatus(routesGridEl, "Laden…");
   if (dagtripsGridEl) showStatus(dagtripsGridEl, "Laden…");
+  if (adventureGridEl) showStatus(adventureGridEl, "Laden…");
 
   if (window.appReady) await window.appReady;
 
@@ -186,8 +194,8 @@ async function initHomePage() {
     document.title = i18nModule.t("home:page.title");
   } catch (_) {}
 
-  // Wandelingen en dagtrips onafhankelijk van elkaar laden — een
-  // mislukte fetch voor de ene categorie mag de andere niet blokkeren.
+  // Elke categorie onafhankelijk laden — een mislukte fetch voor de
+  // ene categorie mag de andere niet blokkeren.
   if (routesGridEl) {
     const routes = await loadItems(ROUTES_INDEX_PATH, ROUTES_FOLDER);
     if (!routes) {
@@ -203,6 +211,15 @@ async function initHomePage() {
       showStatus(dagtripsGridEl, "Dagtrips konden niet worden geladen.", true);
     } else {
       renderGrid(dagtrips, dagtripsGridEl, "Nog geen dagtrips beschikbaar.");
+    }
+  }
+
+  if (adventureGridEl) {
+    const adventure = await loadItems(ADVENTURE_INDEX_PATH, ADVENTURE_FOLDER);
+    if (!adventure) {
+      showStatus(adventureGridEl, "Adventure items konden niet worden geladen.", true);
+    } else {
+      renderGrid(adventure, adventureGridEl, "Nog geen adventure beschikbaar.");
     }
   }
 }
