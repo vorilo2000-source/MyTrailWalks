@@ -32,7 +32,10 @@ const TRANSPORT_COLORS = {
 };
 
 const TRANSPORT_LABELS = {
-  walking: "🚶 Wandelen", hike: "🥾 Hike / Trail", cycling: "🚴 Fietsen",
+  // "hike" blijft de interne sleutel (bestaande route-JSON's met
+  // "transport": "hike" blijven werken) — enkel het label is
+  // hernoemd van "Hike / Trail" naar "Adventure".
+  walking: "🚶 Wandelen", hike: "🥾 Adventure", cycling: "🚴 Fietsen",
   motorcycle: "🏍 Motor", car: "🚗 Auto", train: "🚆 Trein",
   bus: "🚌 Bus", boat: "⛵ Boot", plane: "✈️ Vliegtuig",
 };
