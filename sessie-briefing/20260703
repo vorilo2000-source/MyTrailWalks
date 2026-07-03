@@ -1,0 +1,96 @@
+# MyTrailWalks — Sessie 08 Inbrief
+## Datum: volgende sessie na 03-07-2026 (sessie 07)
+> Doel: Creator categorie-selector · Topbar-navigatie · Labelconsistentie Adventure
+> Reeds afgerond vóór sessie 08: Dagtrips + Adventure categorieën volledig gebouwd, homepage met 3 secties, footer i18n bug opgelost, dubbel stats/weer/vervoer-blok verwijderd (sessie 06-07)
+
+--
+
+## Context
+
+MyTrailWalks is een persoonlijk visueel outdoor storytelling platform. Vanilla HTML/CSS/JS, geen frameworks. i18next voor vertalingen. Foto's via Cloudinary (extern). Statische site op GitHub Pages — **geen backend**, dit is een terugkerend architectuur-gegeven.
+
+---
+
+## Wat er klaar is na sessie 07
+
+| Bestand | Versie | Status |
+|---------|--------|--------|
+| `js/route.js` | v2.4.0 | ✅ Segmenten tonen vervoer + label altijd samen. `TRANSPORT_LABELS.hike` = "🥾 Adventure" (interne sleutel blijft `hike`) |
+| `dagtrips.html` / `js/dagtrips.js` / `css/dagtrips.css` | v1.0.0 | ✅ Volledig werkend, identiek aan wandelingen |
+| `adventure.html` / `js/adventure.js` / `css/adventure.css` | v1.0.0 | ✅ Volledig werkend, identiek aan wandelingen. Voorheen gepland als "Trails" |
+| `dagtrips/dagtrips-index.json` | v1.0.0 | ✅ Leeg — routes nog handmatig toe te voegen |
+| `adventure/adventure-index.json` | v1.0.0 | ✅ Leeg — routes nog handmatig toe te voegen |
+| `index.html` | v2.7.0 | ✅ 3 secties: Wandelingen, Dagtrips, Adventure |
+| `js/home.js` | v2.6.0 | ✅ Generieke `loadItems(indexPath, folder)`, laadt alle 3 categorieën onafhankelijk |
+
+---
+
+## KRITIEK: bestanden die ik nooit heb ontvangen
+
+Deze twee bestanden blokkeerden werk in sessie 07 en moeten bij aanvang van sessie 08 aangeleverd worden als het bijhorende punt wordt opgepakt:
+
+| Bestand | Nodig voor |
+|---|---|
+| `js/creator.js` (huidige versie, vermoedelijk v2.4.2) | Categorie-selector bouwen (prioriteit 1) + `TRANSPORT_LABELS` labelconsistentie checken (prioriteit 3) |
+| `components/topbar.html` (huidige versie, vermoedelijk v2.3.0) | Navigatielinks naar dagtrips.html/adventure.html toevoegen (prioriteit 2) |
+
+**Werkwijze:** vraag deze bestanden op vóórdat je aan de bijhorende taak begint — niet zelf reconstrueren of aannames maken over de inhoud.
+
+---
+
+## Prioriteiten sessie 08
+
+### 1. Creator categorie-selector (TD-014)
+**Probleem:** de route creator exporteert altijd een los JSON-bestand zonder categorie-aanduiding. Gebruiker moet:
+- het bestand handmatig in de juiste map plaatsen (`routes/`, `dagtrips/`, `adventure/`)
+- het ID handmatig toevoegen aan de juiste index (`routes-index.json`, `dagtrips-index.json`, `adventure-index.json`)
+
+**Belangrijk:** dit blijft een handmatige stap zolang de site statisch is — er is geen backend/Git-API die de creator kan gebruiken om bestanden te schrijven. Dat is bevestigd met de gebruiker in sessie 07 en geen bug, maar een architectuur-grens.
+
+**Wat wél kan verbeteren:** na export toont de creator duidelijk:
+- welke map het bestand moet krijgen (bv. "Dit bestand hoort in `dagtrips/`")
+- de exacte regel om toe te voegen aan de index (bv. `"nieuwe-dagtrip-id"`), klaar om te copy-pasten
+
+Vraag `js/creator.js` op vóór je begint.
+
+### 2. Topbar-navigatie (TD-015)
+Nieuwe categorieën (Dagtrips, Adventure) zijn momenteel enkel bereikbaar via de homepage-secties of een directe URL — geen link in de topbar. Vraag `components/topbar.html` op vóór je begint.
+
+### 3. Labelconsistentie Adventure
+`route.js` toont nu "🥾 Adventure" voor het vervoersmiddel `hike`. Onbekend of `js/creator.js` een eigen kopie van `TRANSPORT_LABELS` heeft (zoals eerder het geval was, gedupliceerd sinds patch 29-06-2026) die nog "Hike / Trail" toont in de creator-preview. Controleren en zo nodig gelijktrekken.
+
+### 4. Route kaartpagina (T1-007) — optioneel, van sessie 07 inbrief
+`routes/[id]-map.html` — aparte fullscreen Leaflet kaart pagina per route.
+
+### 5. Hoogteprofiel (T2-004) — optioneel
+Placeholder is aanwezig in route detail lay-out, nog niet ingevuld.
+
+---
+
+## Architectuurafspraken (bevestigd t.e.m. sessie 07)
+
+| Onderwerp | Afspraak |
+|-----------|---------|
+| **Script volgorde** | Eruda → Supabase SDK → i18next CDN → i18n.js → auth.js → topbar-auth.js → analytics.js → app.js → Leaflet (indien nodig) → [pagina].js |
+| **Paden** | Altijd absolute paden (`/MyTrailWalks/...`) in HTML bestanden |
+| **Standaard pagina template** | `construction.html` als basis voor plaatsing van componenten (topbar, main, footer, scripts) |
+| **Categorieën** | Wandelingen, Dagtrips, Adventure — elk eigen map, index, HTML, JS, CSS, maar identieke opbouw/logica en gedeelde `routes/route.html`/`route.js` voor detailweergave |
+| **Route detail — vervoer & segmenten** | Vervoersmiddel + segment-label altijd samen in gekleurde segment-header, geen los stats/weer/vervoer-blok meer bovenaan de pagina |
+| **Vervoersmiddelen** | walking, hike (label: "Adventure"), cycling, motorcycle, car, train, bus, boat, plane — één per segment |
+| **Geen backend** | GitHub Pages statische hosting. Creator kan bestanden laten downloaden maar niet automatisch wegschrijven naar de repo — handmatige stap blijft nodig, ook na TD-014. |
+| **Homepage laadlogica** | `js/home.js`: generieke `loadItems(indexPath, folder)`, elke categorie laadt onafhankelijk (geen blokkerende fetch-keten) |
+
+---
+
+## Werkwijze
+
+1. Vraag altijd toestemming vóór uitvoering
+2. Check of gebruiker informatie/bestanden heeft voordat je zelf iets reconstrueert of aanneemt
+3. Bouw in kleine iteraties
+4. Geef korte uitleg ná elke taak
+5. Eruda niet verwijderen uit HTML pagina's
+6. Absolute paden in alle HTML bestanden
+
+---
+
+# END OF SESSIE_08_INBRIEF.md
