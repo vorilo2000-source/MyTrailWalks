@@ -1,215 +1,424 @@
-# MyTrailWalks — BACKLOG.md
-## Bijgewerkt: 02-07-2026 (patch-sessie, vervolg 3)
-> Versie: v3.2.0 · MVP backlog structure
+# MyTrailWalks — PROJECTLOG.md
+## Bijgewerkt: 29-06-2026 (patch-sessie, vervolg 2)
+> Versie: v1.8.0 · Projectlog — chronologisch overzicht van sessies en wijzigingen
 
 ---
 
-# [BACKLOG]
+# ======================= ENTRIES =======================
 
 ---
 
-## Fase 0 — Concept & architectuur
+## Sessie 01 — 18-06-2026
+**Onderwerp:** T0-005 (i18next systeem) + T0-002 (routes.json schema) + T1-001 (homepage grid) + component-fragmenten (topbar/navbar/footer)
+**Status aan einde sessie:** T0-005 ✅ Done · T0-002 ✅ Done · T1-001 🔄 Gedeeltelijk
 
-| ID | Tags | Taak | Omschrijving | Type | Prioriteit | Status |
-|----|------|------|--------------|------|-----------|--------|
-| T0-001 | architecture | Project setup | Basis projectstructuur opzetten (HTML/CSS/JS + folders data/assets/js/css) | Feature | 🔴 High | 📋 Open |
-| T0-002 | architecture | JSON data model | Definitief routes.json schema implementeren | Feature | 🔴 High | ✅ Done — sessie 01 (18-06-2026). |
-| T0-003 | architecture | Route template | Standaard routepagina template (hero, stats, map, story) bouwen | Feature | 🔴 High | ✅ Done — sessie 05 (25-06-2026). |
-| T0-004 | architecture | Design system | Basis UI design rules (typografie, spacing, kleuren outdoor theme) | Improvement | 🟡 Medium | ✅ Done |
-| T0-005 | architecture, i18n | I18next systeem | `js/i18n.js` v1.3.0: loadPath dynamisch, localStorage via `mtw_language`. getBasePath() filtert .html segmenten. | Feature | 🔴 High | ✅ Done — sessie 03 (21-06-2026). |
-| T0-006 | architecture, components | Component-systeem | `js/app.js` v3.3.0: centrale i18n init + fetch+injectie topbar/footer via `window.appReady` + `window.i18nReady` Promise. applyTranslations per component na injectie. | Feature | 🔴 High | ✅ Done — sessie 04 (22-06-2026). |
-| T0-007 | architecture, media | Cloudinary integratie | Cloudinary gratis tier. Cloud name: dgzlcqdcc. Upload workflow gedocumenteerd in `data/docs/cloudinary-workflow.md`. Automatische WebP via f_auto. Hero: w_1200,f_auto. Thumbnail: w_400,f_auto. Galerij: w_800,f_auto. | Feature | 🔴 High | ✅ Done — sessie 05 (25-06-2026). |
-| T0-008 | architecture, api | API integraties | Drie externe APIs: Open-Meteo, Nominatim, Anthropic API. Leaflet.js via jsdelivr CDN voor kaarten. | Feature | 🔴 High | ✅ Done — sessie 03 (21-06-2026). |
-| T0-009 | architecture, analytics | Analytics systeem | `js/analytics.js` v1.1.0: pageviews, sessieduur, terugkerende bezoekers via Supabase `page_views` tabel. | Feature | 🔴 High | ✅ Done — sessie 04 (22-06-2026). |
-| T0-010 | architecture | Standaard pagina template | `construction.html` als basis voor pagina's onder constructie. Topbar + main + footer. i18n via common namespace. | Feature | 🔴 High | ✅ Done — sessie 06 (28-06-2026). |
+### Aangeleverde bestanden
 
----
-
-## Fase 1 — Core MVP (routesysteem)
-
-| ID | Tags | Taak | Omschrijving | Type | Prioriteit | Status |
-|----|------|------|--------------|------|-----------|--------|
-| T1-001 | routes | Homepage grid | Route-overzicht met tiles (foto + stats + titel). Top 3 meest recente routes per categorie. Link naar wandelingen.html. | Feature | 🔴 High | ✅ Done — sessie 02 + sessie 05 + sessie 06. |
-| T1-002 | routes | Route detail page | `routes/route.html` v2.1.0 + `js/route.js` v2.4.0 + `css/route.css` v2.1.0. 2-koloms lay-out: segmenten+kaart links/rechts, verhaal+foto's links/rechts, slideshow galerij. Bronvermelding. Status badge. Kaart toont alle segmenten met kleurcode per vervoersmiddel. Segmenten-sectie: compacte tabel per segment met vervoer-badge, GPX-stats en weerdata naast elkaar. gpx_raw fallback voor ontbrekende track_points. Heldere kleurenpalet (oranje, paars, blauw, rood, teal, …). **Patch 02-07-2026:** los stats/weer/vervoer-blok bovenaan pagina verwijderd (dubbel op met segmenten-sectie) — vervoersmiddel + segment-label nu altijd samen in de gekleurde segment-header. | Feature | 🔴 High | ✅ Done — sessie 06 (28-06-2026) + patches 29-06-2026 + patch 02-07-2026. |
-| T1-003 | routes | JSON loader | routes-index.json inladen en per ID de volledige JSON ophalen | Feature | 🔴 High | ✅ Done — sessie 06. |
-| T1-004 | routes | Routing logic | Navigatie via `?id=` query parameter. `wandelingen.html` als overzicht. `routes/route.html` als detail. | Feature | 🔴 High | ✅ Done — sessie 05 (25-06-2026). |
-| T1-005 | routes | Eerste route entry | Kalmthoutse Heide + Grenspark Kalmthout aangemaakt. JSON in `routes/`. | Feature | 🔴 High | ✅ Done — sessie 05 (25-06-2026). |
-| T1-006 | routes, ui, ai | Route creator | `creator.html` v2.1.0 + `js/creator.js` v2.4.2. Meerdere segmenten (GPX + datum/locatie + weer per vervoersmiddel), herhaalbaar via "+ Segment toevoegen". Vervoersmiddel "Hike/Trail" toegevoegd naast Wandelen. Moeilijkheidsschaal per vervoersmiddel: Walking (W1-W3), Hike (SAC T1-T6), Cycling/Motorcycle/Car (klim+bochtigheid + kasseien-override), Train/Bus/Boat/Plane (geen schaal). country/region/place via Nominatim per segment. gpx_raw embed + herstel bij import. GPS-ruis filtering. track_points in segmenten-export. Datum-validatie weerdata (toekomstige datum gedetecteerd). resp.ok check + betere foutmeldingen Open-Meteo. Heldere kleurenpalet voor vervoersmiddelen. | Feature | 🔴 High | ✅ Done — sessie 06 (28-06-2026) + patches 29-06-2026. |
-| T1-007 | routes, ui | Route kaartpagina | `routes/[id]-map.html`: interactieve Leaflet kaart + GPX overlay. Apart tabblad. | Feature | 🟡 Medium | 📋 Open |
-| T1-008 | routes, ux | Draft management | Draft/Final badge op route tiles. Alle tiles klikbaar. | Feature | 🟡 Medium | ✅ Done — sessie 06 (28-06-2026). |
-| T1-009 | routes | Wandelingen overzicht | `wandelingen.html` + `js/wandelingen.js` v1.3.0 + `css/wandelingen.css` v1.1.0. Filters: moeilijkheid, land, regio, plaats. | Feature | 🔴 High | ✅ Done — sessie 06 (28-06-2026). |
-| T1-010 | routes | Categorieën: Dagtrips | `dagtrips.html` + `js/dagtrips.js` + `css/dagtrips.css`. Eigen map + index. Bezoeken aan attracties, grotten, musea, … Zelfde JSON structuur als wandelingen. | Feature | 🔴 High | 📋 Open |
-| T1-011 | routes | Categorieën: Trails | `trails.html` + `js/trails.js` + `css/trails.css`. Eigen map + index. Zwaardere wandelingen, meerdere dagen mogelijk. Zelfde JSON structuur als wandelingen. | Feature | 🔴 High | 📋 Open |
+| Bestand | Versie | Omschrijving |
+|---------|--------|--------------|
+| `js/i18n.js` | v1.1.0 | Nieuwe wrapper rond i18next. |
+| `data/i18n/nl/common.json` | v1.0.0 | Gedeelde NL UI-teksten. |
+| `data/i18n/nl/home.json` | v1.0.0 | Homepage-specifieke NL UI-teksten. |
+| `data/i18n/en/common.json` | v1.0.0 | Engelse fallback voor common namespace. |
+| `data/i18n/en/home.json` | v1.0.0 | Engelse fallback voor home namespace. |
+| `data/routes.json` | v2.0.0 | Schema bijgewerkt. |
+| `index.html` | v1.1.0 | Homepage grid. |
+| `css/home.css` | v1.0.0 | Grid-layout. |
+| `js/home.js` | v1.0.0 | Homepage init. |
+| `components/topbar.html` | v1.0.0 | Topbar fragment. |
+| `css/topbar.css` | v1.0.0 | Topbar stijlen. |
+| `components/footer.html` | v1.0.0 | Footer fragment. |
+| `css/footer.css` | v1.0.0 | Footer stijlen. |
 
 ---
 
-## Fase 2 — Maps & GPX integratie
+## Sessie 02 — 20-06-2026
+**Onderwerp:** UI/UX redesign homepage — hero sectie, component-injectie, topbar zichtbaar, i18n keys, favicon, logo
+**Status aan einde sessie:** T0-006 ✅ Done · T0-005 ✅ Done (v1.2.0) · T1-001 ✅ Done · TD-004 ✅ Done · TD-005 ✅ Done
 
-| ID | Tags | Taak | Omschrijving | Type | Prioriteit | Status |
-|----|------|------|--------------|------|-----------|--------|
-| T2-001 | maps | Leaflet setup | Leaflet.js via jsdelivr CDN. Kaart in creator preview + route detail pagina. | Feature | 🔴 High | ✅ Done — sessie 05 (25-06-2026). |
-| T2-002 | maps | GPX parser | GPX bestand client-side parsen: coördinaten, tijdstempels, hoogte, snelheid. trackPoints opgeslagen voor routetekening. startLat/startLon opgeslagen in JSON export. GPS-ruis filtering toegevoegd (29-06-2026). Bochtigheid-detectie (bearing/hoekverschil tussen trackpunten) toegevoegd voor wegvoertuig-moeilijkheidsschaal (29-06-2026). | Feature | 🔴 High | ✅ Done — sessie 03 + sessie 05 + patches 29-06-2026. |
-| T2-003 | maps | Route overlay | GPX track overlay in creator preview + route detail pagina via Leaflet polyline. track_points in gpx_stats. | Feature | 🔴 High | ✅ Done — sessie 06 (28-06-2026). |
-| T2-004 | maps | Elevation profile | Hoogteprofiel genereren uit GPX data. Placeholder aanwezig in route detail lay-out. | Feature | 🟡 Medium | 📋 Open |
-| T2-005 | maps | GPX upload | GPX-bestand inladen in creator. trackPoints samplen tot max 500 voor performantie. gpx_raw opgeslagen als string in JSON export. | Feature | 🟡 Medium | ✅ Done — sessie 05 + patch 29-06-2026. |
-| T2-006 | maps, print | Statische kaartafbeelding | Bij afdrukken: interactieve kaart vervangen door statische kaartafbeelding. | Feature | 🟡 Medium | 📋 Open |
-| T2-007 | maps | Meerdere GPX segmenten | Meerdere GPX bestanden per route, elk met eigen vervoerstype. `segments` array in JSON (creator.js v2.3.0). Kleurcode per vervoerstype op kaart (creator preview + route.js v2.1.0). Achterwaarts compatibel met routes zonder segments array. | Feature | 🟡 Medium | ✅ Done — patch 29-06-2026. |
-| T2-008 | maps, ux | Moeilijkheidsschaal per vervoersmiddel | Eigen moeilijkheidsschaal per segment, afhankelijk van vervoersmiddel: Walking (W1-W3), Hike/Trail (SAC T1-T6), Cycling (C1-C4), Motorcycle (M1-M4), Car (A1-A4) — automatisch berekend uit klimintensiteit + bochtigheid, met handmatige "kasseien/onverhard" override voor motor/auto. Train/Bus/Boat/Plane: geen schaal. Gebruiker kan automatische berekening overschrijven. | Feature | 🟡 Medium | ✅ Done — patch 29-06-2026. |
+### Aangeleverde bestanden
 
----
-
-## Fase 3 — Storytelling UI
-
-| ID | Tags | Taak | Omschrijving | Type | Prioriteit | Status |
-|----|------|------|--------------|------|-----------|--------|
-| T3-001 | ui | Hero section | Fullscreen hero foto op route detail pagina. Gradient overlay + titel + badges + status badge. | Feature | 🔴 High | ✅ Done — sessie 06. |
-| T3-002 | ui | Story blocks | Blokken-editor in creator: tekst, foto (volledig breed), fotogrid (2 of 3 kolommen), link. Vrije volgorde. Tekst/link links, foto's rechts in route detail pagina. | Feature | 🔴 High | ✅ Done — sessie 06 (28-06-2026). |
-| T3-003 | ui | Galerij slideshow | Slideshow galerij onderaan route pagina met pijlen en dots. | Feature | 🟡 Medium | ✅ Done — sessie 06 (28-06-2026). |
-| T3-004 | ui | Stats dashboard | Afstand, duur, stijging, daling, gem. snelheid, hoogste/laagste punt op route detail pagina. | Feature | 🔴 High | 🔁 Vervangen door segmenten-sectie — patch 02-07-2026. Het aparte stats-blok bovenaan de pagina is verwijderd; dezelfde stats worden nu per segment getoond (zie T1-002). |
-| T3-005 | ui | Tips & info blocks | Tips sectie op route detail pagina. | Feature | 🟡 Medium | ✅ Done — sessie 05. |
-| T3-006 | ui | Weer-blok | Weerdata op route detail pagina: temperatuur, neerslag, wind, conditie. | Feature | 🟡 Medium | 🔁 Vervangen door segmenten-sectie — patch 02-07-2026. Het aparte weer-blok bovenaan de pagina is verwijderd; weerdata wordt nu per segment getoond, met het startpunt van elk segment als referentie (zie T1-002). |
-| T3-007 | ui | Bronvermelding | Bronvermelding sectie op route detail pagina. | Feature | 🟡 Medium | ✅ Done — sessie 06 (28-06-2026). |
+| Bestand | Versie | Omschrijving |
+|---------|--------|--------------|
+| `index.html` | v2.1.0 | Hero sectie toegevoegd. |
+| `css/home.css` | v2.1.0 | Hero styling. |
+| `js/app.js` | v2.1.0 | fetch+injectie topbar + footer via `window.appReady`. |
+| `js/home.js` | v2.0.0 | Wacht op `window.appReady`. |
+| `js/i18n.js` | v1.2.0 | `loadPath` dynamisch via `getBasePath()`. |
+| `data/i18n/nl/home.json` | v2.0.0 | Hero keys toegevoegd. |
+| `data/i18n/en/home.json` | v2.0.0 | Hero keys toegevoegd. |
+| `components/topbar.html` | v1.1.0 | Logo toegevoegd. |
+| `css/topbar.css` | v1.1.0 | Logo stijlen. |
 
 ---
 
-## Fase 4 — UX & filtering
-
-| ID | Tags | Taak | Omschrijving | Type | Prioriteit | Status |
-|----|------|------|--------------|------|-----------|--------|
-| T4-001 | ux | Filters | Filter routes op moeilijkheid, land, regio, plaats. Dropdowns boven grid. Dynamisch gevuld vanuit route JSON data. | Feature | 🟡 Medium | ✅ Done — sessie 06 (28-06-2026). |
-| T4-002 | ux | Search | Zoekfunctie op routes (naam + tags) | Feature | 🟡 Medium | 📋 Open |
-| T4-003 | ux | Tags system | Tag-based categorisatie (waterval, bos, berg) | Feature | 🟡 Medium | 📋 Open |
-| T4-004 | ux | Route rating | Persoonlijke rating per route | Feature | 🟢 Low | 📋 Open |
+## Sessie 02b/c/d — 20-06-2026
+**Onderwerp:** Architectuurbeslissingen route creator, print, foto-opslag, login, AI, GPX, draft/published workflow
+**Status:** Beslissingen vastgelegd, taken toegevoegd aan backlog. Geen code gebouwd.
 
 ---
 
-## Fase 5 — Performance & scaling
+## Sessie 03 — 21-06-2026
+**Onderwerp:** Route creator + Supabase auth + topbar login + getBasePath fix
+**Status aan einde sessie:** T1-006 ✅ Done · T6-001 ✅ Done · T0-008 ✅ Done · T2-002 ✅ Done · T0-005 ✅ Done (v1.3.0) · T0-006 ✅ Done (v2.2.0)
 
-| ID | Tags | Taak | Omschrijving | Type | Prioriteit | Status |
-|----|------|------|--------------|------|-----------|--------|
-| T5-001 | performance | Lazy loading | Lazy load images via `loading="lazy"` op alle route foto's. | Improvement | 🔴 High | ✅ Done — sessie 05. |
-| T5-002 | performance | Image optimization | WebP via Cloudinary f_auto. Transformaties w_1200/w_800/w_400 per context. Auto-fix in creator bij import. | Improvement | 🔴 High | ✅ Done — sessie 05. |
-| T5-003 | performance | Code splitting | Modulaire JS per feature (map, routes, ui) | Improvement | 🟡 Medium | 📋 Open |
+### Aangeleverde bestanden
 
----
-
-## Fase 6 — Cloud & Accounts
-
-| ID | Tags | Taak | Omschrijving | Type | Prioriteit | Status |
-|----|------|------|--------------|------|-----------|--------|
-| T6-001 | cloud | Supabase auth | Auth systeem live. profiles tabel met role (gast/creator/admin). | Feature | 🟡 Medium | ✅ Done — sessie 04 (22-06-2026). |
-| T6-002 | cloud | Sync | Offline → cloud sync engine | Feature | 🟡 Medium | 🔮 Future |
-| T6-003 | cloud | Sharing | Shareable trail links. Deel-knop op route detail pagina via Web Share API + clipboard fallback. | Feature | 🟡 Medium | ✅ Done — sessie 05. |
-| T6-004 | i18n, community | User-generated taal-content | Wandelverhalen in eigen taal. Vereist T6-001. | Feature | 🟡 Medium | 🔮 Future |
-| T6-005 | cloud, analytics | Analytics dashboard | Admin dashboard voor page_views data. | Feature | 🟡 Medium | 📋 Open |
+| Bestand | Versie | Omschrijving |
+|---------|--------|--------------|
+| `creator.html` | v1.0.1 | Route creator pagina. 6 stappen. Live JSON preview. AI-modus toggle. |
+| `css/creator.css` | v1.0.0 | Creator styling. |
+| `js/creator.js` | v1.0.0 | GPX parser, Nominatim, Open-Meteo, AI, JSON export. |
+| `js/auth.js` | v1.0.0 | Supabase auth module. |
+| `js/topbar-auth.js` | v1.0.0 | Login modal + admin dropdown. |
+| `components/topbar.html` | v2.0.0 | 3-koloms layout: auth + logo + taal. |
+| `css/topbar.css` | v2.0.0 | 3-koloms grid. |
+| `js/app.js` | v2.2.0 | getBasePath() fix voor .html segmenten. |
+| `index.html` | v2.4.0 | Scripts onderaan body. Supabase SDK toegevoegd. |
 
 ---
 
-## Fase 7 — Print & Publiek gebruik
+## Sessie 04 — 22-06-2026
+**Onderwerp:** Supabase live testen + auth i18n + analytics + rollen + robuuste init-volgorde
+**Status aan einde sessie:** T6-001 ✅ Volledig live · T0-009 ✅ Done · TD-007 ✅ Done · TD-008 ✅ Done
 
-| ID | Tags | Taak | Omschrijving | Type | Prioriteit | Status |
-|----|------|------|--------------|------|-----------|--------|
-| T7-001 | print, ux | Print CSS routepagina | `@media print`: galerij verborgen. Topbar/footer verbergen nog open. | Feature | 🟡 Medium | 🔄 Gedeeltelijk — sessie 06. |
-| T7-002 | print, ux | Print knop | Print-knop aanwezig op route detail pagina via `window.print()`. | Feature | 🟡 Medium | ✅ Done — sessie 05. |
-| T7-003 | print, ux | Planningsinformatie | Vervoer-links, parkeerinfo, startpunt-coördinaten op routepagina. | Feature | 🟢 Low | 📋 Open |
+### Aangeleverde bestanden
 
----
-
-## Fase 8 — Community & Growth (post-MVP)
-
-| ID | Tags | Taak | Omschrijving | Type | Prioriteit | Status |
-|----|------|------|--------------|------|-----------|--------|
-| T8-001 | community | Public trails | Publieke route gallery | Feature | 🟢 Low | 🔮 Future |
-| T8-002 | community | Likes | Likes/bookmarks systeem | Feature | 🟢 Low | 🔮 Future |
-| T8-003 | community | Comments | Comment systeem per route | Feature | 🟢 Low | 🔮 Future |
-
----
-
-## Fase 9 — Advanced Features (post-MVP)
-
-| ID | Tags | Taak | Omschrijving | Type | Prioriteit | Status |
-|----|------|------|--------------|------|-----------|--------|
-| T9-001 | ai | AI route analyse | Uitgebreide AI-analyse van GPX: vergelijking met vorige wandelingen, trends, aanbevelingen | Feature | Future | 🔮 Future |
-| T9-002 | analytics | Stats dashboard | Route analytics dashboard | Feature | Future | 🔮 Future |
-| T9-003 | marketplace | Community trails | Community trail marketplace | Feature | Future | 🔮 Future |
+| Bestand | Versie | Omschrijving |
+|---------|--------|--------------|
+| `js/auth.js` | v1.1.0 | role i.p.v. is_admin, window._supabase, redirectTo fix |
+| `js/analytics.js` | v1.1.0 | Supabase pageview tracking met retry loop |
+| `js/topbar-auth.js` | v2.1.0 | i18n via _updateModalTexts(), wacht op appReady |
+| `js/app.js` | v3.0.0 | Centrale i18n init, window.i18nReady + window.appReady |
+| `js/home.js` | v2.2.0 | Geen eigen i18n init meer |
+| `js/creator.js` | v1.2.0 | Geen eigen i18n init meer |
+| `components/topbar.html` | v2.2.0 | Fallback inlogknop terug voor laadmoment |
+| `css/topbar.css` | v2.1.0 | position: relative op topbar__auth |
+| `data/i18n/nl/auth.json` | v1.0.0 | Auth modal teksten NL |
+| `data/i18n/en/auth.json` | v1.0.0 | Auth modal teksten EN |
 
 ---
 
-## TECHNISCHE SCHULD
+## Sessie 05 — 25-06-2026
+**Onderwerp:** Cloudinary opzetten + creator uitbreiden + route detail pagina + wandelingen overzicht + bestandsstructuur
+**Status aan einde sessie:** T0-007 ✅ Done · T1-002 ✅ Done · T1-004 ✅ Done · T1-005 ✅ Done · T1-009 ✅ Done · T2-001 ✅ Done · T2-003 🔄 Gedeeltelijk
 
-| ID | Tags | Taak | Omschrijving | Type | Status |
-|----|------|------|--------------|------|--------|
-| TD-001 | cleanup | Legacy JS | Vermijden van globale variabelen in app.js | Tech Debt | 📋 Open |
-| TD-002 | cleanup | DOM coupling | HTML structuur te sterk gekoppeld aan JS selectors | Tech Debt | 📋 Open |
-| TD-003 | cleanup | Map logic | Leaflet logic nog niet modulair gescheiden. Creator heeft eigen initLeafletMap(). Route detail heeft eigen implementatie. | Tech Debt | 📋 Open |
-| TD-004 | cleanup | app.js herzien | Herzien naar i18next-architectuur. | Tech Debt | ✅ Done — sessie 02 (20-06-2026) |
-| TD-005 | cleanup | localStorage prefix | `mtw_language` geïmplementeerd in `js/i18n.js` v1.2.0. | Tech Debt | ✅ Done — sessie 02 (20-06-2026) |
-| TD-006 | cleanup | Favicon toevoegen | Favicon tags toegevoegd aan alle HTML pagina's. | Tech Debt | ✅ Done — sessie 05 (25-06-2026) |
-| TD-007 | cleanup | i18n init centraliseren | i18nModule.init() gecentraliseerd in app.js v3.0.0. | Tech Debt | ✅ Done — sessie 04 (22-06-2026) |
-| TD-008 | cleanup | Supabase RLS policies | RLS policies correct ingesteld op profiles en page_views tabellen. | Tech Debt | ✅ Done — sessie 04 (22-06-2026) |
-| TD-009 | cleanup | Bestandsstructuur routes | Route JSON bestanden verplaatst naar `routes/`. routes-index.json vervangt routes.json. | Tech Debt | ✅ Done — sessie 06 (28-06-2026) |
-| TD-010 | cleanup | Route IDs | Route IDs mogen geen spaties bevatten. Gebruik koppeltekens. | Tech Debt | ✅ Done — sessie 05 (25-06-2026) |
-| TD-011 | cleanup | Absolute paden | Alle HTML bestanden gebruiken absolute paden (/MyTrailWalks/...) voor scripts, CSS, afbeeldingen. | Tech Debt | ✅ Done — sessie 06 (28-06-2026) |
-| TD-012 | bug | Footer i18n bug | Op route.html en wandelingen.html toont footer © common.footer.copyright i.p.v. © MyTrailWalks. Oorzaak onbekend. Meerdere fixes geprobeerd zonder succes. | Bug | 🔴 Open |
-| TD-013 | cleanup | Dubbele stats/weer/vervoer-UI | Route detail pagina toonde stats/weer/vervoer zowel in een los blok bovenaan als per segment — inconsistent zichtbaar (bv. segment zonder vervoer-badge bij eigen label, zie screenshot 01-07-2026). Los blok verwijderd; vervoer + label altijd samen in segment-header. | Tech Debt | ✅ Done — patch 02-07-2026 |
+### Aangeleverde bestanden
 
----
-
-## OPEN BUG — Footer i18n
-
-**TD-012** — Zie sessie 07 inbrief voor volledige analyse.
-
----
-
-## AANBEVOLEN VOLGORDE SESSIE 07
-
-1. **T1-010** — Dagtrips categorie
-2. **T1-011** — Trails categorie
-3. **TD-012** — Footer i18n bug
-4. **T1-007** — Route kaartpagina
-5. **T2-004** — Hoogteprofiel
-
-> T2-007 (meerdere GPX segmenten) en T2-008 (moeilijkheidsschaal per vervoersmiddel) zijn vervroegd afgerond in een tussensessie op 29-06-2026, buiten de oorspronkelijke sessie 07 planning om.
-> De UI-cleanup van het dubbele stats/weer/vervoer-blok (TD-013) is tussentijds afgerond op 02-07-2026, eveneens buiten de oorspronkelijke sessie 07 planning om.
+| Bestand | Versie | Omschrijving |
+|---------|--------|--------------|
+| `creator.html` | v2.0.0 | Visuele preview, blokken-editor, JSON import, vervoersmiddel, galerij |
+| `css/creator.css` | v2.0.0 | Blokken-editor, visuele preview, transport checkboxes |
+| `js/creator.js` | v2.1.0 | Alle uitbreidingen, Leaflet, SAC-schaal, auto Cloudinary fix |
+| `routes/route.html` | v1.0.0 | Route detail pagina |
+| `css/route.css` | v1.0.0 | Route detail styling |
+| `js/route.js` | v1.1.0 | Route detail logica + i18n |
+| `wandelingen.html` | v1.0.0 | Wandelingen overzicht |
+| `css/wandelingen.css` | v1.0.0 | Wandelingen overzicht styling |
+| `js/wandelingen.js` | v1.1.0 | Wandelingen overzicht logica + i18n |
+| `index.html` | v2.5.0 | Top 3 routes + "Alle wandelingen →" link |
+| `css/home.css` | v2.2.0 | routes-section__header |
+| `js/home.js` | v2.3.0 | Max 3 routes, sortering op datum, route detail links |
+| `routes/routes.json` | v2.1.0 | Gecorrigeerde route entries |
+| `data/docs/cloudinary-workflow.md` | v1.0.0 | Cloudinary upload workflow documentatie |
+| `data/i18n/nl/creator.json` | v1.0.0 | Creator i18n NL |
+| `data/i18n/en/creator.json` | v1.0.0 | Creator i18n EN |
+| `data/i18n/nl/route.json` | v1.0.0 | Route i18n NL |
+| `data/i18n/en/route.json` | v1.0.0 | Route i18n EN |
+| `data/i18n/nl/wandelingen.json` | v1.0.0 | Wandelingen i18n NL |
+| `data/i18n/en/wandelingen.json` | v1.0.0 | Wandelingen i18n EN |
 
 ---
 
-## STANDAARD AFSPRAKEN (bijgewerkt 02-07-2026, patch-sessie)
+## Sessie 06 — 28-06-2026
+**Onderwerp:** Routes index systeem · Route detail lay-out redesign · Filters wandelingen · Creator uitbreidingen · Standaard template · Footer i18n bug
 
-| Onderwerp | Afspraak |
-|-----------|---------|
-| **Script volgorde** | Eruda → Supabase SDK → i18next CDN → i18n.js → auth.js → topbar-auth.js → analytics.js → app.js → Leaflet (indien nodig) → [pagina].js |
-| **Eruda** | Niet verwijderen uit HTML pagina's |
-| **CSS** | Altijd in `<head>` |
-| **Favicon** | Elke nieuwe pagina krijgt favicon tags na `<title>`, vóór CSS |
-| **Cache busting** | `?v=x.x.x` aan script tags bij elke deploy |
-| **Paden** | Altijd absolute paden (`/MyTrailWalks/...`) in HTML bestanden |
+**Status aan einde sessie:**
+- T1-001 ✅ Done (v2.4.0) — draft/final badge, alle tiles klikbaar
+- T1-002 ✅ Done (v2.0.0) — nieuwe 2-koloms lay-out
+- T1-003 ✅ Done — routes-index.json systeem
+- T1-008 ✅ Done — draft management
+- T1-009 ✅ Done (v1.3.0) — filters toegevoegd
+- T2-003 ✅ Done — track_points in route detail kaart
+- T3-002 ✅ Done — foto's rechts, tekst links in route detail
+- T3-003 ✅ Done — slideshow galerij
+- T3-007 ✅ Done — bronvermelding
+- T4-001 ✅ Done — filters moeilijkheid/land/regio/plaats
+- T7-001 🔄 Gedeeltelijk — galerij verborgen bij print
+- T0-010 ✅ Done — construction.html standaard template
+- TD-011 ✅ Done — absolute paden in alle HTML
+- TD-012 🔴 Open — footer i18n bug onopgelost
+
+### Aangeleverde bestanden
+
+| Bestand | Versie | Omschrijving |
+|---------|--------|--------------|
+| `js/app.js` | v3.3.0 | common namespace + getPageNamespace uitgebreid + applyTranslations per component + setTimeout fallback |
+| `js/home.js` | v2.4.0 | routes-index.json + draft/final badge + alle tiles klikbaar |
+| `js/wandelingen.js` | v1.3.0 | routes-index.json + filters (moeilijkheid, land, regio, plaats) |
+| `js/route.js` | v2.0.0 | 2-koloms lay-out + slideshow + bronvermelding + status badge + track_points polyline |
+| `js/creator.js` | v2.2.0 | country/region/place via Nominatim + track_points bij JSON import |
+| `css/route.css` | v2.0.0 | 2-koloms lay-out + slideshow + print CSS |
+| `css/wandelingen.css` | v1.1.0 | Filter balk CSS |
+| `routes/route.html` | v2.0.0 | Nieuwe lay-out + absolute paden |
+| `wandelingen.html` | v1.1.0 | Filter balk toegevoegd + absolute paden |
+| `components/topbar.html` | v2.3.0 | Absolute paden voor logo en home link |
+| `components/footer.html` | v1.1.0 | Absolute paden voor logo en links |
+| `construction.html` | v1.1.0 | Standaard template + i18n data-attributen |
+| `data/i18n/nl/common.json` | v1.1.0 | construction vertalingen toegevoegd |
+| `data/i18n/en/common.json` | v1.1.0 | construction vertalingen toegevoegd |
+| `routes/routes-index.json` | v1.0.0 | Vervangt routes.json als index |
+| `creator.html` (snippet) | — | Stap 2: land/regio/plaats velden. Stap 3: regio veld verwijderd |
+
+### Architectuurbeslissingen sessie 06
+
+| Onderwerp | Beslissing |
+|-----------|-----------|
+| **Routes index** | `routes-index.json` vervangt `routes.json`. Array van IDs. Manueel beheerd. |
+| **Paden** | Alle HTML bestanden gebruiken absolute paden `/MyTrailWalks/...` |
+| **Categorieën** | Dagtrips + Trails als nieuwe categorieën. Zelfde JSON structuur als wandelingen. |
+| **Meerdere GPX** | `segments` array in JSON voor meerdere vervoerstypes. Toekomstige implementatie. |
+| **Foto verdeling** | Tekst/link blokken links, foto blokken altijd rechts in route detail |
+| **country/region/place** | Aparte velden in JSON via Nominatim. Basis voor filters. |
 | **Standaard template** | `construction.html` als basis voor nieuwe pagina's |
-| **Rollen** | gast / creator / admin — via `role` kolom in profiles tabel |
-| **i18n namespaces** | common (altijd) + auth (altijd) + paginaspecifiek via app.js |
-| **Cloudinary URL's** | Hero: w_1200,f_auto · Galerij/blokken: w_800,f_auto · Thumbnail: w_400,f_auto |
-| **Routes index** | `routes/routes-index.json` — array van IDs |
-| **Categorieën** | Elke categorie krijgt eigen map, index, HTML, JS, CSS |
-| **JSON structuur** | `country`, `region`, `place` als aparte velden (v2.2.0). `segments` array voor meerdere vervoersmiddelen per route (v2.3.0) — root-level `gpx_stats`/`gpx_raw`/`weather`/`location` blijven gevuld vanuit eerste segment voor achterwaartse compatibiliteit |
-| **Track points** | Opgeslagen in `gpx_stats.track_points` (legacy) en per segment in `segments[].gpx_stats.track_points` (v2.3.0) |
-| **gpx_raw** | Volledige GPX-tekst als string in JSON export (v2.2.0), per segment vanaf v2.3.0 |
-| **Vervoersmiddelen** | walking, hike, cycling, motorcycle, car, train, bus, boat, plane. Eén vervoersmiddel per segment (geen checkboxlijst meer, v2.3.0) |
-| **Kleurcode vervoersmiddel** | Heldere kleuren per vervoersmiddel (`TRANSPORT_COLORS`), identiek in creator.js en route.js: walking oranje, hike paars, cycling blauw, motorcycle rood, car teal, train geel-oranje, bus violet, boat turquoise, plane donkerblauw. Gebruikt voor kaart-polylines, segment-headers creator en segmenten-sectie route detail. |
-| **Moeilijkheidsschaal** | Per vervoersmiddel een eigen schaal (v2.4.0): Walking W1-W3, Hike/Trail SAC T1-T6, Cycling C1-C4, Motorcycle M1-M4, Car A1-A4. Train/Bus/Boat/Plane: geen schaal. Automatisch berekend uit GPX (klim + bochtigheid), handmatig overschrijfbaar |
-| **Leaflet CDN** | `https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.min.js` (geen integrity check) |
-| **Route detail — vervoer & segmenten** | Geen los stats/weer/vervoer-blok meer bovenaan de pagina. Vervoersmiddel + segment-label staan altijd samen in de gekleurde segment-header ("🚶 Wandelen — <label>" of enkel "🚶 Wandelen" zonder eigen label), zodat vervoer nooit ontbreekt (v2.4.0, patch 02-07-2026). |
+
+### Openstaande punten na sessie 06
+- Footer i18n bug (TD-012) — onopgelost
+- Route kaartpagina (T1-007)
+- Hoogteprofiel (T2-004)
+- Meerdere GPX segmenten (T2-007)
+- Dagtrips categorie (T1-010)
+- Trails categorie (T1-011)
+- Print CSS volledig (T7-001)
 
 ---
 
-## DEFINITION OF DONE
+## Patch 29-06-2026 (tussensessie)
+**Onderwerp:** creator.js GPX verbeteringen — raw export/import + GPS-ruis filtering
 
-- [ ] Werkt op desktop én mobile
-- [ ] Geen console errors
-- [ ] Code gedocumenteerd (inline comments)
-- [ ] JSON data correct geïntegreerd
-- [ ] UI consistent met route template
-- [ ] Absolute paden in HTML
+**Status:**
+- T1-006 ✅ Uitgebreid — gpx_raw embed + GPS-ruis filtering
+- T2-002 ✅ Uitgebreid — GPS-ruis filtering in parseGpx()
+- T2-005 ✅ Uitgebreid — gpx_raw opgeslagen bij upload
+
+### Aangeleverde bestanden
+
+| Bestand | Versie | Omschrijving |
+|---------|--------|--------------|
+| `js/creator.js` | v2.2.0 | GPX raw embed in JSON export + herstel bij import + GPS-ruis filtering |
+
+### Wijzigingen in detail
+
+**gpx_raw export/import:**
+- JSON export bevat nu `gpx_raw`: volledige GPX-tekst als string
+- JSON import: `gpx_raw` aanwezig → GPX volledig hersteld via `parseGpx()`, trackpunten en kaart actief
+- Zonder `gpx_raw` (oudere exports): fallback naar `gpx_stats` read-only — achterwaarts compatibel
+- Status toont `✓ Uit JSON (GPX aanwezig)` vs `✓ Uit JSON`
+
+**GPS-ruis filtering in parseGpx() (stille filters):**
+- Hoogte: eleDiff < ±2m genegeerd → Kalmthout: was +423m/-432m, correct ~46m/~41m
+- Snelheid: eerste 10 trackpunten overgeslagen (GPS koude-start) → was 37.8 km/u, correct ~8 km/u max
+
+**Snelheidswaarschuwing (bij twijfel):**
+- Pieken ≥ 3× gemiddelde gedetecteerd na koude-start skip
+- Gele niet-blokkerende waarschuwing onder GPX-stats
+- Knoppen: "Negeren" (gefilterde waarde) of "Toch bewaren" (ruwe waarde)
+- Puur statistisch — geen koppeling aan vervoersmiddel
+
+### Architectuurbeslissingen patch 29-06-2026
+
+| Onderwerp | Beslissing |
+|-----------|-----------|
+| **gpx_raw** | Volledige GPX-tekst als string in JSON export. Veld `gpx_raw` in route JSON. |
+| **GPS filtering** | Drempel 2m voor hoogte. Koude-start skip 10 punten. Pieken ≥ 3× gemiddelde → waarschuwing. |
+| **Vervoersmiddel** | Geen drempelwaarden per vervoersmiddel — puur statistisch filteren. |
 
 ---
 
-# END OF BACKLOG.md
+## Patch 29-06-2026 (vervolg) — Meerdere segmenten + moeilijkheidsschaal per vervoersmiddel
+
+**Onderwerp:** creator.js segmenten-systeem (T2-007) + hike/trail vervoersmiddel + moeilijkheidsschaal per vervoersmiddel (T2-008) + route.js kaart-uitbreiding
+
+**Status:**
+- T2-007 ✅ Done — meerdere GPX segmenten, vervroegd afgerond t.o.v. sessie 07 planning
+- T2-008 ✅ Done (nieuw item) — moeilijkheidsschaal per vervoersmiddel
+- T1-002 ✅ Uitgebreid — route.js kaart toont alle segmenten met kleurcode
+- T1-006 ✅ Uitgebreid — creator.js volledig herbouwd rond segmenten
+
+### Aangeleverde bestanden
+
+| Bestand | Versie | Omschrijving |
+|---------|--------|--------------|
+| `js/creator.js` | v2.3.0 → v2.4.0 | Segmenten-systeem + hike/trail + moeilijkheidsschaal per vervoersmiddel |
+| `creator.html` | v2.1.0 | Segmenten-sectie vervangt GPX/datum-stappen, stappen hernummerd |
+| `js/route.js` | v2.1.0 | Kaart toont alle segmenten met kleurcode per vervoersmiddel |
+| `routes/route.html` | v2.0.0 | Cache-busting bijgewerkt naar route.js v2.1.0 |
+
+### Wijzigingen in detail
+
+**Segmenten-systeem (creator.js v2.3.0):**
+- `state.segments` array vervangt de enkelvoudige GPX/datum/weer state
+- Elk segment: eigen vervoersmiddel (dropdown, één keuze), GPX upload, datum, locatie/land/regio/plaats, weerdata
+- "+ Segment toevoegen" knop voegt identiek blok toe; vanaf segment 2 verwijderbaar
+- Export: nieuw veld `segments`, root-level velden (`gpx_stats`, `gpx_raw`, `weather`, `location`, `transport`) blijven gevuld vanuit eerste segment — achterwaartse compatibiliteit met route.js
+- Import: herkent zowel `segments` array (nieuw) als losse root-velden (legacy, wordt als één segment ingeladen)
+
+**Hike/Trail vervoersmiddel + moeilijkheidsschaal per vervoersmiddel (creator.js v2.4.0):**
+- Nieuw vervoersmiddel "Hike / Trail" naast "Wandelen", met eigen kleur
+- SAC T1-T6 schaal verschoven van algemeen "Walking" naar specifiek "Hike/Trail" (bergwandelen)
+- Walking krijgt eigen vlakke schaal W1-W3 (stijging per km, geen SAC)
+- Cycling (C1-C4), Motorcycle (M1-M4), Car (A1-A4): automatisch berekend uit klimintensiteit (m/km) + bochtigheid (scherpe bochten/km, via bearing-berekening op trackpunten)
+- Handmatige "kasseien/onverhard" checkbox voor motorcycle/car — tilt resultaat minimaal naar niveau 2
+- Train/Bus/Boat/Plane: geen schaal
+- Per-segment dropdown, automatische berekening overschrijfbaar; bij vervoerswissel of nieuwe GPX wordt herberekend tenzij gebruiker al handmatig koos
+
+**Route detail kaart (route.js v2.1.0):**
+- `renderMap()` herschreven: checkt eerst op `route.segments`, tekent per segment een polyline in de vervoersmiddel-kleur met popup-label
+- Fallback op oude enkelvoudige `gpx_stats`-tekening voor routes zonder `segments` array
+- `TRANSPORT_COLORS`/`TRANSPORT_LABELS` gedupliceerd in route.js, identiek aan creator.js, voor consistente kleuren tussen creator-preview en gepubliceerde pagina
+
+**Bijgevangen fout:** `hike` ontbrak aanvankelijk in `TRANSPORT_COLORS` (wel in labels/schalen) — gecorrigeerd in beide bestanden.
+
+### Architectuurbeslissingen patch 29-06-2026 (vervolg)
+
+| Onderwerp | Beslissing |
+|-----------|-----------|
+| **Segmenten** | Eén vervoersmiddel per segment, geen checkboxlijst meer. Herhaalbaar via "+ Segment toevoegen". |
+| **Achterwaartse compatibiliteit** | Root-level GPX/weer/locatie-velden blijven bestaan, gevuld vanuit eerste segment — route.js hoeft niet alles tegelijk aangepast te worden. |
+| **SAC-schaal scope** | SAC T1-T6 is specifiek voor bergwandelen (Hike/Trail), niet voor vlakke wandelingen (Walking, eigen W1-W3 schaal). |
+| **Wegvoertuig-moeilijkheid** | Klimintensiteit + bochtigheid uit GPX, geen afstand. Wegdektype (kasseien) niet uit GPX afleidbaar — handmatige checkbox als override. |
+| **Kaart-kleurcode** | Vaste kleur per vervoersmiddel, gedeeld tussen creator en route detail pagina voor consistentie. |
+
+---
+
+## Patch 29-06-2026 (vervolg 2) — Segmenten-sectie route detail + bugfixes + kleurenpalet
+
+**Onderwerp:** Segmenten zichtbaar op route detail pagina + track_points bugfix + kleurenpalet + weerdata validatie
+
+**Status:**
+- T1-002 ✅ Uitgebreid — segmenten-sectie, bugfixes, nieuw kleurenpalet
+- T1-006 ✅ Uitgebreid — weerdata datum-validatie, resp.ok check, nieuw kleurenpalet
+
+### Aangeleverde bestanden
+
+| Bestand | Versie | Omschrijving |
+|---------|--------|--------------|
+| `js/route.js` | v2.3.0 | Segmenten-sectie, heldere kleuren, gpx_raw fallback, stats.maxSpeed i18n fix |
+| `routes/route.html` | v2.0.0 | section-segments toegevoegd, cache-busting v2.3.0 |
+| `css/route-segment-block.css` | v1.0.0 | Nieuwe CSS voor segmenten-tabel (toevoegen aan route.css) |
+| `js/creator.js` | v2.4.2 | Datum-validatie weerdata, resp.ok check, heldere kleuren |
+| `data/i18n/nl/route.json` | — | maxSpeed, hike, W1-W3/C1-C4/M1-M4/A1-A4 toegevoegd |
+| `data/i18n/en/route.json` | — | maxSpeed, hike, alle nieuwe schalen toegevoegd |
+| `data/i18n/nl/creator.json` | — | Volledig bijgewerkt: segmenten, hike, difficulty, stappen hernummerd |
+| `data/i18n/en/creator.json` | — | Volledig bijgewerkt: segmenten, hike, difficulty, stappen hernummerd |
+
+### Wijzigingen in detail
+
+**Segmenten-sectie op route detail pagina (route.js v2.3.0):**
+- Nieuwe `renderSegments()` functie toont alle segmenten als compacte blokken
+- Elk blok: gekleurde header met vervoersmiddel-badge + label + volgnummer
+- Tweekoloms tabel: GPX-stats links, weerdata rechts (startpunt segment = weerdata-referentie)
+- Moeilijkheidsgraad opgenomen in GPX-kolom
+- Op mobiel (< 500px) schakelt naar één kolom
+- Enkel zichtbaar als `route.segments` aanwezig is
+
+**Bugfixes:**
+- `track_points` ontbrak in segments[].gpx_stats export (creator.js v2.4.1) — opgelost
+- `track_points` ontbrak in root-level gpx_stats export — opgelost
+- `gpx_raw` fallback in route.js: als track_points ontbreekt wordt GPX client-side herparst
+- `stats.maxSpeed` i18n sleutel ontbrak — fallback + toegevoegd aan i18n bestanden
+
+**Heldere kleurenpalet (creator.js + route.js):**
+- Weg van kaart-kleuren (forest groen, charcoal, …) naar heldere onderscheidbare kleuren
+- walking oranje, hike paars, cycling blauw, motorcycle rood, car teal, train geel-oranje, bus violet, boat turquoise, plane donkerblauw
+- Identiek in creator.js en route.js voor consistentie
+
+**Weerdata validatie (creator.js v2.4.2):**
+- Datum-in-toekomst check vóór API-aanroep met duidelijke gebruikersfeedback
+- `resp.ok` check met specifieke foutmelding uit Open-Meteo response
+- `data.daily` aanwezigheidscheck als extra veiligheidslaag
+
+**i18n bestanden (nl + en):**
+- route.json: stats.maxSpeed, transport.hike, difficulty W1-W3/C1-C4/M1-M4/A1-A4 toegevoegd
+- creator.json: volledig herschreven naar huidige staat — stappen 1-5, segmenten-sleutels, transport-object, speedWarning-sleutels, difficulty-object met alle schalen
+
+### Architectuurbeslissingen
+
+| Onderwerp | Beslissing |
+|-----------|-----------|
+| **Kleurenpalet** | Heldere kleuren i.p.v. kaart-kleuren voor betere leesbaarheid en onderscheidbaarheid per vervoersmiddel. Identiek in creator en route detail. |
+| **Segmenten-sectie positie** | Na vervoer-sectie in linkerkolom route detail pagina. |
+| **Weerdata-referentie** | Startpunt van elk segment = coördinaten voor Open-Meteo API-aanroep. |
+| **Open-Meteo validatie** | Datum-validatie client-side vóór API-aanroep om onnodige requests te vermijden. |
+
+---
+
+# MyTrailWalks — PROJECTLOG.md (vervolg)
+## Nieuwe entry: Sessie 07 — 03-07-2026
+
+---
+
+## Sessie 07 — 03-07-2026
+**Onderwerp:** Rood-omcirkeld stats/weer/vervoer-blok verwijderd (patch, zie vorige entry) + Categorieën Dagtrips en Adventure gebouwd + homepage uitgebreid naar 3 secties + vervoerslabel hernoemd
+
+**Status aan einde sessie:**
+- TD-012 (footer i18n bug) ✅ Done — bevestigd opgelost door gebruiker vóór deze sessie
+- T1-010 (Dagtrips) ✅ Done — nieuw gebouwd
+- T1-011 (Adventure, voorheen "Trails") ✅ Done — nieuw gebouwd, categorienaam gewijzigd
+- T1-012 (Homepage 3 categorieën) ✅ Done — nieuw item
+- T1-002 uitgebreid — vervoerslabel `hike` hernoemd naar "Adventure"
+- TD-014 (creator categorie-selector) 🔴 Open — geblokkeerd, `js/creator.js` niet aangeleverd
+- TD-015 (topbar-navigatie) 🔴 Open — geblokkeerd, `components/topbar.html` niet aangeleverd
+
+### Aangeleverde bestanden
+
+| Bestand | Versie | Omschrijving |
+|---------|--------|--------------|
+| `routes/route.html` | v2.1.0 | Geen wijziging deze sessie (van patch 02-07) |
+| `js/route.js` | v2.4.0 | `TRANSPORT_LABELS.hike` hernoemd van "🥾 Hike / Trail" naar "🥾 Adventure". Interne sleutel `hike` ongewijzigd. |
+| `dagtrips.html` | v1.0.0 | Nieuw. Kopie van `wandelingen.html` v1.1.0 met Dagtrips-teksten, componenten geplaatst conform `construction.html`-standaard. |
+| `js/dagtrips.js` | v1.0.0 | Nieuw. Identieke logica aan `wandelingen.js` v1.3.0 (filters, tiles, sortering). Laadt uit `dagtrips/dagtrips-index.json` + `dagtrips/[id].json`. |
+| `css/dagtrips.css` | v1.0.0 | Nieuw. Kopie van `wandelingen.css` v1.1.0. |
+| `dagtrips/dagtrips-index.json` | v1.0.0 | Nieuw. Lege array `[]` — routes nog handmatig toe te voegen. |
+| `adventure.html` | v1.0.0 | Nieuw. Zelfde opzet als `dagtrips.html`. Was gepland als "Trails", hernoemd naar "Adventure" op vraag van gebruiker. |
+| `js/adventure.js` | v1.0.0 | Nieuw. Identieke logica aan `dagtrips.js`/`wandelingen.js`. Laadt uit `adventure/adventure-index.json` + `adventure/[id].json`. |
+| `css/adventure.css` | v1.0.0 | Nieuw. Kopie van `dagtrips.css`. |
+| `adventure/adventure-index.json` | v1.0.0 | Nieuw. Lege array `[]`. |
+| `index.html` | v2.5.0 → v2.7.0 | Twee nieuwe secties toegevoegd: Dagtrips (v2.6.0) en Adventure (v2.7.0), identieke opbouw als Wandelingen-sectie. |
+| `js/home.js` | v2.4.0 → v2.6.0 | `loadRoutes()` veralgemeend tot generieke `loadItems(indexPath, folder)` (v2.5.0), daarna hergebruikt voor Adventure-grid (v2.6.0). Elke categorie laadt en rendert onafhankelijk — een mislukte fetch voor de ene blokkeert de andere niet. |
+
+### Wijzigingen in detail
+
+**Dagtrips en Adventure — categorie-opbouw:**
+- Beide categorieën zijn 1-op-1 kopieën van de wandelingen-structuur: eigen overzichtspagina met dezelfde filters (moeilijkheid, land, regio, plaats), dezelfde tile-layout, dezelfde sorteerlogica (published boven draft, meest recent eerst).
+- Route detail hergebruikt bewust `routes/route.html` + `js/route.js` ongewijzigd voor alle drie categorieën — het JSON-schema is identiek, dus een aparte detailpagina per categorie zou nodeloze duplicatie zijn.
+- Elke categorie heeft een eigen `[categorie]-index.json` (array van IDs) en eigen map voor de route-JSON-bestanden, consistent met de bestaande `routes/routes-index.json`-aanpak.
+
+**Homepage (`index.html` + `home.js`):**
+- Drie secties naast elkaar: Wandelingen, Dagtrips, Adventure — elk met eigen grid-element (`#routes-grid`, `#dagtrips-grid`, `#adventure-grid`) en "Alle [categorie] →"-link.
+- `home.js` se laadfunctie is veralgemeend zodat er geen drie keer bijna-identieke code hoefde te staan: `loadItems(indexPath, folder)` accepteert nu het pad naar de index en de mapnaam als parameters.
+- Bewuste keuze: de drie categorieën laden **onafhankelijk** van elkaar (elk in een eigen `if`-blok met eigen try/catch via `loadItems`), zodat een mislukte fetch voor bv. Adventure niet de hele homepage blokkeert.
+
+**Vervoerslabel hernoemd (`route.js`):**
+- `TRANSPORT_LABELS.hike` ging van `"🥾 Hike / Trail"` naar `"🥾 Adventure"`.
+- De interne sleutel `hike` (gebruikt in `TRANSPORT_COLORS`, en als waarde van `segment.transport` in bestaande route-JSON's) is **niet** aangepast — dit zou alle bestaande route-JSON-bestanden met `"transport": "hike"` breken. Enkel de weergavetekst is gewijzigd.
+- **Nog niet gedaan:** `js/creator.js` heeft vermoedelijk een eigen kopie van `TRANSPORT_LABELS` (net zoals die gedupliceerd is tussen creator.js en route.js sinds de patch van 29-06). Dat bestand is nooit aangeleverd tijdens deze sessie, dus de creator-preview toont mogelijk nog "Hike / Trail" terwijl de gepubliceerde pagina "Adventure" toont. **Aandachtspunt voor volgende sessie.**
+
+### Openstaande blokkades na sessie 07
+- **`js/creator.js`** (huidige versie, vermoedelijk v2.4.2) nooit ontvangen tijdens deze sessie → categorie-selector in de creator (TD-014) en labelconsistentie (`hike`-label) kunnen niet aangepakt worden zonder dit bestand.
+- **`components/topbar.html`** nooit ontvangen tijdens deze sessie → geen navigatielinks naar `dagtrips.html`/`adventure.html` toegevoegd (TD-015). Nieuwe categorieën zijn enkel bereikbaar via de homepage-secties of een directe URL.
+
+### Architectuurbeslissingen sessie 07
+
+| Onderwerp | Beslissing |
+|-----------|-----------|
+| **Categorienaam "Adventure"** | Was oorspronkelijk gepland als "Trails" (zie sessie 07 inbrief, T1-011). Op expliciet verzoek van de gebruiker hernoemd naar "Adventure" — enkel de zichtbare naam en bestandsnamen (`adventure.html`, `js/adventure.js`, etc.), niet een technisch concept. |
+| **Categorie-detailpagina** | Alle drie categorieën (Wandelingen, Dagtrips, Adventure) delen dezelfde `routes/route.html`/`route.js` voor detailweergave — geen aparte detailpagina's per categorie, omdat het JSON-schema identiek is. |
+| **Handmatige index-koppeling blijft bestaan** | Bevestigd met de gebruiker: zolang de site statisch is (GitHub Pages, geen backend/Git-API), kan de creator een gedownload JSON-bestand niet automatisch in de juiste map + index plaatsen. Dit blijft een bewuste, geaccepteerde beperking (TD-014 blijft open, mogelijke verbetering: UI-hint bij export). |
+| **home.js generalisatie** | `loadItems(indexPath, folder)` als herbruikbare functie i.p.v. drie keer bijna-identieke laadlogica — vermindert onderhoudslast bij een eventuele vierde categorie in de toekomst. |
+
+---
+
+# END OF PROJECTLOG.md (vervolg)
+
+# END OF PROJECTLOG.md
