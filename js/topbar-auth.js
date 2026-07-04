@@ -381,7 +381,7 @@
     if (username) {
       const adminItems = isAdmin ? `
         <div class="dropdown-section-label">${_t('auth:admin_section')}</div>
-        <a href="creator.html" role="menuitem">✦ ${_t('auth:route_creator')}</a>
+        <a href="/MyTrailWalks/creator.html" role="menuitem">✦ ${_t('auth:route_creator')}</a>
         <hr class="dropdown-divider">
       ` : "";
 
