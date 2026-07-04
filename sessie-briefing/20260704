@@ -1,0 +1,85 @@
+# MyTrailWalks — Sessie 09 Inbrief
+## Datum: volgende sessie na 04-07-2026 (sessie 08)
+> Doel: Route kaartpagina (T1-007) · Hoogteprofiel (T2-004)
+> Reeds afgerond vóór sessie 09: navigatie-verbeteringen (terug-links), bugfix creator-link 404, TD-014 en TD-015 afgesloten (won't do / anders opgelost) — zie sessie 06-08
+
+---
+
+## Context
+
+MyTrailWalks is een persoonlijk visueel outdoor storytelling platform. Vanilla HTML/CSS/JS, geen frameworks. i18next voor vertalingen. Foto's via Cloudinary (extern). Statische site op GitHub Pages — **geen backend**, dit is een terugkerend architectuur-gegeven.
+
+---
+
+## Projectlog — sessie 08 (04-07-2026)
+
+| Item | Resultaat |
+|---|---|
+| **TD-014 — Creator categorie-selector** | ❌ **Won't do.** Beslist dat dit niet nodig is: export blijft ongewijzigd, gebruiker plaatst het JSON-bestand zelf handmatig in de juiste map (`routes/`, `dagtrips/`, `adventure/`) en voegt het ID zelf toe aan de juiste index. Geen wijziging aan `js/creator.js`. |
+| **Labelconsistentie Adventure/hike in creator.js** | ❌ **Geen bug — bewuste keuze.** `js/creator.js` toont bewust "🥾 Hike / Trail" in de creator-UI; de term "Adventure" hoort daar niet thuis en komt enkel voor op de publieke pagina's (`route.js`). Geen wijziging. |
+| **TD-015 — Topbar-navigatie** | ❌ **Won't do zoals origineel gescoped.** `components/topbar.html` wordt niet aangepast. **Vervangen door:** navigatie rechtstreeks in de betrokken HTML-bestanden zelf (zie hieronder). |
+| **Navigatie: terug naar home** | ✅ Snippet toegevoegd aan `wandelingen.html`, `dagtrips.html`, `adventure.html`:<br>`<a href="/MyTrailWalks/index.html" class="back-home-link">← MyTrailWalks Home</a>`<br>Styling (class `back-home-link`) nog te verfijnen indien gewenst — huidige CSS-class van de bestaande "Alle wandelingen →"-link was niet gekend. |
+| **Navigatie: terug vanuit route detail** | ✅ Toegevoegd aan `routes/route.html`:<br>`<a href="#" onclick="history.back(); return false;" class="back-home-link">← Terug</a>`<br>Werkt categorie-onafhankelijk via browser-history, geen aanpassing aan `route.js` nodig. |
+| **BUG — Creator-link 404 op route.html** | ✅ **Opgelost.** In `js/topbar-auth.js`, functie `_renderTopBar()` (±regel 384), gebruikte de admin-dropdown link naar de creator een **relatief pad** (`href="creator.html"`) i.p.v. het verplichte absolute pad. Werkte op pagina's in de root, maar gaf 404 op `routes/route.html` (submap). Fix: `href="/MyTrailWalks/creator.html"`. Bevestigd werkend door gebruiker. |
+
+---
+
+## KRITIEK: bestanden nodig voor sessie 09
+
+| Bestand | Nodig voor |
+|---|---|
+| `js/route.js` (huidige versie, v2.4.0) | Route kaartpagina (T1-007) + hoogteprofiel (T2-004) — beide taken raken route detail-logica en moeten aansluiten op de bestaande segmenten/kleurcode-structuur |
+| `routes/route.html` | ✅ Reeds aangeleverd in sessie 08, kan hergebruikt worden — bevat placeholders `#section-map` / `#route-map` en `#section-elevation` / `#route-elevation` |
+
+**Werkwijze:** vraag `js/route.js` op vóórdat je aan T1-007 of T2-004 begint — niet zelf reconstrueren of aannames maken over de inhoud.
+
+---
+
+## Prioriteiten sessie 09
+
+### 1. Route kaartpagina (T1-007)
+`routes/[id]-map.html` — aparte fullscreen Leaflet kaartpagina per route, vermoedelijk gelinkt vanaf de bestaande `#btn-open-map`-knop in `route.html`. Moet dezelfde kleurcode per vervoersmiddel + segmenten-logica hergebruiken als de preview-kaart in `route.js`/`creator.js`. Vraag `js/route.js` op vóór je begint.
+
+### 2. Hoogteprofiel (T2-004)
+Placeholder `#route-elevation` is aanwezig in `route.html`, nog niet ingevuld. Vraag `js/route.js` op vóór je begint om te zien welke GPX-data (trackpoints, elevatie) al beschikbaar is per segment.
+
+---
+
+## Architectuurafspraken (bevestigd t.e.m. sessie 08)
+
+| Onderwerp | Afspraak |
+|-----------|---------|
+| **Script volgorde** | Eruda → Supabase SDK → i18next CDN → i18n.js → auth.js → topbar-auth.js → analytics.js → app.js → Leaflet (indien nodig) → [pagina].js |
+| **Paden** | Altijd absolute paden (`/MyTrailWalks/...`) in HTML én in gegenereerde links vanuit JS (zie sessie 08-bugfix) |
+| **Standaard pagina template** | `construction.html` als basis voor plaatsing van componenten (topbar, main, footer, scripts) |
+| **Categorieën** | Wandelingen, Dagtrips, Adventure — elk eigen map, index, HTML, JS, CSS, maar identieke opbouw/logica en gedeelde `routes/route.html`/`route.js` voor detailweergave |
+| **Categorie-toewijzing creator-export** | Blijft volledig handmatig — gebruiker plaatst bestand + index-regel zelf. Geen UI-hulp hiervoor gewenst (TD-014 afgesloten). |
+| **Navigatie tussen categorieën** | Niet via `topbar.html` — losse "← Terug"-links rechtstreeks in de pagina's zelf (zie sessie 08). |
+| **Vervoersmiddelen** | walking, hike (label op publieke pagina's: "Adventure", in creator-UI: "Hike / Trail" — bewust verschillend), cycling, motorcycle, car, train, bus, boat, plane — één per segment |
+| **Geen backend** | GitHub Pages statische hosting. Creator kan bestanden laten downloaden maar niet automatisch wegschrijven naar de repo. |
+| **Homepage laadlogica** | `js/home.js`: generieke `loadItems(indexPath, folder)`, elke categorie laadt onafhankelijk (geen blokkerende fetch-keten) |
+
+---
+
+## Werkwijze
+
+1. Vraag altijd toestemming vóór uitvoering
+2. Check of gebruiker informatie/bestanden heeft voordat je zelf iets reconstrueert of aanneemt
+3. Bouw in kleine iteraties
+4. Geef korte uitleg ná elke taak
+5. Eruda niet verwijderen uit HTML pagina's
+6. Absolute paden in alle HTML bestanden én in via JS gegenereerde links
+
+---
+
+## Definition of Done (per taak)
+- [ ] Werkt op desktop én mobile
+- [ ] Geen console errors
+- [ ] Code gedocumenteerd (inline comments)
+- [ ] JSON data correct geïntegreerd
+- [ ] UI consistent met route template
+- [ ] Absolute paden in HTML
+
+---
+
+# END OF SESSIE_09_INBRIEF.md
