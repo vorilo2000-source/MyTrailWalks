@@ -1,8 +1,14 @@
-<!-- ======================= routes/route-map.html v1.0.0 =======================
+<!-- ======================= routes/route-map.html v1.0.1 =======================
      Fullscreen kaartpagina per route — MyTrailWalks
      Aparte pagina gelinkt via btn-open-map in route.html.
      Laadt dezelfde JSON als route.html, tekent alle segmenten
      met dezelfde TRANSPORT_COLORS als route.js.
+     v1.0.1: kaarthoogte gefixed — #fullscreen-map gebruikt
+             100dvh minus de hoogte van topbar + map-header zodat
+             de kaart exact binnen het viewport past zonder te scrollen.
+             dvh (dynamic viewport height) voorkomt mobile browser-
+             chrome overlap (adresbalk). Fallback naar 100vh voor
+             oudere browsers.
      Vereist: route-map.js, Leaflet, zelfde script-volgorde als route.html
      ======================================================================= -->
 <!DOCTYPE html>
@@ -27,29 +33,29 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.min.css" crossorigin="">
 
   <style>
-    /* Fullscreen kaart — vult viewport onder de topbar */
+    /* Reset — geen extra scroll door body */
     html, body {
       height: 100%;
       margin: 0;
       padding: 0;
+      overflow: hidden;
     }
 
-    #map-page {
-      display: flex;
-      flex-direction: column;
-      height: 100vh;
+    /* Topbar en footer staan buiten #map-page maar nemen wel hoogte in.
+       We meten hun hoogte via JS en zetten --topbar-h en --map-header-h
+       als CSS custom properties op :root zodat #fullscreen-map exact past. */
+    :root {
+      --topbar-h: 56px;      /* schatting; wordt overschreven door JS */
+      --map-header-h: 44px;  /* schatting; wordt overschreven door JS */
     }
 
-    /* Topbar bovenaan, kaart vult de rest */
-    #map-topbar {
-      flex-shrink: 0;
-    }
-
-    #map-main {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      min-height: 0; /* nodig voor flex + overflow */
+    /* Kaart vult exact het resterende viewport in na topbar + map-header.
+       dvh = dynamic viewport height (houdt rekening met mobile browser chrome).
+       Fallback naar vh voor oudere browsers. */
+    #fullscreen-map {
+      width: 100%;
+      height: calc(100vh - var(--topbar-h) - var(--map-header-h));
+      height: calc(100dvh - var(--topbar-h) - var(--map-header-h));
     }
 
     /* Balk met terugknop + routetitel */
@@ -60,7 +66,6 @@
       padding: 0.6rem 1rem;
       background: var(--color-surface, #fff);
       border-bottom: 1px solid var(--color-border, #e5e7eb);
-      flex-shrink: 0;
       z-index: 10;
     }
 
@@ -92,7 +97,12 @@
       white-space: nowrap;
     }
 
-    /* Legenda — zweeft over de kaart rechtsonder */
+    /* Wrapper voor kaart + legenda — relatief zodat legenda absoluut zweeft */
+    #map-wrapper {
+      position: relative;
+    }
+
+    /* Legenda — zweeft rechtsonder over de kaart */
     #map-legend {
       position: absolute;
       bottom: 1.5rem;
@@ -129,23 +139,7 @@
       flex-shrink: 0;
     }
 
-    /* Kaart container — vult resterende ruimte volledig */
-    #fullscreen-map {
-      flex: 1;
-      width: 100%;
-      min-height: 0;
-    }
-
-    /* Wrapper zodat legenda absoluut gepositioneerd kan worden t.o.v. kaart */
-    #map-wrapper {
-      position: relative;
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      min-height: 0;
-    }
-
-    /* Laadindicator */
+    /* Laadindicator over de kaart */
     #map-loading {
       position: absolute;
       inset: 0;
@@ -172,35 +166,29 @@
   <!-- Topbar -->
   <div id="topbar-placeholder" class="topbar-placeholder" aria-hidden="true"></div>
 
-  <!-- Kaartpagina layout -->
-  <div id="map-page">
-    <main id="map-main">
+  <!-- Map header: terugknop + routetitel -->
+  <div id="map-header">
+    <button id="btn-back-map" onclick="history.back(); return false;" aria-label="Terug naar route">
+      ← Terug
+    </button>
+    <span id="map-route-title">Laden…</span>
+  </div>
 
-      <!-- Balk: terugknop + routetitel -->
-      <div id="map-header">
-        <button id="btn-back-map" onclick="history.back(); return false;" aria-label="Terug naar route">
-          ← Terug
-        </button>
-        <span id="map-route-title">Laden…</span>
-      </div>
+  <!-- Kaart + legenda wrapper -->
+  <div id="map-wrapper">
 
-      <!-- Kaart + legenda wrapper -->
-      <div id="map-wrapper">
+    <!-- Laadindicator zichtbaar tot kaart klaar is -->
+    <div id="map-loading">Kaart laden…</div>
 
-        <!-- Laadindicator zichtbaar tot kaart klaar is -->
-        <div id="map-loading">Kaart laden…</div>
+    <!-- Leaflet kaart container -->
+    <div id="fullscreen-map"></div>
 
-        <!-- Leaflet kaart container -->
-        <div id="fullscreen-map"></div>
+    <!-- Legenda — gevuld door route-map.js op basis van aanwezige segmenten -->
+    <div id="map-legend" hidden>
+      <div id="map-legend__title">Vervoer</div>
+      <div id="map-legend__items"></div>
+    </div>
 
-        <!-- Legenda — gevuld door route-map.js op basis van aanwezige segmenten -->
-        <div id="map-legend" hidden>
-          <div id="map-legend__title">Vervoer</div>
-          <div id="map-legend__items"></div>
-        </div>
-
-      </div>
-    </main>
   </div>
 
   <!-- Footer -->
@@ -224,6 +212,27 @@
   <script src="/MyTrailWalks/js/analytics.js?v=1.1.0"></script>
   <script src="/MyTrailWalks/js/app.js?v=3.3.0"></script>
   <script src="/MyTrailWalks/js/route-map.js?v=1.0.0"></script>
+
+  <script>
+    // Meet de werkelijke hoogte van topbar en map-header na laden
+    // en schrijf die als CSS custom properties op :root zodat
+    // #fullscreen-map exact past zonder te scrollen.
+    function updateMapHeight() {
+      const topbar = document.getElementById("topbar-placeholder");
+      const header = document.getElementById("map-header");
+      const topbarH = topbar ? topbar.offsetHeight : 56;
+      const headerH = header ? header.offsetHeight : 44;
+      document.documentElement.style.setProperty("--topbar-h", `${topbarH}px`);
+      document.documentElement.style.setProperty("--map-header-h", `${headerH}px`);
+    }
+
+    // Meten na DOM-load en na resize (bijv. mobile orientatiewijziging)
+    window.addEventListener("DOMContentLoaded", updateMapHeight);
+    window.addEventListener("resize", updateMapHeight);
+
+    // Nogmaals meten nadat topbar geladen is (async component inject)
+    setTimeout(updateMapHeight, 500);
+  </script>
 
 </body>
 </html>
