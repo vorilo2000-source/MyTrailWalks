@@ -1,6 +1,6 @@
-# MyTrailWalks — PROJECTLOG.md
-## Bijgewerkt: 29-06-2026 (patch-sessie, vervolg 2)
-> Versie: v1.8.0 · Projectlog — chronologisch overzicht van sessies en wijzigingen
+MyTrailWalks — PROJECTLOG.md
+## Bijgewerkt: 04-07-2026 (sessie 08)
+> Versie: v1.9.0 · Projectlog — chronologisch overzicht van sessies en wijzigingen
 
 ---
 
@@ -353,11 +353,6 @@
 
 ---
 
-# MyTrailWalks — PROJECTLOG.md (vervolg)
-## Nieuwe entry: Sessie 07 — 03-07-2026
-
----
-
 ## Sessie 07 — 03-07-2026
 **Onderwerp:** Rood-omcirkeld stats/weer/vervoer-blok verwijderd (patch, zie vorige entry) + Categorieën Dagtrips en Adventure gebouwd + homepage uitgebreid naar 3 secties + vervoerslabel hernoemd
 
@@ -419,6 +414,59 @@
 
 ---
 
-# END OF PROJECTLOG.md (vervolg)
+## Sessie 08 — 04-07-2026
+**Onderwerp:** `js/creator.js` en `js/topbar-auth.js` alsnog ontvangen — TD-014 en TD-015 heroverwogen en afgesloten + navigatie-verbeteringen + 404-bugfix creator-link
+
+**Status aan einde sessie:**
+- TD-014 (creator categorie-selector) ⚪ **Won't do** — bewust besloten dat dit niet nodig is; export blijft ongewijzigd, gebruiker plaatst bestand + index-regel zelf. Geen wijziging aan `js/creator.js`.
+- Labelconsistentie `hike`/"Adventure" in creator.js — **geen bug.** Bevestigd dat de creator-UI bewust "Hike / Trail" blijft tonen; "Adventure" is enkel de publieke weergavenaam op `route.js`. Geen wijziging.
+- TD-015 (topbar-navigatie) ⚪ **Won't do zoals origineel gescoped** — `components/topbar.html` wordt niet aangepast.
+- T1-013 (nieuw item) ✅ Done — terug-navigatie rechtstreeks in de pagina's zelf toegevoegd, ter vervanging van TD-015.
+- TD-016 (nieuw item) ✅ Done — 404-bug op creator-link in de admin-dropdown opgelost.
+
+### Aangeleverde bestanden / wijzigingen
+
+| Bestand | Versie | Omschrijving |
+|---------|--------|--------------|
+| `js/creator.js` | v2.4.2 (ontvangen, ongewijzigd) | Ontvangen ter controle van labelconsistentie. Geen wijziging doorgevoerd — zie architectuurbeslissingen. |
+| `wandelingen.html` | — (snippet) | Terug-naar-home link toegevoegd: `<a href="/MyTrailWalks/index.html" class="back-home-link">← MyTrailWalks Home</a>` |
+| `dagtrips.html` | — (snippet) | Zelfde terug-naar-home snippet toegevoegd. |
+| `adventure.html` | — (snippet) | Zelfde terug-naar-home snippet toegevoegd. |
+| `routes/route.html` | v2.1.0 | Terug-link toegevoegd boven `route-content`: `<a href="#" onclick="history.back(); return false;" class="back-home-link">← Terug</a>` |
+| `js/topbar-auth.js` | v2.1.0 (patch) | Bugfix in `_renderTopBar()` (±regel 384): creator-link in admin-dropdown gebruikte relatief pad `href="creator.html"`, gaf 404 op `routes/route.html` (submap). Gefixed naar absoluut pad `href="/MyTrailWalks/creator.html"`. Bevestigd werkend door gebruiker. |
+
+### Wijzigingen in detail
+
+**TD-014 heroverwogen en afgesloten:**
+- `js/creator.js` (v2.4.2) werd deze sessie eindelijk ontvangen, wat controle van de labelconsistentie mogelijk maakte.
+- Bij het bespreken van de categorie-selector besliste de gebruiker echter dat dit niet nodig is: de export blijft exact zoals ze is, en de gebruiker plaatst het gedownloade JSON-bestand zelf handmatig in de juiste map en voegt zelf de ID toe aan de juiste index. Geen UI-hulp (doelmap-hint, kant-en-klare index-regel) gewenst.
+- Resultaat: TD-014 gesloten als "won't do", `js/creator.js` blijft volledig ongewijzigd.
+
+**Labelconsistentie — geen bug, bewuste keuze:**
+- Aanvankelijk vermoeden (sessie 07): creator-UI zou nog verouderd "Hike / Trail" tonen terwijl `route.js` al "Adventure" toont.
+- Bevestigd met `js/creator.js` dat `TRANSPORT_LABELS.hike` daar inderdaad nog "🥾 Hike / Trail" is — maar de gebruiker gaf aan dat dit **bewust zo hoort te blijven**: "Adventure" is een publieke categorienaam en hoort nergens in de creator-interface voor te komen. Geen wijziging doorgevoerd.
+
+**TD-015 vervangen door directe navigatie-links (T1-013):**
+- In plaats van links toe te voegen aan `components/topbar.html`, koos de gebruiker voor eenvoudige, rechtstreekse "← Terug"-links in de betrokken pagina's zelf.
+- `wandelingen.html`, `dagtrips.html`, `adventure.html`: link terug naar de homepage (`/MyTrailWalks/index.html`).
+- `routes/route.html`: link terug naar de vorige pagina via `history.back()` — werkt ongeacht vanuit welke categorie de route werd geopend, zonder dat `route.js` moet weten uit welke categorie de route komt.
+- Styling van de nieuwe `.back-home-link`-class is nog niet verfijnd; de bestaande CSS-class van de "Alle wandelingen →"-link was niet gekend tijdens deze sessie.
+
+**TD-016 — 404-bug creator-link opgelost:**
+- Gebruiker meldde dat de creator-link in de login-dropdown een 404 gaf, maar enkel wanneer aangeklikt vanaf `routes/route.html`; op andere pagina's werkte de link wel.
+- Na vergelijking van scriptversies (geen verschil gevonden — beide op `topbar-auth.js v2.1.0`) en het aanleveren van `js/topbar-auth.js`, bleek de oorzaak: de link in `_renderTopBar()` gebruikte een relatief pad (`href="creator.html"`). Op pagina's in de root resolveert dit correct, maar `routes/route.html` zit in een submap, waardoor het pad daar oploste naar `/MyTrailWalks/routes/creator.html` → 404.
+- Fix: absoluut pad `href="/MyTrailWalks/creator.html"`, conform de architectuurafspraak die al langer gold maar op deze ene plek gemist was.
+
+### Architectuurbeslissingen sessie 08
+
+| Onderwerp | Beslissing |
+|-----------|-----------|
+| **Categorie-toewijzing bij export** | Blijft volledig handmatig, permanent — geen UI-hulp (doelmap-hint/index-regel) gewenst. TD-014 definitief gesloten, niet enkel geblokkeerd. |
+| **"Adventure"-label scope** | Enkel op publieke pagina's (`route.js`). De creator-interface (`creator.js`) toont bewust "Hike / Trail" en wordt niet gesynchroniseerd met de publieke labelnaam. |
+| **Navigatie tussen categorieën/home** | Niet via `components/topbar.html`. Losse "← Terug"-links rechtstreeks in de betrokken pagina's, per pagina toegevoegd. |
+| **Terugknop route detail** | `history.back()` i.p.v. een vaste link per categorie — vermijdt dat `route.js` moet weten uit welke categorie de route werd geopend. |
+| **Absolute paden ook in JS-gegenereerde links** | De architectuurafspraak "absolute paden" geldt expliciet ook voor `href`-waarden die dynamisch via JavaScript worden opgebouwd (zoals in `topbar-auth.js`), niet enkel voor statische HTML. |
+
+---
 
 # END OF PROJECTLOG.md
