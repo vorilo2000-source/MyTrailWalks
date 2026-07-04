@@ -315,9 +315,10 @@ function renderMap(route) {
     if (btnMap && firstLat !== null) {
       btnMap.hidden = false;
       btnMap.innerHTML = `<span>🗺</span> Route openen`;
-      btnMap.addEventListener("click", () =>
-        window.open(`https://www.openstreetmap.org/#map=13/${firstLat}/${firstLon}`, "_blank")
-      );
+      btnMap.addEventListener("click", () => {
+  const id = getRouteId();
+  window.location.href = `/MyTrailWalks/routes/route-map.html?id=${id}`;
+});
     }
   }, 50);
 }
