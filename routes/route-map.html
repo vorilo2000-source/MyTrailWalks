@@ -1,0 +1,229 @@
+<!-- ======================= routes/route-map.html v1.0.0 =======================
+     Fullscreen kaartpagina per route — MyTrailWalks
+     Aparte pagina gelinkt via btn-open-map in route.html.
+     Laadt dezelfde JSON als route.html, tekent alle segmenten
+     met dezelfde TRANSPORT_COLORS als route.js.
+     Vereist: route-map.js, Leaflet, zelfde script-volgorde als route.html
+     ======================================================================= -->
+<!DOCTYPE html>
+<html lang="nl" id="html-root">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Kaart — MyTrailWalks</title>
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/x-icon" href="/MyTrailWalks/assets/images/favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="/MyTrailWalks/assets/images/favicon-32x32.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/MyTrailWalks/assets/images/favicon-180x180.png">
+  <link rel="icon" type="image/png" sizes="192x192" href="/MyTrailWalks/assets/images/favicon-192x192.png">
+
+  <!-- CSS -->
+  <link rel="stylesheet" href="/MyTrailWalks/css/main.css">
+  <link rel="stylesheet" href="/MyTrailWalks/css/topbar.css">
+  <link rel="stylesheet" href="/MyTrailWalks/css/footer.css">
+
+  <!-- Leaflet -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.min.css" crossorigin="">
+
+  <style>
+    /* Fullscreen kaart — vult viewport onder de topbar */
+    html, body {
+      height: 100%;
+      margin: 0;
+      padding: 0;
+    }
+
+    #map-page {
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+    }
+
+    /* Topbar bovenaan, kaart vult de rest */
+    #map-topbar {
+      flex-shrink: 0;
+    }
+
+    #map-main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-height: 0; /* nodig voor flex + overflow */
+    }
+
+    /* Balk met terugknop + routetitel */
+    #map-header {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.6rem 1rem;
+      background: var(--color-surface, #fff);
+      border-bottom: 1px solid var(--color-border, #e5e7eb);
+      flex-shrink: 0;
+      z-index: 10;
+    }
+
+    #btn-back-map {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+      font-size: 0.9rem;
+      color: var(--color-primary, #2C4A3B);
+      text-decoration: none;
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 0.3rem 0.5rem;
+      border-radius: 4px;
+      white-space: nowrap;
+    }
+
+    #btn-back-map:hover {
+      background: var(--color-surface-hover, #f3f4f6);
+    }
+
+    #map-route-title {
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: var(--color-text, #111);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    /* Legenda — zweeft over de kaart rechtsonder */
+    #map-legend {
+      position: absolute;
+      bottom: 1.5rem;
+      right: 0.75rem;
+      background: rgba(255,255,255,0.95);
+      border-radius: 8px;
+      padding: 0.6rem 0.8rem;
+      font-size: 0.8rem;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+      z-index: 1000;
+      max-width: 200px;
+    }
+
+    #map-legend__title {
+      font-weight: 700;
+      margin-bottom: 0.4rem;
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: #555;
+    }
+
+    .map-legend__item {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-bottom: 0.25rem;
+    }
+
+    .map-legend__dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    /* Kaart container — vult resterende ruimte volledig */
+    #fullscreen-map {
+      flex: 1;
+      width: 100%;
+      min-height: 0;
+    }
+
+    /* Wrapper zodat legenda absoluut gepositioneerd kan worden t.o.v. kaart */
+    #map-wrapper {
+      position: relative;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+    }
+
+    /* Laadindicator */
+    #map-loading {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--color-surface, #f9fafb);
+      z-index: 500;
+      font-size: 0.95rem;
+      color: #555;
+    }
+
+    #map-loading.hidden {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Eruda debugger — niet verwijderen -->
+  <script src="https://cdn.jsdelivr.net/npm/eruda"></script>
+  <script>eruda.init();</script>
+
+  <!-- Topbar -->
+  <div id="topbar-placeholder" class="topbar-placeholder" aria-hidden="true"></div>
+
+  <!-- Kaartpagina layout -->
+  <div id="map-page">
+    <main id="map-main">
+
+      <!-- Balk: terugknop + routetitel -->
+      <div id="map-header">
+        <button id="btn-back-map" onclick="history.back(); return false;" aria-label="Terug naar route">
+          ← Terug
+        </button>
+        <span id="map-route-title">Laden…</span>
+      </div>
+
+      <!-- Kaart + legenda wrapper -->
+      <div id="map-wrapper">
+
+        <!-- Laadindicator zichtbaar tot kaart klaar is -->
+        <div id="map-loading">Kaart laden…</div>
+
+        <!-- Leaflet kaart container -->
+        <div id="fullscreen-map"></div>
+
+        <!-- Legenda — gevuld door route-map.js op basis van aanwezige segmenten -->
+        <div id="map-legend" hidden>
+          <div id="map-legend__title">Vervoer</div>
+          <div id="map-legend__items"></div>
+        </div>
+
+      </div>
+    </main>
+  </div>
+
+  <!-- Footer -->
+  <div id="footer-placeholder" class="footer-placeholder" aria-hidden="true"></div>
+
+  <!-- Supabase SDK -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+
+  <!-- i18next CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/i18next@23/i18next.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/i18next-http-backend@2/i18nextHttpBackend.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/i18next-browser-languagedetector@7/i18nextBrowserLanguageDetector.min.js"></script>
+
+  <!-- Leaflet JS -->
+  <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.min.js"></script>
+
+  <!-- Scripts — zelfde volgorde als route.html -->
+  <script src="/MyTrailWalks/js/i18n.js"></script>
+  <script src="/MyTrailWalks/js/auth.js?v=1.1.0"></script>
+  <script src="/MyTrailWalks/js/topbar-auth.js?v=2.1.0"></script>
+  <script src="/MyTrailWalks/js/analytics.js?v=1.1.0"></script>
+  <script src="/MyTrailWalks/js/app.js?v=3.3.0"></script>
+  <script src="/MyTrailWalks/js/route-map.js?v=1.0.0"></script>
+
+</body>
+</html>
