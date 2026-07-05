@@ -1,8 +1,8 @@
 // =======================================================
-// creator.js — MyTrailWalks
+// creator.js â€” MyTrailWalks
 // Route creator: GPX parse, weer, locatie, AI, JSON export
 // v2.4.3: hoogteprofiel preview toegevoegd (renderElevationPreview)
-//         in de visuele preview rechterkolom — toont SVG profiel
+//         in de visuele preview rechterkolom â€” toont SVG profiel
 //         per segment in segmentkleur zodra gpxRaw beschikbaar is
 // v2.4.2: datum-validatie bij weerdata ophalen (toekomstige datum)
 //         resp.ok check + betere foutmeldingen Open-Meteo
@@ -20,7 +20,7 @@
 "use strict";
 
 // -----------------------------------------------------------
-// KLEURCODE PER VERVOERSMIDDEL — kaart + segment header
+// KLEURCODE PER VERVOERSMIDDEL â€” kaart + segment header
 // -----------------------------------------------------------
 const TRANSPORT_COLORS = {
   walking:    "#E8800A",  // oranje
@@ -35,15 +35,15 @@ const TRANSPORT_COLORS = {
 };
 
 const TRANSPORT_LABELS = {
-  walking:    "🚶 Wandelen",
-  hike:       "🥾 Hike / Trail",
-  cycling:    "🚴 Fietsen",
-  motorcycle: "🏍 Motor",
-  car:        "🚗 Auto",
-  train:      "🚆 Trein",
-  bus:        "🚌 Bus",
-  boat:       "⛵ Boot",
-  plane:      "✈️ Vliegtuig",
+  walking:    "ðŸš¶ Wandelen",
+  hike:       "ðŸ¥¾ Hike / Trail",
+  cycling:    "ðŸš´ Fietsen",
+  motorcycle: "ðŸ Motor",
+  car:        "ðŸš— Auto",
+  train:      "ðŸš† Trein",
+  bus:        "ðŸšŒ Bus",
+  boat:       "â›µ Boot",
+  plane:      "âœˆï¸ Vliegtuig",
 };
 
 // -----------------------------------------------------------
@@ -51,35 +51,35 @@ const TRANSPORT_LABELS = {
 // -----------------------------------------------------------
 const DIFFICULTY_SCALES = {
   walking: [
-    { value: "W1", label: "W1 — Vlak (wandelpad, park, heide)" },
-    { value: "W2", label: "W2 — Glooiend (bos, polders)" },
-    { value: "W3", label: "W3 — Heuvelachtig (onverhard, hellingen)" },
+    { value: "W1", label: "W1 â€” Vlak (wandelpad, park, heide)" },
+    { value: "W2", label: "W2 â€” Glooiend (bos, polders)" },
+    { value: "W3", label: "W3 â€” Heuvelachtig (onverhard, hellingen)" },
   ],
   hike: [
-    { value: "T1", label: "T1 — Wandelen (vlak, gymschoenen volstaan)" },
-    { value: "T2", label: "T2 — Bergwandeling (gedeeltelijk steil)" },
-    { value: "T3", label: "T3 — Veeleisende bergwandeling (steil terrein)" },
-    { value: "T4", label: "T4 — Alpine wandeling (soms handen nodig)" },
-    { value: "T5", label: "T5 — Veeleisende alpine wandeling (bergschoenen)" },
-    { value: "T6", label: "T6 — Moeilijke alpine wandeling (klimgedeeltes)" },
+    { value: "T1", label: "T1 â€” Wandelen (vlak, gymschoenen volstaan)" },
+    { value: "T2", label: "T2 â€” Bergwandeling (gedeeltelijk steil)" },
+    { value: "T3", label: "T3 â€” Veeleisende bergwandeling (steil terrein)" },
+    { value: "T4", label: "T4 â€” Alpine wandeling (soms handen nodig)" },
+    { value: "T5", label: "T5 â€” Veeleisende alpine wandeling (bergschoenen)" },
+    { value: "T6", label: "T6 â€” Moeilijke alpine wandeling (klimgedeeltes)" },
   ],
   cycling: [
-    { value: "C1", label: "C1 — Ontspannen (fietspad, rivierdal)" },
-    { value: "C2", label: "C2 — Gemiddeld (landweg, lichte bochten)" },
-    { value: "C3", label: "C3 — Pittig (heuvelweg, col met bochten)" },
-    { value: "C4", label: "C4 — Zwaar (bergpas, haarspeldbochten)" },
+    { value: "C1", label: "C1 â€” Ontspannen (fietspad, rivierdal)" },
+    { value: "C2", label: "C2 â€” Gemiddeld (landweg, lichte bochten)" },
+    { value: "C3", label: "C3 â€” Pittig (heuvelweg, col met bochten)" },
+    { value: "C4", label: "C4 â€” Zwaar (bergpas, haarspeldbochten)" },
   ],
   motorcycle: [
-    { value: "M1", label: "M1 — Verharde weg (lokaal, snelweg, asfalt/beton/klinkers)" },
-    { value: "M2", label: "M2 — Toeren / kasseien (landweg of kinderkopjes)" },
-    { value: "M3", label: "M3 — Sportief (bergweg met bochten)" },
-    { value: "M4", label: "M4 — Uitdagend (alpenpas, haarspeldbochten)" },
+    { value: "M1", label: "M1 â€” Verharde weg (lokaal, snelweg, asfalt/beton/klinkers)" },
+    { value: "M2", label: "M2 â€” Toeren / kasseien (landweg of kinderkopjes)" },
+    { value: "M3", label: "M3 â€” Sportief (bergweg met bochten)" },
+    { value: "M4", label: "M4 â€” Uitdagend (alpenpas, haarspeldbochten)" },
   ],
   car: [
-    { value: "A1", label: "A1 — Verharde weg (lokaal, snelweg, asfalt/beton/klinkers)" },
-    { value: "A2", label: "A2 — Landweg / kasseien (secundaire weg of kinderkopjes)" },
-    { value: "A3", label: "A3 — Bergweg (heuvelachtig, col met bochten)" },
-    { value: "A4", label: "A4 — Pas (alpenpas, serpentines)" },
+    { value: "A1", label: "A1 â€” Verharde weg (lokaal, snelweg, asfalt/beton/klinkers)" },
+    { value: "A2", label: "A2 â€” Landweg / kasseien (secundaire weg of kinderkopjes)" },
+    { value: "A3", label: "A3 â€” Bergweg (heuvelachtig, col met bochten)" },
+    { value: "A4", label: "A4 â€” Pas (alpenpas, serpentines)" },
   ],
 };
 
@@ -291,30 +291,30 @@ function renderSegments() {
           </select>
         </div>
         <input type="text" class="input input--sm segment-label" placeholder="Label (optioneel, bv. Naar startpunt)" value="${seg.label || ""}" data-sid="${sid}">
-        ${!isOnly ? `<button class="segment-remove-btn" data-sid="${sid}" title="Segment verwijderen">✕</button>` : ""}
+        ${!isOnly ? `<button class="segment-remove-btn" data-sid="${sid}" title="Segment verwijderen">âœ•</button>` : ""}
       </div>
 
       <div class="segment-gpx">
         <div class="drop-zone segment-drop-zone ${seg.gpx ? "drop-zone--has-file" : ""}" id="gpx-drop-zone-${sid}">
           <input type="file" id="gpx-file-input-${sid}" accept=".gpx" hidden>
           <div class="drop-zone__inner" id="gpx-drop-inner-${sid}" ${seg.gpx ? 'hidden' : ''}>
-            <span class="drop-zone__icon">↑</span>
+            <span class="drop-zone__icon">â†‘</span>
             <p class="drop-zone__text">Sleep je GPX-bestand hierheen</p>
             <p class="drop-zone__sub">of <button class="link-btn" id="gpx-browse-btn-${sid}">kies een bestand</button></p>
           </div>
         </div>
         <div class="gpx-stats" id="gpx-stats-${sid}" ${seg.gpx ? "" : "hidden"}>
           <div class="stat-grid">
-            <div class="stat-item"><span class="stat-value" id="stat-distance-${sid}">${seg.gpx?.distance_km ? seg.gpx.distance_km + " km" : "—"}</span><span class="stat-label">Afstand</span></div>
-            <div class="stat-item"><span class="stat-value" id="stat-duration-${sid}">${seg.gpx?.duration_hours ? seg.gpx.duration_hours + " u" : "—"}</span><span class="stat-label">Duur</span></div>
-            <div class="stat-item"><span class="stat-value" id="stat-ele-up-${sid}">${seg.gpx?.elevation_up_m ? "+" + seg.gpx.elevation_up_m + " m" : "—"}</span><span class="stat-label">Stijging</span></div>
-            <div class="stat-item"><span class="stat-value" id="stat-ele-down-${sid}">${seg.gpx?.elevation_down_m ? "-" + seg.gpx.elevation_down_m + " m" : "—"}</span><span class="stat-label">Daling</span></div>
-            <div class="stat-item"><span class="stat-value" id="stat-highest-${sid}">${seg.gpx?.highest_point_m ? seg.gpx.highest_point_m + " m" : "—"}</span><span class="stat-label">Hoogste punt</span></div>
-            <div class="stat-item"><span class="stat-value" id="stat-lowest-${sid}">${seg.gpx?.lowest_point_m ? seg.gpx.lowest_point_m + " m" : "—"}</span><span class="stat-label">Laagste punt</span></div>
-            <div class="stat-item"><span class="stat-value" id="stat-avg-speed-${sid}">${seg.gpx?.avg_speed_kmh ? seg.gpx.avg_speed_kmh + " km/u" : "—"}</span><span class="stat-label">Gem. snelheid</span></div>
-            <div class="stat-item"><span class="stat-value" id="stat-max-speed-${sid}">${seg.gpx?.max_speed_kmh ? seg.gpx.max_speed_kmh + " km/u" : "—"}</span><span class="stat-label">Max. snelheid</span></div>
+            <div class="stat-item"><span class="stat-value" id="stat-distance-${sid}">${seg.gpx?.distance_km ? seg.gpx.distance_km + " km" : "â€”"}</span><span class="stat-label">Afstand</span></div>
+            <div class="stat-item"><span class="stat-value" id="stat-duration-${sid}">${seg.gpx?.duration_hours ? seg.gpx.duration_hours + " u" : "â€”"}</span><span class="stat-label">Duur</span></div>
+            <div class="stat-item"><span class="stat-value" id="stat-ele-up-${sid}">${seg.gpx?.elevation_up_m ? "+" + seg.gpx.elevation_up_m + " m" : "â€”"}</span><span class="stat-label">Stijging</span></div>
+            <div class="stat-item"><span class="stat-value" id="stat-ele-down-${sid}">${seg.gpx?.elevation_down_m ? "-" + seg.gpx.elevation_down_m + " m" : "â€”"}</span><span class="stat-label">Daling</span></div>
+            <div class="stat-item"><span class="stat-value" id="stat-highest-${sid}">${seg.gpx?.highest_point_m ? seg.gpx.highest_point_m + " m" : "â€”"}</span><span class="stat-label">Hoogste punt</span></div>
+            <div class="stat-item"><span class="stat-value" id="stat-lowest-${sid}">${seg.gpx?.lowest_point_m ? seg.gpx.lowest_point_m + " m" : "â€”"}</span><span class="stat-label">Laagste punt</span></div>
+            <div class="stat-item"><span class="stat-value" id="stat-avg-speed-${sid}">${seg.gpx?.avg_speed_kmh ? seg.gpx.avg_speed_kmh + " km/u" : "â€”"}</span><span class="stat-label">Gem. snelheid</span></div>
+            <div class="stat-item"><span class="stat-value" id="stat-max-speed-${sid}">${seg.gpx?.max_speed_kmh ? seg.gpx.max_speed_kmh + " km/u" : "â€”"}</span><span class="stat-label">Max. snelheid</span></div>
           </div>
-          <span class="gpx-status" id="gpx-status-${sid}">${seg.gpx ? "✓ Geladen" : ""}</span>
+          <span class="gpx-status" id="gpx-status-${sid}">${seg.gpx ? "âœ“ Geladen" : ""}</span>
           <button class="link-btn link-btn--small" id="gpx-reset-btn-${sid}">Ander bestand kiezen</button>
         </div>
       </div>
@@ -333,7 +333,7 @@ function renderSegments() {
             <label class="field__label">Locatie</label>
             <div class="input-with-action">
               <input type="text" class="input segment-location" placeholder="Automatisch via GPX of handmatig" value="${seg.location || ""}" data-sid="${sid}">
-              <button class="btn btn--ghost btn--sm segment-fetch-location" data-sid="${sid}" title="Locatie ophalen via GPX-coördinaten">↺</button>
+              <button class="btn btn--ghost btn--sm segment-fetch-location" data-sid="${sid}" title="Locatie ophalen via GPX-coÃ¶rdinaten">â†º</button>
             </div>
           </div>
         </div>
@@ -353,18 +353,18 @@ function renderSegments() {
         </div>
         <div class="weather-block" id="weather-block-${sid}" ${seg.weather ? "" : "hidden"}>
           <div class="weather-block__header">
-            <span class="weather-block__label">Weerdata — Open-Meteo</span>
+            <span class="weather-block__label">Weerdata â€” Open-Meteo</span>
             <button class="link-btn link-btn--small segment-refetch-weather" data-sid="${sid}">Opnieuw ophalen</button>
           </div>
           <div class="weather-grid">
-            <div class="weather-item"><span class="stat-value" id="w-temp-min-${sid}">${seg.weather?.temperature_min != null ? seg.weather.temperature_min + "°C" : "—"}</span><span class="stat-label">Min. temp</span></div>
-            <div class="weather-item"><span class="stat-value" id="w-temp-max-${sid}">${seg.weather?.temperature_max != null ? seg.weather.temperature_max + "°C" : "—"}</span><span class="stat-label">Max. temp</span></div>
-            <div class="weather-item"><span class="stat-value" id="w-precip-${sid}">${seg.weather?.precipitation_mm != null ? seg.weather.precipitation_mm + " mm" : "—"}</span><span class="stat-label">Neerslag</span></div>
-            <div class="weather-item"><span class="stat-value" id="w-wind-${sid}">${seg.weather?.wind_kmh != null ? seg.weather.wind_kmh + " km/u" : "—"}</span><span class="stat-label">Wind</span></div>
+            <div class="weather-item"><span class="stat-value" id="w-temp-min-${sid}">${seg.weather?.temperature_min != null ? seg.weather.temperature_min + "Â°C" : "â€”"}</span><span class="stat-label">Min. temp</span></div>
+            <div class="weather-item"><span class="stat-value" id="w-temp-max-${sid}">${seg.weather?.temperature_max != null ? seg.weather.temperature_max + "Â°C" : "â€”"}</span><span class="stat-label">Max. temp</span></div>
+            <div class="weather-item"><span class="stat-value" id="w-precip-${sid}">${seg.weather?.precipitation_mm != null ? seg.weather.precipitation_mm + " mm" : "â€”"}</span><span class="stat-label">Neerslag</span></div>
+            <div class="weather-item"><span class="stat-value" id="w-wind-${sid}">${seg.weather?.wind_kmh != null ? seg.weather.wind_kmh + " km/u" : "â€”"}</span><span class="stat-label">Wind</span></div>
           </div>
           <div class="field field--inline">
             <label class="field__label">Omschrijving</label>
-            <input type="text" class="input segment-weather-condition" placeholder="zonnig, bewolkt…" value="${seg.weather?.condition || ""}" data-sid="${sid}">
+            <input type="text" class="input segment-weather-condition" placeholder="zonnig, bewolktâ€¦" value="${seg.weather?.condition || ""}" data-sid="${sid}">
           </div>
         </div>
         <button class="btn btn--secondary btn--sm segment-fetch-weather" data-sid="${sid}">Weerdata ophalen</button>
@@ -386,7 +386,7 @@ function _renderDifficultyBlock(seg) {
 
   const showRoughSurface = seg.transport === "motorcycle" || seg.transport === "car";
   const autoLabel = seg.gpx
-    ? (seg.difficultyAuto ? "✓ Automatisch berekend" : "Handmatig ingesteld")
+    ? (seg.difficultyAuto ? "âœ“ Automatisch berekend" : "Handmatig ingesteld")
     : "Laad een GPX-bestand voor automatische berekening";
 
   var optionsHtml = scale.map(function(opt) {
@@ -407,7 +407,7 @@ function _renderDifficultyBlock(seg) {
   return "<div class=\"field\">" +
     "<label class=\"field__label\">Moeilijkheidsgraad</label>" +
     "<select class=\"input segment-difficulty-select\" data-sid=\"" + sid + "\">" +
-    "<option value=\"\">— Kies —</option>" +
+    "<option value=\"\">â€” Kies â€”</option>" +
     optionsHtml +
     "</select>" +
     "<span class=\"field__help segment-difficulty__status\" id=\"difficulty-status-" + sid + "\">" + autoLabel + "</span>" +
@@ -707,17 +707,17 @@ function renderBlockEditor() {
       const escaped = (block.value || "").replace(/</g, "&lt;").replace(/>/g, "&gt;");
       bodyHtml = `<div class="block-item__label">Tekst</div><textarea class="block-textarea input input--textarea" rows="4" placeholder="Schrijf een alinea\u2026" data-idx="${i}">${escaped}</textarea>`;
     } else if (block.type === "photo") {
-      bodyHtml = `<div class="block-item__label">Foto (volledig breed)</div><input type="url" class="block-url-input input" placeholder="https://res.cloudinary.com/…" value="${block.value || ""}" data-idx="${i}"><div class="block-photo-preview" data-idx="${i}">${block.value ? `<img src="${block.value}" alt="" class="block-photo-preview__img" onerror="this.parentElement.hidden=true">` : ""}</div>`;
+      bodyHtml = `<div class="block-item__label">Foto (volledig breed)</div><input type="url" class="block-url-input input" placeholder="https://res.cloudinary.com/â€¦" value="${block.value || ""}" data-idx="${i}"><div class="block-photo-preview" data-idx="${i}">${block.value ? `<img src="${block.value}" alt="" class="block-photo-preview__img" onerror="this.parentElement.hidden=true">` : ""}</div>`;
     } else if (block.type === "photo-grid") {
       const cols = block.cols || 2;
       const photos = block.photos || ["", ""];
-      const photosHtml = photos.map((url, pi) => `<div class="photo-grid-entry"><input type="url" class="block-url-input input block-grid-url" placeholder="Cloudinary URL…" value="${url}" data-idx="${i}" data-pi="${pi}">${url ? `<img src="${url}" alt="" class="block-photo-preview__img" style="margin-top:4px;" onerror="this.remove()">` : ""}</div>`).join("");
+      const photosHtml = photos.map((url, pi) => `<div class="photo-grid-entry"><input type="url" class="block-url-input input block-grid-url" placeholder="Cloudinary URLâ€¦" value="${url}" data-idx="${i}" data-pi="${pi}">${url ? `<img src="${url}" alt="" class="block-photo-preview__img" style="margin-top:4px;" onerror="this.remove()">` : ""}</div>`).join("");
       bodyHtml = `<div class="block-item__label">Foto grid</div><div class="block-grid-controls"><span style="font-size:var(--text-xs);color:var(--color-charcoal-soft);">Kolommen:</span><label class="block-grid-col-opt"><input type="radio" name="grid-cols-${i}" value="2" ${cols === 2 ? "checked" : ""} data-idx="${i}"> 2</label><label class="block-grid-col-opt"><input type="radio" name="grid-cols-${i}" value="3" ${cols === 3 ? "checked" : ""} data-idx="${i}"> 3</label></div><div class="photo-grid-inputs" data-idx="${i}" style="display:grid;grid-template-columns:repeat(${cols},1fr);gap:6px;">${photosHtml}</div><button class="link-btn link-btn--small block-grid-add-photo" data-idx="${i}" style="margin-top:6px;">+ Foto toevoegen</button>`;
     } else if (block.type === "link") {
-      bodyHtml = `<div class="block-item__label">Link</div><input type="text" class="block-link-name input" placeholder="Naam (bv. Route op AllTrails)" value="${block.name || ""}" data-idx="${i}" style="margin-bottom:6px;"><input type="url" class="block-link-url input" placeholder="https://…" value="${block.url || ""}" data-idx="${i}">`;
+      bodyHtml = `<div class="block-item__label">Link</div><input type="text" class="block-link-name input" placeholder="Naam (bv. Route op AllTrails)" value="${block.name || ""}" data-idx="${i}" style="margin-bottom:6px;"><input type="url" class="block-link-url input" placeholder="https://â€¦" value="${block.url || ""}" data-idx="${i}">`;
     }
 
-    item.innerHTML = `<div class="block-controls"><button class="block-ctrl-btn" data-action="up" data-idx="${i}" title="Omhoog" ${isFirst ? "disabled" : ""}>↑</button><button class="block-ctrl-btn" data-action="down" data-idx="${i}" title="Omlaag" ${isLast ? "disabled" : ""}>↓</button></div><div class="block-body">${bodyHtml}</div><button class="block-remove-btn" data-action="remove" data-idx="${i}" title="Verwijder blok">✕</button>`;
+    item.innerHTML = `<div class="block-controls"><button class="block-ctrl-btn" data-action="up" data-idx="${i}" title="Omhoog" ${isFirst ? "disabled" : ""}>â†‘</button><button class="block-ctrl-btn" data-action="down" data-idx="${i}" title="Omlaag" ${isLast ? "disabled" : ""}>â†“</button></div><div class="block-body">${bodyHtml}</div><button class="block-remove-btn" data-action="remove" data-idx="${i}" title="Verwijder blok">âœ•</button>`;
     els.blockList.appendChild(item);
   });
 
@@ -761,7 +761,7 @@ function renderGallery() {
   state.galleryPhotos.forEach((photo, i) => {
     const entry = document.createElement("div");
     entry.className = "photo-entry";
-    entry.innerHTML = `<input type="url" class="input gallery-url-input" placeholder="https://res.cloudinary.com/…" value="${photo.url || ""}" data-idx="${i}"><button class="photo-entry__remove" data-idx="${i}" title="Verwijder">✕</button>`;
+    entry.innerHTML = `<input type="url" class="input gallery-url-input" placeholder="https://res.cloudinary.com/â€¦" value="${photo.url || ""}" data-idx="${i}"><button class="photo-entry__remove" data-idx="${i}" title="Verwijder">âœ•</button>`;
     entry.querySelector(".gallery-url-input").addEventListener("blur", (e) => { const fixed = fixCloudinaryUrl(e.target.value.trim(), "w_800,f_auto"); e.target.value = fixed; state.galleryPhotos[i].url = fixed; updatePreview(); });
     entry.querySelector(".gallery-url-input").addEventListener("input", (e) => { state.galleryPhotos[i].url = e.target.value; updatePreview(); });
     entry.querySelector(".photo-entry__remove").addEventListener("click", () => { state.galleryPhotos.splice(i, 1); renderGallery(); updatePreview(); });
@@ -797,14 +797,14 @@ function handleGpxFile(file, sid) {
 
 function displayGpxStats(gpx, sid) {
   const set = (id, val) => { const el = $(id); if (el) el.textContent = val; };
-  set(`stat-distance-${sid}`, gpx.distance_km ? `${gpx.distance_km} km` : "—");
-  set(`stat-duration-${sid}`, gpx.duration_hours ? `${gpx.duration_hours} u` : "—");
-  set(`stat-ele-up-${sid}`, gpx.elevation_up_m ? `+${gpx.elevation_up_m} m` : "—");
-  set(`stat-ele-down-${sid}`, gpx.elevation_down_m ? `-${gpx.elevation_down_m} m` : "—");
-  set(`stat-highest-${sid}`, gpx.highest_point_m ? `${gpx.highest_point_m} m` : "—");
-  set(`stat-lowest-${sid}`, gpx.lowest_point_m ? `${gpx.lowest_point_m} m` : "—");
-  set(`stat-avg-speed-${sid}`, gpx.avg_speed_kmh ? `${gpx.avg_speed_kmh} km/u` : "—");
-  set(`stat-max-speed-${sid}`, gpx.max_speed_kmh ? `${gpx.max_speed_kmh} km/u` : "—");
+  set(`stat-distance-${sid}`, gpx.distance_km ? `${gpx.distance_km} km` : "â€”");
+  set(`stat-duration-${sid}`, gpx.duration_hours ? `${gpx.duration_hours} u` : "â€”");
+  set(`stat-ele-up-${sid}`, gpx.elevation_up_m ? `+${gpx.elevation_up_m} m` : "â€”");
+  set(`stat-ele-down-${sid}`, gpx.elevation_down_m ? `-${gpx.elevation_down_m} m` : "â€”");
+  set(`stat-highest-${sid}`, gpx.highest_point_m ? `${gpx.highest_point_m} m` : "â€”");
+  set(`stat-lowest-${sid}`, gpx.lowest_point_m ? `${gpx.lowest_point_m} m` : "â€”");
+  set(`stat-avg-speed-${sid}`, gpx.avg_speed_kmh ? `${gpx.avg_speed_kmh} km/u` : "â€”");
+  set(`stat-max-speed-${sid}`, gpx.max_speed_kmh ? `${gpx.max_speed_kmh} km/u` : "â€”");
   const dropZone = $(`gpx-drop-zone-${sid}`);
   const inner = $(`gpx-drop-inner-${sid}`);
   const statsEl = $(`gpx-stats-${sid}`);
@@ -812,7 +812,7 @@ function displayGpxStats(gpx, sid) {
   if (inner) inner.hidden = true;
   if (dropZone) dropZone.classList.add("drop-zone--has-file");
   if (statsEl) statsEl.hidden = false;
-  if (statusEl) statusEl.textContent = "✓ Geladen";
+  if (statusEl) statusEl.textContent = "âœ“ Geladen";
 }
 
 // -----------------------------------------------------------
@@ -919,7 +919,7 @@ function showSpeedWarning(gpxData, sid) {
   const maxRaw = gpxData._maxSpeedRaw, maxFiltered = gpxData.max_speed_kmh;
   const warning = document.createElement("div");
   warning.className = "gpx-warning";
-  warning.innerHTML = `<p class="gpx-warning__text">⚠️ Verdachte snelheidspiek: <strong>${maxRaw} km/u</strong> (gem. ${gpxData.avg_speed_kmh} km/u). Waarschijnlijk GPS-ruis. Gefilterd maximum: <strong>${maxFiltered} km/u</strong>.</p><div class="gpx-warning__actions"><button class="btn btn--primary btn--sm gpx-warn-ignore">Negeren (${maxFiltered} km/u)</button><button class="btn btn--ghost btn--sm gpx-warn-keep" data-raw="${maxRaw}" data-sid="${sid || 1}">Toch bewaren (${maxRaw} km/u)</button></div>`;
+  warning.innerHTML = `<p class="gpx-warning__text">âš ï¸ Verdachte snelheidspiek: <strong>${maxRaw} km/u</strong> (gem. ${gpxData.avg_speed_kmh} km/u). Waarschijnlijk GPS-ruis. Gefilterd maximum: <strong>${maxFiltered} km/u</strong>.</p><div class="gpx-warning__actions"><button class="btn btn--primary btn--sm gpx-warn-ignore">Negeren (${maxFiltered} km/u)</button><button class="btn btn--ghost btn--sm gpx-warn-keep" data-raw="${maxRaw}" data-sid="${sid || 1}">Toch bewaren (${maxRaw} km/u)</button></div>`;
   container.appendChild(warning);
   warning.querySelector(".gpx-warn-ignore").addEventListener("click", () => warning.remove());
   warning.querySelector(".gpx-warn-keep").addEventListener("click", (e) => {
@@ -936,7 +936,7 @@ function showSpeedWarning(gpxData, sid) {
 // -----------------------------------------------------------
 async function fetchLocationName(lat, lon, sid) {
   const fetchBtn = document.querySelector(`.segment-fetch-location[data-sid="${sid}"]`);
-  if (fetchBtn) fetchBtn.textContent = "…";
+  if (fetchBtn) fetchBtn.textContent = "â€¦";
   try {
     const url = `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json`;
     const resp = await fetch(url, { headers: { "Accept-Language": "nl" } });
@@ -959,7 +959,7 @@ async function fetchLocationName(lat, lon, sid) {
   } catch (err) {
     console.warn("Nominatim fout:", err);
   } finally {
-    if (fetchBtn) fetchBtn.textContent = "↺";
+    if (fetchBtn) fetchBtn.textContent = "â†º";
     updatePreview();
   }
 }
@@ -974,11 +974,11 @@ async function fetchWeather(sid) {
   if (!date) { alert("Kies eerst een datum voor dit segment."); return; }
   if (!lat || !lon) { alert("Laad eerst een GPX-bestand voor dit segment."); return; }
   const fetchBtn = document.querySelector(`.segment-fetch-weather[data-sid="${sid}"]`);
-  if (fetchBtn) { fetchBtn.textContent = "Ophalen…"; fetchBtn.disabled = true; }
+  if (fetchBtn) { fetchBtn.textContent = "Ophalenâ€¦"; fetchBtn.disabled = true; }
   try {
     const today = new Date(); today.setHours(0, 0, 0, 0);
     const chosenDate = new Date(date);
-    if (chosenDate >= today) { alert("Weerdata is enkel beschikbaar voor datums in het verleden. Kies een datum vóór vandaag."); return; }
+    if (chosenDate >= today) { alert("Weerdata is enkel beschikbaar voor datums in het verleden. Kies een datum vÃ³Ã³r vandaag."); return; }
     const url = `https://archive-api.open-meteo.com/v1/archive?latitude=${lat}&longitude=${lon}&start_date=${date}&end_date=${date}&daily=temperature_2m_max,temperature_2m_min,precipitation_sum,wind_speed_10m_max&timezone=Europe/Brussels`;
     const resp = await fetch(url);
     if (!resp.ok) { const errData = await resp.json().catch(() => ({})); const reason = errData?.reason || `HTTP ${resp.status}`; console.error("Open-Meteo fout:", reason); alert(`Weerdata kon niet worden opgehaald: ${reason}`); return; }
@@ -988,10 +988,10 @@ async function fetchWeather(sid) {
     const condInp = document.querySelector(`.segment-weather-condition[data-sid="${sid}"]`);
     seg.weather = { date, temperature_min: d.temperature_2m_min?.[0] ?? null, temperature_max: d.temperature_2m_max?.[0] ?? null, precipitation_mm: d.precipitation_sum?.[0] ?? null, wind_kmh: d.wind_speed_10m_max?.[0] ?? null, condition: condInp?.value || "", source: "Open-Meteo" };
     const set = (id, val) => { const el = $(id); if (el) el.textContent = val; };
-    set(`w-temp-min-${sid}`, seg.weather.temperature_min != null ? `${seg.weather.temperature_min}°C` : "—");
-    set(`w-temp-max-${sid}`, seg.weather.temperature_max != null ? `${seg.weather.temperature_max}°C` : "—");
-    set(`w-precip-${sid}`, seg.weather.precipitation_mm != null ? `${seg.weather.precipitation_mm} mm` : "—");
-    set(`w-wind-${sid}`, seg.weather.wind_kmh != null ? `${seg.weather.wind_kmh} km/u` : "—");
+    set(`w-temp-min-${sid}`, seg.weather.temperature_min != null ? `${seg.weather.temperature_min}Â°C` : "â€”");
+    set(`w-temp-max-${sid}`, seg.weather.temperature_max != null ? `${seg.weather.temperature_max}Â°C` : "â€”");
+    set(`w-precip-${sid}`, seg.weather.precipitation_mm != null ? `${seg.weather.precipitation_mm} mm` : "â€”");
+    set(`w-wind-${sid}`, seg.weather.wind_kmh != null ? `${seg.weather.wind_kmh} km/u` : "â€”");
     const weatherBlock = $(`weather-block-${sid}`);
     if (weatherBlock) weatherBlock.hidden = false;
     if (seg.difficultyAuto && seg.gpx) { const auto = calculateSegmentDifficulty(seg); if (auto) { seg.difficulty = auto; _refreshDifficultyBlock(sid); } }
@@ -1035,13 +1035,13 @@ els.inputHeroPhoto.addEventListener("input", updatePreview);
 els.inputIntro.addEventListener("input", () => { els.introCount.textContent = `${els.inputIntro.value.length}/160`; updatePreview(); });
 
 // -----------------------------------------------------------
-// HOOGTEPROFIEL PREVIEW — T2-004 creator variant
+// HOOGTEPROFIEL PREVIEW â€” T2-004 creator variant
 // -----------------------------------------------------------
 
 /**
  * Herpars GPX-string naar array van {lat, lon, ele} objecten.
  * Filtert punten zonder geldige elevatie.
- * Geen sampling — alle hoogtepunten voor nauwkeurigheid.
+ * Geen sampling â€” alle hoogtepunten voor nauwkeurigheid.
  * @param {string} gpxRaw - Volledige GPX XML als string
  * @returns {Array<{lat,lon,ele}>|null}
  */
@@ -1117,7 +1117,7 @@ function renderElevationPreview(segments) {
     });
   }
 
-  // Geen data — sectie verbergen en stoppen
+  // Geen data â€” sectie verbergen en stoppen
   if (segmentData.length === 0) {
     wrapper.hidden = true;
     return;
@@ -1212,7 +1212,7 @@ function renderElevationPreview(segments) {
       stroke="var(--color-border,#e5e7eb)" stroke-width="1.5" stroke-dasharray="4 3"/>`;
   }
 
-  // Interactieve hover overlay — transparante rect vangt muisevents op
+  // Interactieve hover overlay â€” transparante rect vangt muisevents op
   svg += `<rect id="elev-prev-overlay" x="${ML}" y="${MT}" width="${plotW}" height="${plotH}"
     fill="transparent" style="cursor:crosshair;"/>`;
 
@@ -1232,7 +1232,7 @@ function renderElevationPreview(segments) {
   svg += `</svg>`;
   container.innerHTML = svg;
 
-  // Hover interactie — platte lookup array voor snel dichtstbijzijnd punt
+  // Hover interactie â€” platte lookup array voor snel dichtstbijzijnd punt
   const svgEl = container.querySelector("svg");
   const overlay  = container.querySelector("#elev-prev-overlay");
   const cursor   = container.querySelector("#elev-prev-cursor");
@@ -1269,10 +1269,10 @@ function renderElevationPreview(segments) {
     cursor.setAttribute("x1", cx); cursor.setAttribute("x2", cx); cursor.setAttribute("opacity", "0.6");
     dot.setAttribute("cx", cx); dot.setAttribute("cy", cy); dot.setAttribute("fill", best.color); dot.setAttribute("opacity", "1");
 
-    tip1.textContent = `↑ ${Math.round(best.ele)} m`;
-    tip2.textContent = `⇌ ${best.d.toFixed(2)} km`;
+    tip1.textContent = `â†‘ ${Math.round(best.ele)} m`;
+    tip2.textContent = `â‡Œ ${best.d.toFixed(2)} km`;
 
-    // Tooltip positie — rechts van cursor, tenzij te dicht bij rand
+    // Tooltip positie â€” rechts van cursor, tenzij te dicht bij rand
     const tipW = 88, tipPad = 6;
     let tipX = cx + tipPad;
     if (tipX + tipW > W - MR) tipX = cx - tipW - tipPad;
@@ -1322,21 +1322,21 @@ function updatePreview() {
   if (heroUrl) { heroImg.src = heroUrl; heroImg.hidden = false; heroPlaceholder.hidden = true; }
   else { heroImg.hidden = true; heroPlaceholder.hidden = false; }
 
-  $("rp-distance").textContent = gpx?.distance_km ? `${gpx.distance_km} km` : "—";
-  $("rp-duration").textContent = gpx?.duration_hours ? `${gpx.duration_hours} u` : "—";
-  $("rp-elevation").textContent = gpx?.elevation_up_m ? `+${gpx.elevation_up_m} m` : "—";
-  $("rp-avg-speed").textContent = gpx?.avg_speed_kmh ? `${gpx.avg_speed_kmh} km/u` : "—";
+  $("rp-distance").textContent = gpx?.distance_km ? `${gpx.distance_km} km` : "â€”";
+  $("rp-duration").textContent = gpx?.duration_hours ? `${gpx.duration_hours} u` : "â€”";
+  $("rp-elevation").textContent = gpx?.elevation_up_m ? `+${gpx.elevation_up_m} m` : "â€”";
+  $("rp-avg-speed").textContent = gpx?.avg_speed_kmh ? `${gpx.avg_speed_kmh} km/u` : "â€”";
 
-  const diffLabels = { T1: "T1 — Wandelen", T2: "T2 — Bergwandeling", T3: "T3 — Veeleisend", T4: "T4 — Alpien", T5: "T5 — Veeleisend alpien", T6: "T6 — Moeilijk alpien" };
-  $("rp-difficulty").textContent = diffLabels[difficulty] || "—";
+  const diffLabels = { T1: "T1 â€” Wandelen", T2: "T2 â€” Bergwandeling", T3: "T3 â€” Veeleisend", T4: "T4 â€” Alpien", T5: "T5 â€” Veeleisend alpien", T6: "T6 â€” Moeilijk alpien" };
+  $("rp-difficulty").textContent = diffLabels[difficulty] || "â€”";
 
   const weatherEl = $("rp-weather");
   if (weather) {
-    $("rp-w-temp").innerHTML = `<span class="rp-weather__icon">🌡</span> ${weather.temperature_min ?? "—"}° – ${weather.temperature_max ?? "—"}°C`;
-    $("rp-w-precip").innerHTML = `<span class="rp-weather__icon">💧</span> ${weather.precipitation_mm ?? "—"} mm`;
-    $("rp-w-wind").innerHTML = `<span class="rp-weather__icon">🍃</span> ${weather.wind_kmh ?? "—"} km/u`;
-    const dateStr = weather.date ? new Date(weather.date).toLocaleDateString("nl-BE", { day: "numeric", month: "long", year: "numeric" }) : "—";
-    $("rp-w-date").innerHTML = `<span class="rp-weather__icon">📅</span> ${dateStr}`;
+    $("rp-w-temp").innerHTML = `<span class="rp-weather__icon">ðŸŒ¡</span> ${weather.temperature_min ?? "â€”"}Â° â€“ ${weather.temperature_max ?? "â€”"}Â°C`;
+    $("rp-w-precip").innerHTML = `<span class="rp-weather__icon">ðŸ’§</span> ${weather.precipitation_mm ?? "â€”"} mm`;
+    $("rp-w-wind").innerHTML = `<span class="rp-weather__icon">ðŸƒ</span> ${weather.wind_kmh ?? "â€”"} km/u`;
+    const dateStr = weather.date ? new Date(weather.date).toLocaleDateString("nl-BE", { day: "numeric", month: "long", year: "numeric" }) : "â€”";
+    $("rp-w-date").innerHTML = `<span class="rp-weather__icon">ðŸ“…</span> ${dateStr}`;
     weatherEl.hidden = false;
   } else {
     weatherEl.hidden = true;
@@ -1366,7 +1366,7 @@ function updatePreview() {
     mapEl.hidden = true;
   }
 
-  // Hoogteprofiel preview — toont zodra minstens één segment gpxRaw heeft
+  // Hoogteprofiel preview â€” toont zodra minstens Ã©Ã©n segment gpxRaw heeft
   renderElevationPreview(state.segments);
 }
 
@@ -1443,7 +1443,7 @@ els.btnAiGenerate.addEventListener("click", async () => {
   const gpx = seg0?.gpx, weather = seg0?.weather;
   if (!title && !location && !keywords) { alert("Vul minstens een titel, locatie of steekwoorden in."); return; }
   els.btnAiGenerate.classList.add("is-loading"); els.btnAiGenerate.textContent = "\u2746 Genereren\u2026";
-  const prompt = `Je schrijft Nederlandse wandelverhalen voor MyTrailWalks, een persoonlijk outdoor storytelling platform.\n\nGegevens van de route:\n- Titel: ${title || "onbekend"}\n- Locatie: ${location || "onbekend"}\n- Moeilijkheid: ${difficulty || "onbekend"}\n- Steekwoorden / ervaringen: ${keywords || "geen"}\n${gpx ? `- Afstand: ${gpx.distance_km} km, Duur: ${gpx.duration_hours} uur, Stijging: ${gpx.elevation_up_m} m` : ""}\n${weather ? `- Weer: min ${weather.temperature_min}°C, max ${weather.temperature_max}°C, neerslag ${weather.precipitation_mm} mm, wind ${weather.wind_kmh} km/u` : ""}\n${state.segments.length > 1 ? `- Vervoersmiddelen: ${state.segments.map((s) => TRANSPORT_LABELS[s.transport] || s.transport).join(", ")}` : ""}\n\nGenereer ALLEEN een JSON-object (geen uitleg, geen markdown) met deze velden:\n{\n  "summary": "Één zin samenvatting van max 160 tekens voor de grid-weergave.",\n  "story_blocks": [\n    { "type": "text", "value": "Eerste alinea van het verhaal." },\n    { "type": "text", "value": "Tweede alinea van het verhaal." }\n  ],\n  "tips": "2-4 praktische tips voor wandelaars, als doorlopende tekst."\n}\n\nSchrijf het verhaal in 3-5 alinea's. Persoonlijk, beschrijvend, no clickbait.`;
+  const prompt = `Je schrijft Nederlandse wandelverhalen voor MyTrailWalks, een persoonlijk outdoor storytelling platform.\n\nGegevens van de route:\n- Titel: ${title || "onbekend"}\n- Locatie: ${location || "onbekend"}\n- Moeilijkheid: ${difficulty || "onbekend"}\n- Steekwoorden / ervaringen: ${keywords || "geen"}\n${gpx ? `- Afstand: ${gpx.distance_km} km, Duur: ${gpx.duration_hours} uur, Stijging: ${gpx.elevation_up_m} m` : ""}\n${weather ? `- Weer: min ${weather.temperature_min}Â°C, max ${weather.temperature_max}Â°C, neerslag ${weather.precipitation_mm} mm, wind ${weather.wind_kmh} km/u` : ""}\n${state.segments.length > 1 ? `- Vervoersmiddelen: ${state.segments.map((s) => TRANSPORT_LABELS[s.transport] || s.transport).join(", ")}` : ""}\n\nGenereer ALLEEN een JSON-object (geen uitleg, geen markdown) met deze velden:\n{\n  "summary": "Ã‰Ã©n zin samenvatting van max 160 tekens voor de grid-weergave.",\n  "story_blocks": [\n    { "type": "text", "value": "Eerste alinea van het verhaal." },\n    { "type": "text", "value": "Tweede alinea van het verhaal." }\n  ],\n  "tips": "2-4 praktische tips voor wandelaars, als doorlopende tekst."\n}\n\nSchrijf het verhaal in 3-5 alinea's. Persoonlijk, beschrijvend, no clickbait.`;
   try {
     const response = await fetch("https://api.anthropic.com/v1/messages", { method: "POST", headers: { "Content-Type": "application/json", "x-api-key": state.apiKey, "anthropic-version": "2023-06-01" }, body: JSON.stringify({ model: "claude-sonnet-4-6", max_tokens: 1000, messages: [{ role: "user", content: prompt }] }) });
     const data = await response.json();
@@ -1470,7 +1470,7 @@ function initLeafletMap(segments) {
   if (!container) return;
   if (leafletMap) { leafletMap.remove(); leafletMap = null; }
   leafletMap = L.map("leaflet-preview-map", { zoomControl: true, scrollWheelZoom: false });
-  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", { attribution: "© OpenStreetMap contributors", maxZoom: 18 }).addTo(leafletMap);
+  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", { attribution: "Â© OpenStreetMap contributors", maxZoom: 18 }).addTo(leafletMap);
   const allBounds = [];
   segments.forEach((seg) => {
     if (!seg.gpx?.startLat) return;
@@ -1510,7 +1510,7 @@ function showInlineError(inputEl, message) {
 }
 
 // -----------------------------------------------------------
-// INIT — v2.4.3
+// INIT â€” v2.4.3
 // -----------------------------------------------------------
 window.appReady.then(() => {
   const style = document.createElement("style");
