@@ -1,36 +1,17 @@
-<!-- ======================= creator.html v2.1.0 =======================
+<!-- ======================= creator.html v2.1.1 =======================
      Route creator pagina — MyTrailWalks
 
-     Gebruikt creator.js v2.4.0:
+     Gebruikt creator.js v2.4.3:
+       - Hoogteprofiel preview toegevoegd (#rp-elevation)
+         toont SVG profiel per segment zodra GPX geladen is
        - Segmenten (GPX + datum/locatie + weer) — herhaalbaar
        - Vervoersmiddel "Hike / Trail" toegevoegd naast Wandelen
        - Per-segment moeilijkheidsgraad, automatisch berekend uit GPX
-         (schaal afhankelijk van vervoersmiddel — zie creator.js)
 
-     Bouwt stap voor stap een route-JSON op en exporteert deze.
-
-     Stappen:
-       1. Segmenten — GPX + datum/locatie + weer per vervoersmiddel
-          (herhaalbaar via "+ Segment toevoegen")
-       2. Route-informatie (titel, moeilijkheid, regio, bron)
-       3. Foto's (hero)
-       4. Verhaal & tips — blokken-editor (tekst + foto blokken, vrije volgorde)
-       5. Export → downloadt [id].json
-
-     Modi:
-       - Handmatig: geen AI, alles zelf invullen
-       - AI-assisted: Anthropic API genereert verhaal/samenvatting/tips
-
-     Toegang:
-       - Pagina enkel bereikbaar via admin dropdown in topbar na inlog
-
-     Scripts: alle scripts onderaan <body> — standaard MyTrailWalks volgorde:
-       Eruda → Supabase SDK → i18next → i18n.js → auth.js → topbar-auth.js → app.js → creator.js
-
-     v2.1.0: stap 1+2 samengevoegd tot herhaalbare segmenten (GPX + datum/locatie
-             per vervoersmiddel). Eén vervoersmiddel per segment i.p.v. checkboxlijst.
+     v2.1.1: #rp-elevation toegevoegd in preview kolom (T2-004)
+     v2.1.0: stap 1+2 samengevoegd tot herhaalbare segmenten
      v2.0.0: visuele preview, blokken-editor, JSON upload/import
-     v1.0.1: scripts verplaatst naar onderaan <body> conform standaard
+     v1.0.1: scripts verplaatst naar onderaan <body>
      v1.0.0: initiële versie
      ======================================================================= -->
 <!DOCTYPE html>
@@ -107,13 +88,7 @@
       <!-- LINKER KOLOM: stap-voor-stap formulier -->
       <div class="creator-form-col">
 
-        <!-- ===================================================================
-             STAP 1: Route segmenten (GPX + datum/locatie + weer per segment)
-             Vervangt de vroegere losse stappen "GPX-bestand" en "Datum & locatie".
-             De inhoud van #segment-list wordt volledig gerenderd door
-             renderSegments() in creator.js — hier staat enkel de buitenste
-             structuur en de "+ Segment toevoegen" knop.
-             =================================================================== -->
+        <!-- STAP 1: Route segmenten -->
         <section class="creator-step" id="step-segments">
           <div class="creator-step__header">
             <span class="creator-step__num">1</span>
@@ -167,6 +142,7 @@
             </div>
           </div>
         </section>
+
         <hr class="step-divider">
 
         <!-- STAP 3: Foto's -->
@@ -187,7 +163,7 @@
 
         <hr class="step-divider">
 
-        <!-- STAP 4: Verhaal & tips — blokken-editor -->
+        <!-- STAP 4: Verhaal & tips -->
         <section class="creator-step" id="step-story">
           <div class="creator-step__header">
             <span class="creator-step__num">4</span>
@@ -207,7 +183,6 @@
               <textarea id="input-intro" class="input input--textarea" rows="3" maxlength="160" placeholder="Eén zin die de wandeling samenvat voor de grid-weergave…"></textarea>
             </div>
 
-            <!-- Blokken-editor voor verhaal -->
             <div class="field">
               <label class="field__label">Verhaal</label>
               <span class="field__help" style="display:block; margin-bottom: 8px;">Voeg tekst- en fotoblokken toe in de volgorde die je wilt.</span>
@@ -227,7 +202,6 @@
               <textarea id="input-tips" class="input input--textarea" rows="4" placeholder="Praktische tips voor wandelaars…"></textarea>
             </div>
 
-            <!-- Galerij onderaan -->
             <div class="field">
               <label class="field__label">Galerij (onderaan pagina)</label>
               <span class="field__help" style="display:block;margin-bottom:8px;">Extra foto's die als grid worden getoond onderaan de route pagina.</span>
@@ -285,7 +259,6 @@
             <span class="preview-header__label">Voorvertoning</span>
           </div>
 
-          <!-- Visuele route preview -->
           <div class="route-preview" id="route-preview">
 
             <!-- Hero foto -->
@@ -345,6 +318,14 @@
                 <div class="rp-map__frame" id="rp-map-frame"></div>
               </div>
 
+              <!-- Hoogteprofiel — gevuld door renderElevationPreview() in creator.js
+                   Verschijnt automatisch zodra een segment gpxRaw heeft met elevatie.
+                   Verborgen als geen GPX geladen is. -->
+              <div class="rp-elevation" id="rp-elevation" hidden>
+                <p class="rp-map__label">Hoogteprofiel</p>
+                <div id="rp-elevation-chart"></div>
+              </div>
+
             </div><!-- /rp-body -->
           </div><!-- /route-preview -->
         </div>
@@ -372,7 +353,7 @@
   <script src="js/analytics.js"></script>
   <script src="js/app.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.min.js"></script>
-  <script src="js/creator.js?v=2.4.1"></script>
+  <script src="js/creator.js?v=2.4.3"></script>
 
 </body>
 </html>
