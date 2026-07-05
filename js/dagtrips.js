@@ -35,7 +35,7 @@ let allRoutes = [];
 // ROUTES LADEN — uit dagtrips/dagtrips-index.json + dagtrips/[id].json
 // -----------------------------------------------------------
 async function loadRoutes() {
-  const indexUrl = "dagtrips/dagtrips-index.json";
+  const indexUrl = "routes/_dagtrips-index.json";
   console.log("dagtrips.js: index laden van", indexUrl);
 
   try {
@@ -47,7 +47,7 @@ async function loadRoutes() {
 
     const results = await Promise.allSettled(
       ids.map((id) => {
-        const url = `dagtrips/${id}.json`;
+        const url = `routes/${id}.json`;
         console.log("dagtrips.js: dagtrip laden van", url);
 
         return fetch(url).then((r) => {
