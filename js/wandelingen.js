@@ -32,7 +32,7 @@ let allRoutes = [];
 // ROUTES LADEN
 // -----------------------------------------------------------
 async function loadRoutes() {
-  const indexUrl = "routes/routes-index.json";
+  const indexUrl = "routes/_routes-index.json";
   console.log("wandelingen.js: index laden van", indexUrl);
 
   try {
