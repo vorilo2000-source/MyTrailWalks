@@ -1,4 +1,4 @@
-/ =======================================================
+// =======================================================
 // creator.js — MyTrailWalks
 // Route creator: GPX parse, weer, locatie, AI, JSON export
 // v2.4.3: hoogteprofiel preview toegevoegd (renderElevationPreview)
@@ -1540,4 +1540,3 @@ window.appReady.then(() => {
   renderBlockEditor();
   updatePreview();
 });
-ENDOFFILE
