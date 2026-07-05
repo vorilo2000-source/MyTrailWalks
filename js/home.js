@@ -15,14 +15,14 @@
 // =======================================================
 "use strict";
 
-const ROUTES_INDEX_PATH = "routes/routes-index.json";
+const ROUTES_INDEX_PATH = "routes/_routes-index.json";
 const ROUTES_FOLDER = "routes";
 
-const DAGTRIPS_INDEX_PATH = "dagtrips/dagtrips-index.json";
-const DAGTRIPS_FOLDER = "dagtrips";
+const DAGTRIPS_INDEX_PATH = "routes/_dagtrips-index.json";
+const DAGTRIPS_FOLDER = "routes";
 
-const ADVENTURE_INDEX_PATH = "adventure/adventure-index.json";
-const ADVENTURE_FOLDER = "adventure";
+const ADVENTURE_INDEX_PATH = "routes/_adventure-index.json";
+const ADVENTURE_FOLDER = "routes";
 
 // SAC-schaal + achterwaartse compatibiliteit
 const DIFFICULTY_LABELS = {
