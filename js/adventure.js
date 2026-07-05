@@ -23,7 +23,7 @@ const DIFFICULTY_LABELS = {
 let allRoutes = [];
 
 async function loadRoutes() {
-  const indexUrl = "adventure/adventure-index.json";
+  const indexUrl = "routes/_adventure-index.json";
   console.log("adventure.js: index laden van", indexUrl);
 
   try {
@@ -35,7 +35,7 @@ async function loadRoutes() {
 
     const results = await Promise.allSettled(
       ids.map((id) => {
-        const url = `adventure/${id}.json`;
+        const url = `routes/${id}.json`;
         console.log("adventure.js: item laden van", url);
 
         return fetch(url).then((r) => {
