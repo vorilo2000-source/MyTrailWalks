@@ -389,27 +389,30 @@ function _renderDifficultyBlock(seg) {
     ? (seg.difficultyAuto ? "✓ Automatisch berekend" : "Handmatig ingesteld")
     : "Laad een GPX-bestand voor automatische berekening";
 
-  return `
-    <div class="field">
-      <label class="field__label">Moeilijkheidsgraad</label>
-      <select class="input segment-difficulty-select" data-sid="${sid}">
-        <option value="">— Kies —</option>
-        ${scale.map((opt) =>
-          `<option value="${opt.value}" ${seg.difficulty === opt.value ? "selected" : ""}>${opt.label}</option>`
-        ).join("")}
-      </select>
-      <span class="field__help segment-difficulty__status" id="difficulty-status-${sid}">${autoLabel}</span>
-    </div>
-    ${showRoughSurface ? `
-      <div class="field field--inline">
-        <label class="checkbox-label">
-          <input type="checkbox" class="segment-rough-surface" data-sid="${sid}" ${seg.roughSurface ? "checked" : ""}>
-          Kasseien / kinderkopjes / onverhard wegdek
-        </label>
-        <span class="field__help">Tilt het niveau minstens naar niveau 2 (wegdektype is niet uit GPX af te leiden)</span>
-      </div>
-    ` : ""}
-  `;
+  var optionsHtml = scale.map(function(opt) {
+    return "<option value=\"" + opt.value + "\" " + (seg.difficulty === opt.value ? "selected" : "") + ">" + opt.label + "</option>";
+  }).join("");
+
+  var roughHtml = "";
+  if (showRoughSurface) {
+    roughHtml = "<div class=\"field field--inline\">" +
+      "<label class=\"checkbox-label\">" +
+      "<input type=\"checkbox\" class=\"segment-rough-surface\" data-sid=\"" + sid + "\" " + (seg.roughSurface ? "checked" : "") + ">" +
+      " Kasseien / kinderkopjes / onverhard wegdek" +
+      "</label>" +
+      "<span class=\"field__help\">Tilt het niveau minstens naar niveau 2 (wegdektype is niet uit GPX af te leiden)</span>" +
+      "</div>";
+  }
+
+  return "<div class=\"field\">" +
+    "<label class=\"field__label\">Moeilijkheidsgraad</label>" +
+    "<select class=\"input segment-difficulty-select\" data-sid=\"" + sid + "\">" +
+    "<option value=\"\">— Kies —</option>" +
+    optionsHtml +
+    "</select>" +
+    "<span class=\"field__help segment-difficulty__status\" id=\"difficulty-status-" + sid + "\">" + autoLabel + "</span>" +
+    "</div>" +
+    roughHtml;
 }
 
 function _bindSegmentEvents(sid) {
