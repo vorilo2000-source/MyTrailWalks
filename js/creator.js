@@ -1,16 +1,16 @@
 // =======================================================
 // creator.js — MyTrailWalks
 // Route creator: GPX parse, weer, locatie, AI, JSON export
+// v3.0.0: één unified segment.gpx model
+//         - GPX volledig uitgelezen naar segment.gpx.tracks[].segments[].points[]
+//         - segment.gpx.stats bevat alle berekende statistieken
+//         - Geen gpx_raw / gpx_stats / gpx_data meer in export
+//         - renderElevationPreview leest uit segment.gpx.tracks[].segments[].points[]
+//         - Import converteert oud formaat (gpx_raw / gpx_stats) naar nieuw model
 // v2.4.3: hoogteprofiel preview toegevoegd (renderElevationPreview)
-//         in de visuele preview rechterkolom — toont SVG profiel
-//         per segment in segmentkleur zodra gpxRaw beschikbaar is
 // v2.4.2: datum-validatie bij weerdata ophalen (toekomstige datum)
-//         resp.ok check + betere foutmeldingen Open-Meteo
 // v2.4.1: track_points toegevoegd aan segments[].gpx_stats export
-//         track_points toegevoegd aan root-level gpx_stats export (bug fix)
 // v2.4.0: hike/trail vervoersmiddel + moeilijkheidsschaal per vervoersmiddel
-//         (walking W1-W3, hike SAC T1-T6, cycling/motorcycle/car
-//          klim+bochtigheid uit GPX + kasseien-override)
 // v2.3.0: meerdere segmenten (GPX + datum/locatie per segment)
 // v2.2.0: GPX raw embed in JSON export + GPS-ruis filtering
 // v2.1.0: GPX raw embed in JSON export + herstel bij import
@@ -83,25 +83,30 @@ const DIFFICULTY_SCALES = {
   ],
 };
 
+// -----------------------------------------------------------
+// MOEILIJKHEIDSBEREKENING
+// Leest uit het unified seg.gpx model (seg.gpx.stats)
+// -----------------------------------------------------------
 function calculateSegmentDifficulty(seg) {
-  const gpx = seg.gpx;
-  if (!gpx || !gpx.distance_km) return null;
+  // Statistieken zitten nu in seg.gpx.stats
+  const stats = seg.gpx?.stats;
+  if (!stats || !stats.distance_km) return null;
 
   if (seg.transport === "walking") {
-    const climbPerKm = (gpx.elevation_up_m || 0) / gpx.distance_km;
-    if (climbPerKm < 5) return "W1";
+    const climbPerKm = (stats.elevation_up_m || 0) / stats.distance_km;
+    if (climbPerKm < 5)  return "W1";
     if (climbPerKm < 15) return "W2";
     return "W3";
   }
 
   if (seg.transport === "hike") {
     let score = 0;
-    score += gpx.distance_km;
-    if (gpx.elevation_up_m) score += gpx.elevation_up_m / 100;
+    score += stats.distance_km;
+    if (stats.elevation_up_m) score += stats.elevation_up_m / 100;
     if (seg.weather) {
       if (seg.weather.temperature_max >= 25) score += 2;
-      if (seg.weather.precipitation_mm >= 5) score += 2;
-      if (seg.weather.wind_kmh >= 30) score += 1;
+      if (seg.weather.precipitation_mm >= 5)  score += 2;
+      if (seg.weather.wind_kmh >= 30)          score += 1;
     }
     if (score <= 5)  return "T1";
     if (score <= 10) return "T2";
@@ -119,25 +124,27 @@ function calculateSegmentDifficulty(seg) {
 }
 
 function _calculateRoadDifficulty(seg) {
-  const gpx = seg.gpx;
+  const stats = seg.gpx.stats;
   const prefix = { cycling: "C", motorcycle: "M", car: "A" }[seg.transport];
 
-  const climbPerKm = (gpx.elevation_up_m || 0) / gpx.distance_km;
-  const sharpTurnsPerKm = _countSharpTurnsPerKm(gpx.trackPoints, gpx.distance_km);
+  // trackPoints voor bochtenberekening zitten in stats
+  const climbPerKm       = (stats.elevation_up_m || 0) / stats.distance_km;
+  const sharpTurnsPerKm  = _countSharpTurnsPerKm(stats.track_points, stats.distance_km);
 
   let level;
   if (seg.transport === "cycling") {
-    if (climbPerKm < 8 && sharpTurnsPerKm < 3) level = 1;
-    else if (climbPerKm < 20 || sharpTurnsPerKm < 8) level = 2;
+    if (climbPerKm < 8  && sharpTurnsPerKm < 3)  level = 1;
+    else if (climbPerKm < 20 || sharpTurnsPerKm < 8)  level = 2;
     else if (climbPerKm < 40 || sharpTurnsPerKm < 15) level = 3;
     else level = 4;
   } else {
-    if (climbPerKm < 15 && sharpTurnsPerKm < 2) level = 1;
-    else if (climbPerKm < 40 || sharpTurnsPerKm < 6) level = 2;
+    if (climbPerKm < 15 && sharpTurnsPerKm < 2)  level = 1;
+    else if (climbPerKm < 40 || sharpTurnsPerKm < 6)  level = 2;
     else if (climbPerKm < 80 || sharpTurnsPerKm < 15) level = 3;
     else level = 4;
   }
 
+  // Kasseien/onverhard tilt niveau minstens naar 2
   if (seg.roughSurface && (seg.transport === "motorcycle" || seg.transport === "car") && level < 2) {
     level = 2;
   }
@@ -162,8 +169,8 @@ function _countSharpTurnsPerKm(trackPoints, distanceKm) {
 }
 
 function _bearing(lat1, lon1, lat2, lon2) {
-  const phi1 = (lat1 * Math.PI) / 180;
-  const phi2 = (lat2 * Math.PI) / 180;
+  const phi1    = (lat1 * Math.PI) / 180;
+  const phi2    = (lat2 * Math.PI) / 180;
   const dLambda = ((lon2 - lon1) * Math.PI) / 180;
   const y = Math.sin(dLambda) * Math.cos(phi2);
   const x = Math.cos(phi1) * Math.sin(phi2) - Math.sin(phi1) * Math.cos(phi2) * Math.cos(dLambda);
@@ -173,6 +180,8 @@ function _bearing(lat1, lon1, lat2, lon2) {
 
 // -----------------------------------------------------------
 // STATE
+// Elk segment heeft enkel nog seg.gpx (unified model).
+// gpxRaw en gpx_stats worden niet meer bewaard in state.
 // -----------------------------------------------------------
 const state = {
   aiMode: false,
@@ -183,8 +192,7 @@ const state = {
       id: 1,
       transport: "walking",
       label: "",
-      gpx: null,
-      gpxRaw: null,
+      gpx: null,       // unified GPX model: { version, creator, metadata, waypoints, routes, tracks, stats }
       date: "",
       location: "",
       country: "",
@@ -196,7 +204,8 @@ const state = {
       roughSurface: false,
     },
   ],
-  get gpx() { return this.segments[0]?.gpx || null; },
+  // Convenience getters voor backward compat in updatePreview / buildRouteJson
+  get gpx()     { return this.segments[0]?.gpx || null; },
   get weather() { return this.segments[0]?.weather || null; },
   storyBlocks: [],
   galleryPhotos: [],
@@ -207,35 +216,35 @@ let segmentCounter = 1;
 const $ = (id) => document.getElementById(id);
 
 const els = {
-  btnModeToggle: $("btn-mode-toggle"),
-  modeLabel: $("mode-label"),
-  apiKeyBar: $("api-key-bar"),
-  inputApiKey: $("input-api-key"),
-  btnKeyConfirm: $("btn-key-confirm"),
-  aiActions: $("ai-actions"),
-  aiStoryHint: $("ai-story-hint"),
-  btnAiGenerate: $("btn-ai-generate"),
-  segmentList: $("segment-list"),
-  btnAddSegment: $("btn-add-segment"),
-  inputTitle: $("input-title"),
-  inputDifficulty: $("input-difficulty"),
-  inputSource: $("input-source"),
-  inputHeroPhoto: $("input-hero-photo"),
-  inputKeywords: $("input-keywords"),
-  inputIntro: $("input-intro"),
-  introCount: $("intro-count"),
-  inputTips: $("input-tips"),
-  inputRouteId: $("input-route-id"),
-  inputStatus: $("input-status"),
-  btnExport: $("btn-export"),
-  jsonImportInput: $("json-import-input"),
-  blockList: $("block-list"),
-  btnAddTextBlock: $("btn-add-text-block"),
-  btnAddPhotoBlock: $("btn-add-photo-block"),
+  btnModeToggle:        $("btn-mode-toggle"),
+  modeLabel:            $("mode-label"),
+  apiKeyBar:            $("api-key-bar"),
+  inputApiKey:          $("input-api-key"),
+  btnKeyConfirm:        $("btn-key-confirm"),
+  aiActions:            $("ai-actions"),
+  aiStoryHint:          $("ai-story-hint"),
+  btnAiGenerate:        $("btn-ai-generate"),
+  segmentList:          $("segment-list"),
+  btnAddSegment:        $("btn-add-segment"),
+  inputTitle:           $("input-title"),
+  inputDifficulty:      $("input-difficulty"),
+  inputSource:          $("input-source"),
+  inputHeroPhoto:       $("input-hero-photo"),
+  inputKeywords:        $("input-keywords"),
+  inputIntro:           $("input-intro"),
+  introCount:           $("intro-count"),
+  inputTips:            $("input-tips"),
+  inputRouteId:         $("input-route-id"),
+  inputStatus:          $("input-status"),
+  btnExport:            $("btn-export"),
+  jsonImportInput:      $("json-import-input"),
+  blockList:            $("block-list"),
+  btnAddTextBlock:      $("btn-add-text-block"),
+  btnAddPhotoBlock:     $("btn-add-photo-block"),
   btnAddPhotoGridBlock: $("btn-add-photo-grid-block"),
-  btnAddLinkBlock: $("btn-add-link-block"),
-  galleryList: $("gallery-list"),
-  btnAddGalleryPhoto: $("btn-add-gallery-photo"),
+  btnAddLinkBlock:      $("btn-add-link-block"),
+  galleryList:          $("gallery-list"),
+  btnAddGalleryPhoto:   $("btn-add-gallery-photo"),
 };
 
 // -----------------------------------------------------------
@@ -244,8 +253,8 @@ const els = {
 els.btnModeToggle.addEventListener("click", () => {
   state.aiMode = !state.aiMode;
   els.modeLabel.textContent = state.aiMode ? "AI-modus uitschakelen" : "AI-modus inschakelen";
-  els.apiKeyBar.hidden = !state.aiMode;
-  els.aiActions.hidden = !state.aiMode;
+  els.apiKeyBar.hidden   = !state.aiMode;
+  els.aiActions.hidden   = !state.aiMode;
   els.aiStoryHint.hidden = !state.aiMode;
   els.btnModeToggle.classList.toggle("btn--ai", state.aiMode);
   updatePreview();
@@ -257,27 +266,29 @@ els.btnKeyConfirm.addEventListener("click", () => {
     showInlineError(els.inputApiKey, "Sleutel moet beginnen met sk-ant-");
     return;
   }
-  state.apiKey = key;
+  state.apiKey          = key;
   state.apiKeyConfirmed = true;
-  els.inputApiKey.value = "\u2022".repeat(20);
+  els.inputApiKey.value        = "\u2022".repeat(20);
   els.btnKeyConfirm.textContent = "\u2713 Bevestigd";
-  els.btnKeyConfirm.disabled = true;
+  els.btnKeyConfirm.disabled    = true;
 });
 
 // -----------------------------------------------------------
-// SEGMENTEN
+// SEGMENTEN — render + events
 // -----------------------------------------------------------
 function renderSegments() {
   els.segmentList.innerHTML = "";
 
   state.segments.forEach((seg, idx) => {
     const isOnly = state.segments.length === 1;
-    const color = TRANSPORT_COLORS[seg.transport] || "#2C4A3B";
-    const sid = seg.id;
+    const color  = TRANSPORT_COLORS[seg.transport] || "#2C4A3B";
+    const sid    = seg.id;
+    // Statistieken staan nu in seg.gpx.stats
+    const stats  = seg.gpx?.stats || null;
 
     const div = document.createElement("div");
-    div.className = "segment-block";
-    div.dataset.sid = sid;
+    div.className          = "segment-block";
+    div.dataset.sid        = sid;
     div.style.borderLeftColor = color;
 
     div.innerHTML = `
@@ -290,14 +301,16 @@ function renderSegments() {
             ).join("")}
           </select>
         </div>
-        <input type="text" class="input input--sm segment-label" placeholder="Label (optioneel, bv. Naar startpunt)" value="${seg.label || ""}" data-sid="${sid}">
+        <input type="text" class="input input--sm segment-label"
+          placeholder="Label (optioneel, bv. Naar startpunt)"
+          value="${seg.label || ""}" data-sid="${sid}">
         ${!isOnly ? `<button class="segment-remove-btn" data-sid="${sid}" title="Segment verwijderen">✕</button>` : ""}
       </div>
 
       <div class="segment-gpx">
         <div class="drop-zone segment-drop-zone ${seg.gpx ? "drop-zone--has-file" : ""}" id="gpx-drop-zone-${sid}">
           <input type="file" id="gpx-file-input-${sid}" accept=".gpx" hidden>
-          <div class="drop-zone__inner" id="gpx-drop-inner-${sid}" ${seg.gpx ? 'hidden' : ''}>
+          <div class="drop-zone__inner" id="gpx-drop-inner-${sid}" ${seg.gpx ? "hidden" : ""}>
             <span class="drop-zone__icon">↑</span>
             <p class="drop-zone__text">Sleep je GPX-bestand hierheen</p>
             <p class="drop-zone__sub">of <button class="link-btn" id="gpx-browse-btn-${sid}">kies een bestand</button></p>
@@ -305,14 +318,14 @@ function renderSegments() {
         </div>
         <div class="gpx-stats" id="gpx-stats-${sid}" ${seg.gpx ? "" : "hidden"}>
           <div class="stat-grid">
-            <div class="stat-item"><span class="stat-value" id="stat-distance-${sid}">${seg.gpx?.distance_km ? seg.gpx.distance_km + " km" : "—"}</span><span class="stat-label">Afstand</span></div>
-            <div class="stat-item"><span class="stat-value" id="stat-duration-${sid}">${seg.gpx?.duration_hours ? seg.gpx.duration_hours + " u" : "—"}</span><span class="stat-label">Duur</span></div>
-            <div class="stat-item"><span class="stat-value" id="stat-ele-up-${sid}">${seg.gpx?.elevation_up_m ? "+" + seg.gpx.elevation_up_m + " m" : "—"}</span><span class="stat-label">Stijging</span></div>
-            <div class="stat-item"><span class="stat-value" id="stat-ele-down-${sid}">${seg.gpx?.elevation_down_m ? "-" + seg.gpx.elevation_down_m + " m" : "—"}</span><span class="stat-label">Daling</span></div>
-            <div class="stat-item"><span class="stat-value" id="stat-highest-${sid}">${seg.gpx?.highest_point_m ? seg.gpx.highest_point_m + " m" : "—"}</span><span class="stat-label">Hoogste punt</span></div>
-            <div class="stat-item"><span class="stat-value" id="stat-lowest-${sid}">${seg.gpx?.lowest_point_m ? seg.gpx.lowest_point_m + " m" : "—"}</span><span class="stat-label">Laagste punt</span></div>
-            <div class="stat-item"><span class="stat-value" id="stat-avg-speed-${sid}">${seg.gpx?.avg_speed_kmh ? seg.gpx.avg_speed_kmh + " km/u" : "—"}</span><span class="stat-label">Gem. snelheid</span></div>
-            <div class="stat-item"><span class="stat-value" id="stat-max-speed-${sid}">${seg.gpx?.max_speed_kmh ? seg.gpx.max_speed_kmh + " km/u" : "—"}</span><span class="stat-label">Max. snelheid</span></div>
+            <div class="stat-item"><span class="stat-value" id="stat-distance-${sid}">${stats?.distance_km ? stats.distance_km + " km" : "—"}</span><span class="stat-label">Afstand</span></div>
+            <div class="stat-item"><span class="stat-value" id="stat-duration-${sid}">${stats?.duration_hours ? stats.duration_hours + " u" : "—"}</span><span class="stat-label">Duur</span></div>
+            <div class="stat-item"><span class="stat-value" id="stat-ele-up-${sid}">${stats?.elevation_up_m ? "+" + stats.elevation_up_m + " m" : "—"}</span><span class="stat-label">Stijging</span></div>
+            <div class="stat-item"><span class="stat-value" id="stat-ele-down-${sid}">${stats?.elevation_down_m ? "-" + stats.elevation_down_m + " m" : "—"}</span><span class="stat-label">Daling</span></div>
+            <div class="stat-item"><span class="stat-value" id="stat-highest-${sid}">${stats?.highest_point_m ? stats.highest_point_m + " m" : "—"}</span><span class="stat-label">Hoogste punt</span></div>
+            <div class="stat-item"><span class="stat-value" id="stat-lowest-${sid}">${stats?.lowest_point_m ? stats.lowest_point_m + " m" : "—"}</span><span class="stat-label">Laagste punt</span></div>
+            <div class="stat-item"><span class="stat-value" id="stat-avg-speed-${sid}">${stats?.avg_speed_kmh ? stats.avg_speed_kmh + " km/u" : "—"}</span><span class="stat-label">Gem. snelheid</span></div>
+            <div class="stat-item"><span class="stat-value" id="stat-max-speed-${sid}">${stats?.max_speed_kmh ? stats.max_speed_kmh + " km/u" : "—"}</span><span class="stat-label">Max. snelheid</span></div>
           </div>
           <span class="gpx-status" id="gpx-status-${sid}">${seg.gpx ? "✓ Geladen" : ""}</span>
           <button class="link-btn link-btn--small" id="gpx-reset-btn-${sid}">Ander bestand kiezen</button>
@@ -332,8 +345,11 @@ function renderSegments() {
           <div class="field field--grow">
             <label class="field__label">Locatie</label>
             <div class="input-with-action">
-              <input type="text" class="input segment-location" placeholder="Automatisch via GPX of handmatig" value="${seg.location || ""}" data-sid="${sid}">
-              <button class="btn btn--ghost btn--sm segment-fetch-location" data-sid="${sid}" title="Locatie ophalen via GPX-coördinaten">↺</button>
+              <input type="text" class="input segment-location"
+                placeholder="Automatisch via GPX of handmatig"
+                value="${seg.location || ""}" data-sid="${sid}">
+              <button class="btn btn--ghost btn--sm segment-fetch-location"
+                data-sid="${sid}" title="Locatie ophalen via GPX-coördinaten">↺</button>
             </div>
           </div>
         </div>
@@ -364,7 +380,8 @@ function renderSegments() {
           </div>
           <div class="field field--inline">
             <label class="field__label">Omschrijving</label>
-            <input type="text" class="input segment-weather-condition" placeholder="zonnig, bewolkt…" value="${seg.weather?.condition || ""}" data-sid="${sid}">
+            <input type="text" class="input segment-weather-condition"
+              placeholder="zonnig, bewolkt…" value="${seg.weather?.condition || ""}" data-sid="${sid}">
           </div>
         </div>
         <button class="btn btn--secondary btn--sm segment-fetch-weather" data-sid="${sid}">Weerdata ophalen</button>
@@ -377,7 +394,7 @@ function renderSegments() {
 }
 
 function _renderDifficultyBlock(seg) {
-  const sid = seg.id;
+  const sid   = seg.id;
   const scale = DIFFICULTY_SCALES[seg.transport];
 
   if (!scale) {
@@ -425,7 +442,7 @@ function _bindSegmentEvents(sid) {
       seg.transport = e.target.value;
       const block = document.querySelector(`.segment-block[data-sid="${sid}"]`);
       if (block) block.style.borderLeftColor = TRANSPORT_COLORS[seg.transport] || "#2C4A3B";
-      seg.difficulty = "";
+      seg.difficulty     = "";
       seg.difficultyAuto = true;
       if (seg.gpx) {
         const auto = calculateSegmentDifficulty(seg);
@@ -448,14 +465,14 @@ function _bindSegmentEvents(sid) {
     });
   }
 
-  const dropZone = $(`gpx-drop-zone-${sid}`);
+  const dropZone  = $(`gpx-drop-zone-${sid}`);
   const fileInput = $(`gpx-file-input-${sid}`);
   const browseBtn = $(`gpx-browse-btn-${sid}`);
-  const resetBtn = $(`gpx-reset-btn-${sid}`);
+  const resetBtn  = $(`gpx-reset-btn-${sid}`);
 
   if (dropZone) {
-    dropZone.addEventListener("click", () => fileInput.click());
-    dropZone.addEventListener("dragover", (e) => { e.preventDefault(); dropZone.classList.add("drop-zone--active"); });
+    dropZone.addEventListener("click",     () => fileInput.click());
+    dropZone.addEventListener("dragover",  (e) => { e.preventDefault(); dropZone.classList.add("drop-zone--active"); });
     dropZone.addEventListener("dragleave", () => dropZone.classList.remove("drop-zone--active"));
     dropZone.addEventListener("drop", (e) => {
       e.preventDefault();
@@ -470,8 +487,8 @@ function _bindSegmentEvents(sid) {
 
   if (resetBtn) {
     resetBtn.addEventListener("click", () => {
+      // Reset naar leeg — geen raw bewaren
       seg.gpx = null;
-      seg.gpxRaw = null;
       $(`gpx-stats-${sid}`).hidden = true;
       const inner = $(`gpx-drop-inner-${sid}`);
       if (inner) inner.hidden = false;
@@ -487,7 +504,7 @@ function _bindSegmentEvents(sid) {
   const difficultySel = document.querySelector(`.segment-difficulty-select[data-sid="${sid}"]`);
   if (difficultySel) {
     difficultySel.addEventListener("change", (e) => {
-      seg.difficulty = e.target.value;
+      seg.difficulty     = e.target.value;
       seg.difficultyAuto = false;
       const statusEl = $(`difficulty-status-${sid}`);
       if (statusEl) statusEl.textContent = seg.difficulty ? "Handmatig ingesteld" : "Nog niet gekozen";
@@ -526,8 +543,9 @@ function _bindSegmentEvents(sid) {
   const fetchLocBtn = document.querySelector(`.segment-fetch-location[data-sid="${sid}"]`);
   if (fetchLocBtn) {
     fetchLocBtn.addEventListener("click", () => {
-      if (seg.gpx?.startLat && seg.gpx?.startLon) {
-        fetchLocationName(seg.gpx.startLat, seg.gpx.startLon, sid);
+      // Startcoördinaten zitten nu in seg.gpx.stats
+      if (seg.gpx?.stats?.start_lat && seg.gpx?.stats?.start_lon) {
+        fetchLocationName(seg.gpx.stats.start_lat, seg.gpx.stats.start_lon, sid);
       } else {
         alert("Laad eerst een GPX-bestand voor dit segment.");
       }
@@ -545,7 +563,7 @@ function _bindSegmentEvents(sid) {
 }
 
 function _refreshDifficultyBlock(sid) {
-  const seg = _getSeg(sid);
+  const seg       = _getSeg(sid);
   const container = $(`segment-difficulty-${sid}`);
   if (!seg || !container) return;
   container.innerHTML = _renderDifficultyBlock(seg);
@@ -553,7 +571,7 @@ function _refreshDifficultyBlock(sid) {
   const difficultySel = container.querySelector(`.segment-difficulty-select[data-sid="${sid}"]`);
   if (difficultySel) {
     difficultySel.addEventListener("change", (e) => {
-      seg.difficulty = e.target.value;
+      seg.difficulty     = e.target.value;
       seg.difficultyAuto = false;
       const statusEl = $(`difficulty-status-${sid}`);
       if (statusEl) statusEl.textContent = seg.difficulty ? "Handmatig ingesteld" : "Nog niet gekozen";
@@ -580,7 +598,7 @@ function _getSeg(sid) {
 els.btnAddSegment.addEventListener("click", () => {
   segmentCounter++;
   state.segments.push({
-    id: segmentCounter, transport: "walking", label: "", gpx: null, gpxRaw: null,
+    id: segmentCounter, transport: "walking", label: "", gpx: null,
     date: "", location: "", country: "", region: "", place: "",
     weather: null, difficulty: "", difficultyAuto: true, roughSurface: false,
   });
@@ -591,6 +609,8 @@ els.btnAddSegment.addEventListener("click", () => {
 
 // -----------------------------------------------------------
 // JSON IMPORT
+// Ondersteunt nieuw formaat (seg.gpx) én oud formaat (gpx_raw / gpx_stats).
+// Export is altijd het nieuwe formaat.
 // -----------------------------------------------------------
 els.jsonImportInput.addEventListener("change", () => {
   const file = els.jsonImportInput.files[0];
@@ -610,13 +630,16 @@ els.jsonImportInput.addEventListener("change", () => {
 });
 
 function loadJsonIntoForm(data) {
-  if (data.id) els.inputRouteId.value = data.id;
-  if (data.status) els.inputStatus.value = data.status;
-  if (data.title?.nl) els.inputTitle.value = data.title.nl;
-  if (data.difficulty) els.inputDifficulty.value = data.difficulty;
-  if (data.source_reference) els.inputSource.value = data.source_reference;
-  if (data.tags?.length) els.inputKeywords.value = data.tags.join(", ");
-  if (data.summary?.nl) { els.inputIntro.value = data.summary.nl; els.introCount.textContent = `${data.summary.nl.length}/160`; }
+  if (data.id)               els.inputRouteId.value   = data.id;
+  if (data.status)           els.inputStatus.value    = data.status;
+  if (data.title?.nl)        els.inputTitle.value     = data.title.nl;
+  if (data.difficulty)       els.inputDifficulty.value = data.difficulty;
+  if (data.source_reference) els.inputSource.value    = data.source_reference;
+  if (data.tags?.length)     els.inputKeywords.value  = data.tags.join(", ");
+  if (data.summary?.nl) {
+    els.inputIntro.value     = data.summary.nl;
+    els.introCount.textContent = `${data.summary.nl.length}/160`;
+  }
   if (data.tips?.nl) els.inputTips.value = data.tips.nl;
 
   if (data.photos?.length) {
@@ -637,7 +660,10 @@ function loadJsonIntoForm(data) {
     data.photos.slice(1).forEach((p) => { if (p.url) state.storyBlocks.push({ type: "photo", value: p.url }); });
   }
 
-  if (data.gallery?.length) { state.galleryPhotos = data.gallery.map((p) => ({ url: p.url || "" })); renderGallery(); }
+  if (data.gallery?.length) {
+    state.galleryPhotos = data.gallery.map((p) => ({ url: p.url || "" }));
+    renderGallery();
+  }
 
   if (data.segments?.length) {
     segmentCounter = 0;
@@ -645,32 +671,61 @@ function loadJsonIntoForm(data) {
       segmentCounter++;
       const seg = {
         id: segmentCounter, transport: s.transport || "walking", label: s.label || "",
-        gpx: null, gpxRaw: s.gpx_raw || null, date: s.date || "",
-        location: s.location || "", country: s.country || "", region: s.region || "",
-        place: s.place || "", weather: s.weather || null, difficulty: s.difficulty || "",
+        gpx: null, date: s.date || "", location: s.location || "",
+        country: s.country || "", region: s.region || "", place: s.place || "",
+        weather: s.weather || null, difficulty: s.difficulty || "",
         difficultyAuto: s.difficulty_auto !== false, roughSurface: s.rough_surface || false,
       };
-      if (s.gpx_raw) { const parsed = parseGpx(s.gpx_raw); if (parsed) seg.gpx = parsed; }
-      else if (s.gpx_stats) { seg.gpx = _gpxStatsToGpx(s.gpx_stats); }
-      if (!seg.difficulty && seg.gpx) { const auto = calculateSegmentDifficulty(seg); if (auto) seg.difficulty = auto; }
+
+      if (s.gpx) {
+        // Nieuw formaat: direct laden
+        seg.gpx = s.gpx;
+      } else if (s.gpx_raw) {
+        // Oud formaat met raw GPX string: opnieuw parsen naar unified model
+        const parsed = parseGpx(s.gpx_raw);
+        if (parsed) seg.gpx = parsed;
+      } else if (s.gpx_stats) {
+        // Oud formaat met enkel stats: converteren naar unified model (zonder tracks)
+        seg.gpx = _legacyStatsToGpx(s.gpx_stats);
+      }
+
+      if (!seg.difficulty && seg.gpx) {
+        const auto = calculateSegmentDifficulty(seg);
+        if (auto) seg.difficulty = auto;
+      }
       return seg;
     });
   } else {
+    // Enkelvoudige route (oud formaat zonder segments array)
     segmentCounter = 1;
     const seg = state.segments[0];
-    seg.transport = data.transport?.[0] || "walking";
-    seg.date = data.published_date || "";
-    seg.location = data.location || "";
-    seg.country = data.country || "";
-    seg.region = data.region || "";
-    seg.place = data.place || "";
-    seg.weather = data.weather || null;
-    seg.difficulty = data.difficulty || "";
+    seg.transport      = data.transport?.[0] || "walking";
+    seg.date           = data.published_date || "";
+    seg.location       = data.location || "";
+    seg.country        = data.country  || "";
+    seg.region         = data.region   || "";
+    seg.place          = data.place    || "";
+    seg.weather        = data.weather  || null;
+    seg.difficulty     = data.difficulty || "";
     seg.difficultyAuto = !data.difficulty;
-    seg.roughSurface = false;
-    if (data.gpx_raw) { seg.gpxRaw = data.gpx_raw; const parsed = parseGpx(data.gpx_raw); if (parsed) seg.gpx = parsed; }
-    else if (data.gpx_stats) { seg.gpx = _gpxStatsToGpx(data.gpx_stats); }
-    if (!seg.difficulty && seg.gpx) { const auto = calculateSegmentDifficulty(seg); if (auto) seg.difficulty = auto; }
+    seg.roughSurface   = false;
+
+    if (data.gpx) {
+      // Nieuw formaat op root-niveau
+      seg.gpx = data.gpx;
+    } else if (data.gpx_raw) {
+      // Oud formaat: parsen
+      const parsed = parseGpx(data.gpx_raw);
+      if (parsed) seg.gpx = parsed;
+    } else if (data.gpx_stats) {
+      // Oud stats-only: converteren
+      seg.gpx = _legacyStatsToGpx(data.gpx_stats);
+    }
+
+    if (!seg.difficulty && seg.gpx) {
+      const auto = calculateSegmentDifficulty(seg);
+      if (auto) seg.difficulty = auto;
+    }
     state.segments = [seg];
   }
 
@@ -679,14 +734,38 @@ function loadJsonIntoForm(data) {
   updatePreview();
 }
 
-function _gpxStatsToGpx(g) {
+/**
+ * Converteert oud gpx_stats object (zonder tracks) naar het unified gpx model.
+ * Wordt enkel gebruikt bij import van pre-v3.0.0 JSON bestanden.
+ * tracks en points blijven leeg — hoogteprofiel zal niet beschikbaar zijn.
+ * @param {Object} g - oud gpx_stats object
+ * @returns {Object} unified gpx model
+ */
+function _legacyStatsToGpx(g) {
   return {
-    distance_km: g.distance_km, duration_hours: g.duration_hours,
-    elevation_up_m: g.elevation_up_m, elevation_down_m: g.elevation_down_m,
-    avg_speed_kmh: g.avg_speed_kmh, max_speed_kmh: g.max_speed_kmh,
-    highest_point_m: g.highest_point_m, lowest_point_m: g.lowest_point_m,
-    startLat: g.start_lat || null, startLon: g.start_lon || null,
-    trackPoints: g.track_points || null,
+    version:   null,
+    creator:   null,
+    metadata:  null,
+    waypoints: [],
+    routes:    [],
+    // Geen tracks beschikbaar in oud stats-only formaat
+    tracks: [],
+    stats: {
+      distance_km:      g.distance_km      || null,
+      duration_hours:   g.duration_hours   || null,
+      elevation_up_m:   g.elevation_up_m   || null,
+      elevation_down_m: g.elevation_down_m || null,
+      avg_speed_kmh:    g.avg_speed_kmh    || null,
+      max_speed_kmh:    g.max_speed_kmh    || null,
+      highest_point_m:  g.highest_point_m  || null,
+      lowest_point_m:   g.lowest_point_m   || null,
+      start_lat:        g.start_lat        || null,
+      start_lon:        g.start_lon        || null,
+      start:            null,
+      end:              null,
+      // track_points bewaren voor bochtenberekening
+      track_points:     g.track_points     || null,
+    },
   };
 }
 
@@ -697,10 +776,10 @@ function renderBlockEditor() {
   els.blockList.innerHTML = "";
   state.storyBlocks.forEach((block, i) => {
     const item = document.createElement("div");
-    item.className = `block-item block-item--${block.type}`;
+    item.className  = `block-item block-item--${block.type}`;
     item.dataset.idx = i;
     const isFirst = i === 0;
-    const isLast = i === state.storyBlocks.length - 1;
+    const isLast  = i === state.storyBlocks.length - 1;
 
     let bodyHtml = "";
     if (block.type === "text") {
@@ -709,7 +788,7 @@ function renderBlockEditor() {
     } else if (block.type === "photo") {
       bodyHtml = `<div class="block-item__label">Foto (volledig breed)</div><input type="url" class="block-url-input input" placeholder="https://res.cloudinary.com/…" value="${block.value || ""}" data-idx="${i}"><div class="block-photo-preview" data-idx="${i}">${block.value ? `<img src="${block.value}" alt="" class="block-photo-preview__img" onerror="this.parentElement.hidden=true">` : ""}</div>`;
     } else if (block.type === "photo-grid") {
-      const cols = block.cols || 2;
+      const cols   = block.cols   || 2;
       const photos = block.photos || ["", ""];
       const photosHtml = photos.map((url, pi) => `<div class="photo-grid-entry"><input type="url" class="block-url-input input block-grid-url" placeholder="Cloudinary URL…" value="${url}" data-idx="${i}" data-pi="${pi}">${url ? `<img src="${url}" alt="" class="block-photo-preview__img" style="margin-top:4px;" onerror="this.remove()">` : ""}</div>`).join("");
       bodyHtml = `<div class="block-item__label">Foto grid</div><div class="block-grid-controls"><span style="font-size:var(--text-xs);color:var(--color-charcoal-soft);">Kolommen:</span><label class="block-grid-col-opt"><input type="radio" name="grid-cols-${i}" value="2" ${cols === 2 ? "checked" : ""} data-idx="${i}"> 2</label><label class="block-grid-col-opt"><input type="radio" name="grid-cols-${i}" value="3" ${cols === 3 ? "checked" : ""} data-idx="${i}"> 3</label></div><div class="photo-grid-inputs" data-idx="${i}" style="display:grid;grid-template-columns:repeat(${cols},1fr);gap:6px;">${photosHtml}</div><button class="link-btn link-btn--small block-grid-add-photo" data-idx="${i}" style="margin-top:6px;">+ Foto toevoegen</button>`;
@@ -739,18 +818,18 @@ function renderBlockEditor() {
 
 function handleBlockAction(e) {
   const action = e.currentTarget.dataset.action;
-  const idx = parseInt(e.currentTarget.dataset.idx);
-  if (action === "up" && idx > 0) [state.storyBlocks[idx - 1], state.storyBlocks[idx]] = [state.storyBlocks[idx], state.storyBlocks[idx - 1]];
+  const idx    = parseInt(e.currentTarget.dataset.idx);
+  if (action === "up"     && idx > 0)                         [state.storyBlocks[idx - 1], state.storyBlocks[idx]] = [state.storyBlocks[idx], state.storyBlocks[idx - 1]];
   else if (action === "down" && idx < state.storyBlocks.length - 1) [state.storyBlocks[idx], state.storyBlocks[idx + 1]] = [state.storyBlocks[idx + 1], state.storyBlocks[idx]];
   else if (action === "remove") state.storyBlocks.splice(idx, 1);
   renderBlockEditor();
   updatePreview();
 }
 
-els.btnAddTextBlock.addEventListener("click", () => { state.storyBlocks.push({ type: "text", value: "" }); renderBlockEditor(); updatePreview(); });
-els.btnAddPhotoBlock.addEventListener("click", () => { state.storyBlocks.push({ type: "photo", value: "" }); renderBlockEditor(); updatePreview(); });
+els.btnAddTextBlock.addEventListener("click",      () => { state.storyBlocks.push({ type: "text",       value: "" });               renderBlockEditor(); updatePreview(); });
+els.btnAddPhotoBlock.addEventListener("click",     () => { state.storyBlocks.push({ type: "photo",      value: "" });               renderBlockEditor(); updatePreview(); });
 els.btnAddPhotoGridBlock.addEventListener("click", () => { state.storyBlocks.push({ type: "photo-grid", cols: 2, photos: ["", ""] }); renderBlockEditor(); updatePreview(); });
-els.btnAddLinkBlock.addEventListener("click", () => { state.storyBlocks.push({ type: "link", name: "", url: "" }); renderBlockEditor(); updatePreview(); });
+els.btnAddLinkBlock.addEventListener("click",      () => { state.storyBlocks.push({ type: "link",       name: "", url: "" });       renderBlockEditor(); updatePreview(); });
 
 // -----------------------------------------------------------
 // GALERIJ
@@ -762,7 +841,7 @@ function renderGallery() {
     const entry = document.createElement("div");
     entry.className = "photo-entry";
     entry.innerHTML = `<input type="url" class="input gallery-url-input" placeholder="https://res.cloudinary.com/…" value="${photo.url || ""}" data-idx="${i}"><button class="photo-entry__remove" data-idx="${i}" title="Verwijder">✕</button>`;
-    entry.querySelector(".gallery-url-input").addEventListener("blur", (e) => { const fixed = fixCloudinaryUrl(e.target.value.trim(), "w_800,f_auto"); e.target.value = fixed; state.galleryPhotos[i].url = fixed; updatePreview(); });
+    entry.querySelector(".gallery-url-input").addEventListener("blur",  (e) => { const fixed = fixCloudinaryUrl(e.target.value.trim(), "w_800,f_auto"); e.target.value = fixed; state.galleryPhotos[i].url = fixed; updatePreview(); });
     entry.querySelector(".gallery-url-input").addEventListener("input", (e) => { state.galleryPhotos[i].url = e.target.value; updatePreview(); });
     entry.querySelector(".photo-entry__remove").addEventListener("click", () => { state.galleryPhotos.splice(i, 1); renderGallery(); updatePreview(); });
     els.galleryList.appendChild(entry);
@@ -780,152 +859,275 @@ function handleGpxFile(file, sid) {
   if (!seg) return;
   const reader = new FileReader();
   reader.onload = (e) => {
-    seg.gpxRaw = e.target.result;
+    // parseGpx retourneert nu het volledige unified model
     const gpxData = parseGpx(e.target.result, sid);
     if (!gpxData) { alert("GPX-bestand kon niet worden gelezen. Controleer het bestand."); return; }
     seg.gpx = gpxData;
-    displayGpxStats(gpxData, sid);
+
+    // Statistieken tonen vanuit seg.gpx.stats
+    displayGpxStats(gpxData.stats, sid);
+
+    // Datum uit stats invullen als het veld nog leeg is
     const dateInp = document.querySelector(`.segment-date[data-sid="${sid}"]`);
-    if (dateInp && !dateInp.value && gpxData.date) { dateInp.value = gpxData.date; seg.date = gpxData.date; }
-    if (gpxData.startLat && gpxData.startLon) fetchLocationName(gpxData.startLat, gpxData.startLon, sid);
-    if (seg.difficultyAuto) { const auto = calculateSegmentDifficulty(seg); if (auto) { seg.difficulty = auto; _refreshDifficultyBlock(sid); } }
+    if (dateInp && !dateInp.value && gpxData.stats?.start) {
+      const dateStr = gpxData.stats.start.split("T")[0];
+      dateInp.value = dateStr;
+      seg.date = dateStr;
+    }
+
+    // Locatie ophalen via startcoördinaten uit stats
+    if (gpxData.stats?.start_lat && gpxData.stats?.start_lon) {
+      fetchLocationName(gpxData.stats.start_lat, gpxData.stats.start_lon, sid);
+    }
+
+    if (seg.difficultyAuto) {
+      const auto = calculateSegmentDifficulty(seg);
+      if (auto) { seg.difficulty = auto; _refreshDifficultyBlock(sid); }
+    }
     if (sid === state.segments[0].id) applyCalculatedDifficulty();
     updatePreview();
   };
   reader.readAsText(file);
 }
 
-function displayGpxStats(gpx, sid) {
+function displayGpxStats(stats, sid) {
   const set = (id, val) => { const el = $(id); if (el) el.textContent = val; };
-  set(`stat-distance-${sid}`, gpx.distance_km ? `${gpx.distance_km} km` : "—");
-  set(`stat-duration-${sid}`, gpx.duration_hours ? `${gpx.duration_hours} u` : "—");
-  set(`stat-ele-up-${sid}`, gpx.elevation_up_m ? `+${gpx.elevation_up_m} m` : "—");
-  set(`stat-ele-down-${sid}`, gpx.elevation_down_m ? `-${gpx.elevation_down_m} m` : "—");
-  set(`stat-highest-${sid}`, gpx.highest_point_m ? `${gpx.highest_point_m} m` : "—");
-  set(`stat-lowest-${sid}`, gpx.lowest_point_m ? `${gpx.lowest_point_m} m` : "—");
-  set(`stat-avg-speed-${sid}`, gpx.avg_speed_kmh ? `${gpx.avg_speed_kmh} km/u` : "—");
-  set(`stat-max-speed-${sid}`, gpx.max_speed_kmh ? `${gpx.max_speed_kmh} km/u` : "—");
+  set(`stat-distance-${sid}`,  stats.distance_km      ? `${stats.distance_km} km`      : "—");
+  set(`stat-duration-${sid}`,  stats.duration_hours   ? `${stats.duration_hours} u`    : "—");
+  set(`stat-ele-up-${sid}`,    stats.elevation_up_m   ? `+${stats.elevation_up_m} m`   : "—");
+  set(`stat-ele-down-${sid}`,  stats.elevation_down_m ? `-${stats.elevation_down_m} m` : "—");
+  set(`stat-highest-${sid}`,   stats.highest_point_m  ? `${stats.highest_point_m} m`   : "—");
+  set(`stat-lowest-${sid}`,    stats.lowest_point_m   ? `${stats.lowest_point_m} m`    : "—");
+  set(`stat-avg-speed-${sid}`, stats.avg_speed_kmh    ? `${stats.avg_speed_kmh} km/u`  : "—");
+  set(`stat-max-speed-${sid}`, stats.max_speed_kmh    ? `${stats.max_speed_kmh} km/u`  : "—");
+
   const dropZone = $(`gpx-drop-zone-${sid}`);
-  const inner = $(`gpx-drop-inner-${sid}`);
-  const statsEl = $(`gpx-stats-${sid}`);
+  const inner    = $(`gpx-drop-inner-${sid}`);
+  const statsEl  = $(`gpx-stats-${sid}`);
   const statusEl = $(`gpx-status-${sid}`);
-  if (inner) inner.hidden = true;
+  if (inner)    inner.hidden = true;
   if (dropZone) dropZone.classList.add("drop-zone--has-file");
-  if (statsEl) statsEl.hidden = false;
+  if (statsEl)  statsEl.hidden = false;
   if (statusEl) statusEl.textContent = "✓ Geladen";
 }
 
 // -----------------------------------------------------------
-// GPX PARSER
+// GPX PARSER — unified model
+// Retourneert: { version, creator, metadata, waypoints, routes, tracks, stats }
+// tracks[].segments[].points[] bevat { lat, lon, ele, time, extensions }
+// stats bevat alle berekende statistieken voor weergave en export
 // -----------------------------------------------------------
 function parseGpx(xmlText, sid) {
   try {
     const parser = new DOMParser();
-    const doc = parser.parseFromString(xmlText, "application/xml");
-    const trkpts = Array.from(doc.querySelectorAll("trkpt"));
-    if (trkpts.length < 2) return null;
+    const doc    = parser.parseFromString(xmlText, "application/xml");
 
-    let totalDistance = 0, elevationUp = 0, elevationDown = 0;
-    let highestPoint = -Infinity, lowestPoint = Infinity;
-    const speeds = [], speedPeaks = [];
-    let startTime = null, endTime = null;
-    const WARMUP_SKIP = 10;
+    // Parseerfouten opvangen
+    const parseErr = doc.querySelector("parsererror");
+    if (parseErr) { console.error("[creator.js] GPX XML parsefout"); return null; }
 
-    for (let i = 1; i < trkpts.length; i++) {
-      const prev = trkpts[i - 1], curr = trkpts[i];
-      const lat1 = parseFloat(prev.getAttribute("lat")), lon1 = parseFloat(prev.getAttribute("lon"));
-      const lat2 = parseFloat(curr.getAttribute("lat")), lon2 = parseFloat(curr.getAttribute("lon"));
-      const ele1 = parseFloat(prev.querySelector("ele")?.textContent || 0);
-      const ele2 = parseFloat(curr.querySelector("ele")?.textContent || 0);
-      const dist = haversine(lat1, lon1, lat2, lon2);
-      totalDistance += dist;
-      const eleDiff = ele2 - ele1;
-      if (eleDiff > 2) elevationUp += eleDiff;
-      else if (eleDiff < -2) elevationDown += Math.abs(eleDiff);
-      highestPoint = Math.max(highestPoint, ele1, ele2);
-      lowestPoint = Math.min(lowestPoint, ele1, ele2);
-      const timeEl1 = prev.querySelector("time"), timeEl2 = curr.querySelector("time");
-      if (timeEl1 && timeEl2) {
-        const t1 = new Date(timeEl1.textContent), t2 = new Date(timeEl2.textContent);
-        if (!startTime) startTime = t1;
-        endTime = t2;
-        const timeDiff = (t2 - t1) / 3600000;
-        if (timeDiff > 0 && i >= WARMUP_SKIP) speeds.push((dist / 1000) / timeDiff);
-      }
-    }
+    const gpxEl = doc.querySelector("gpx");
 
-    const avgRaw = speeds.length ? speeds.reduce((a, b) => a + b, 0) / speeds.length : null;
-    const peakThreshold = avgRaw ? avgRaw * 3 : null;
-    const filteredSpeeds = [];
-    speeds.forEach((s) => { if (peakThreshold && s >= peakThreshold) speedPeaks.push(Math.round(s * 10) / 10); else filteredSpeeds.push(s); });
+    // --- Metadata ---
+    const metaEl = doc.querySelector("metadata");
+    const metadata = metaEl ? {
+      name:        metaEl.querySelector("name")?.textContent        || null,
+      description: metaEl.querySelector("desc")?.textContent        || null,
+      author:      metaEl.querySelector("author name")?.textContent || null,
+      time:        metaEl.querySelector("time")?.textContent        || null,
+    } : null;
 
-    const firstPt = trkpts[0];
-    const startLat = parseFloat(firstPt.getAttribute("lat"));
-    const startLon = parseFloat(firstPt.getAttribute("lon"));
-    const durationHours = startTime && endTime ? (endTime - startTime) / 3600000 : null;
-    const avgSpeed = filteredSpeeds.length ? filteredSpeeds.reduce((a, b) => a + b, 0) / filteredSpeeds.length : null;
-    const maxSpeedFiltered = filteredSpeeds.length ? Math.max(...filteredSpeeds) : 0;
-    const maxSpeedRaw = speeds.length ? Math.max(...speeds) : 0;
+    // --- Waypoints ---
+    const waypoints = Array.from(doc.querySelectorAll("wpt")).map((wpt) => ({
+      lat:  parseFloat(wpt.getAttribute("lat")),
+      lon:  parseFloat(wpt.getAttribute("lon")),
+      ele:  wpt.querySelector("ele")  ? parseFloat(wpt.querySelector("ele").textContent)  : null,
+      name: wpt.querySelector("name") ? wpt.querySelector("name").textContent             : null,
+      time: wpt.querySelector("time") ? wpt.querySelector("time").textContent             : null,
+    }));
 
-    let date = null;
-    const firstTime = trkpts[0].querySelector("time");
-    if (firstTime) date = firstTime.textContent.split("T")[0];
+    // --- Routes (rte/rtept) ---
+    const routes = Array.from(doc.querySelectorAll("rte")).map((rte) => ({
+      name:   rte.querySelector("name")?.textContent || null,
+      points: Array.from(rte.querySelectorAll("rtept")).map((pt) => ({
+        lat:  parseFloat(pt.getAttribute("lat")),
+        lon:  parseFloat(pt.getAttribute("lon")),
+        ele:  pt.querySelector("ele")  ? parseFloat(pt.querySelector("ele").textContent)  : null,
+        name: pt.querySelector("name") ? pt.querySelector("name").textContent             : null,
+        time: pt.querySelector("time") ? pt.querySelector("time").textContent             : null,
+      })),
+    }));
 
-    const step = Math.max(1, Math.floor(trkpts.length / 500));
-    const trackPoints = [];
-    for (let i = 0; i < trkpts.length; i += step) {
-      trackPoints.push([parseFloat(trkpts[i].getAttribute("lat")), parseFloat(trkpts[i].getAttribute("lon"))]);
-    }
+    // --- Tracks (trk/trkseg/trkpt) ---
+    const tracks = Array.from(doc.querySelectorAll("trk")).map((trk) => ({
+      name:     trk.querySelector("name")?.textContent || null,
+      segments: Array.from(trk.querySelectorAll("trkseg")).map((seg) => ({
+        points: Array.from(seg.querySelectorAll("trkpt")).map((pt) => ({
+          lat:  parseFloat(pt.getAttribute("lat")),
+          lon:  parseFloat(pt.getAttribute("lon")),
+          ele:  pt.querySelector("ele")  ? parseFloat(pt.querySelector("ele").textContent)  : null,
+          time: pt.querySelector("time") ? pt.querySelector("time").textContent             : null,
+        })),
+      })),
+    }));
 
-    const result = {
-      distance_km: Math.round(totalDistance / 10) / 100,
-      duration_hours: durationHours ? Math.round(durationHours * 10) / 10 : null,
-      elevation_up_m: Math.round(elevationUp),
-      elevation_down_m: Math.round(elevationDown),
-      highest_point_m: Math.round(highestPoint),
-      lowest_point_m: Math.round(lowestPoint),
-      avg_speed_kmh: avgSpeed ? Math.round(avgSpeed * 10) / 10 : null,
-      max_speed_kmh: Math.round(maxSpeedFiltered * 10) / 10,
-      startLat, startLon, trackPoints, date,
+    // Alle trackpunten samengevoegd voor statistiekenberekening
+    const allPoints = tracks.flatMap((t) => t.segments.flatMap((s) => s.points));
+    if (allPoints.length < 2) return null;
+
+    // --- Statistieken berekenen ---
+    const stats = _computeStats(allPoints, sid);
+
+    return {
+      version:   gpxEl?.getAttribute("version")            || null,
+      creator:   gpxEl?.getAttribute("creator")            || null,
+      metadata,
+      waypoints,
+      routes,
+      tracks,
+      stats,
     };
 
-    if (speedPeaks.length > 0) {
-      result._maxSpeedRaw = Math.round(maxSpeedRaw * 10) / 10;
-      result._speedPeaks = speedPeaks;
-      showSpeedWarning(result, sid);
-    }
-
-    return result;
   } catch (err) {
-    console.error("GPX parse fout:", err);
+    console.error("[creator.js] GPX parse fout:", err);
     return null;
   }
 }
 
+/**
+ * Berekent alle statistieken uit een geflattende array van trkpt punten.
+ * GPS-ruis filtering op snelheid: pieken boven 3× het gemiddelde worden gefilterd.
+ * @param {Array<{lat,lon,ele,time}>} points - alle trackpunten
+ * @param {number|undefined} sid             - segment id (voor waarschuwing UI)
+ * @returns {Object} stats object voor seg.gpx.stats
+ */
+function _computeStats(points, sid) {
+  let totalDistance  = 0;
+  let elevationUp    = 0;
+  let elevationDown  = 0;
+  let highestPoint   = -Infinity;
+  let lowestPoint    = Infinity;
+  const speeds       = [];
+  const speedPeaks   = [];
+  let startTime      = null;
+  let endTime        = null;
+  const WARMUP_SKIP  = 10;   // eerste punten overslaan voor snelheidsberekening
+
+  // Subsampled trackpoints voor kaart + bochtenberekening (max 500 punten)
+  const step        = Math.max(1, Math.floor(points.length / 500));
+  const trackPoints = [];
+
+  for (let i = 0; i < points.length; i++) {
+    const curr = points[i];
+    // Hoogte globaal bijhouden
+    if (curr.ele !== null && !isNaN(curr.ele)) {
+      if (curr.ele > highestPoint) highestPoint = curr.ele;
+      if (curr.ele < lowestPoint)  lowestPoint  = curr.ele;
+    }
+    // Subsampled punt voor kaart
+    if (i % step === 0) trackPoints.push([curr.lat, curr.lon]);
+
+    if (i === 0) continue; // eerste punt heeft geen voorganger
+
+    const prev = points[i - 1];
+    const dist = haversine(prev.lat, prev.lon, curr.lat, curr.lon);
+    totalDistance += dist;
+
+    // Hoogteverschil — drempel 2m om GPS-ruis te filteren
+    const ele1 = prev.ele, ele2 = curr.ele;
+    if (ele1 !== null && ele2 !== null && !isNaN(ele1) && !isNaN(ele2)) {
+      const eleDiff = ele2 - ele1;
+      if (eleDiff > 2)  elevationUp   += eleDiff;
+      if (eleDiff < -2) elevationDown += Math.abs(eleDiff);
+    }
+
+    // Snelheid berekenen indien timestamps beschikbaar
+    if (prev.time && curr.time) {
+      const t1 = new Date(prev.time), t2 = new Date(curr.time);
+      if (!startTime) startTime = t1;
+      endTime = t2;
+      const timeDiff = (t2 - t1) / 3600000; // uren
+      if (timeDiff > 0 && i >= WARMUP_SKIP) {
+        speeds.push((dist / 1000) / timeDiff); // km/u
+      }
+    }
+  }
+
+  // Snelheidspiek-filter: alles boven 3× gemiddelde terzijde stellen
+  const avgRaw       = speeds.length ? speeds.reduce((a, b) => a + b, 0) / speeds.length : null;
+  const peakThreshold = avgRaw ? avgRaw * 3 : null;
+  const filteredSpeeds = [];
+  speeds.forEach((s) => {
+    if (peakThreshold && s >= peakThreshold) speedPeaks.push(Math.round(s * 10) / 10);
+    else filteredSpeeds.push(s);
+  });
+
+  const firstPt      = points[0];
+  const durationHours = startTime && endTime ? (endTime - startTime) / 3600000 : null;
+  const avgSpeed      = filteredSpeeds.length ? filteredSpeeds.reduce((a, b) => a + b, 0) / filteredSpeeds.length : null;
+  const maxSpeedFiltered = filteredSpeeds.length ? Math.max(...filteredSpeeds) : 0;
+  const maxSpeedRaw      = speeds.length        ? Math.max(...speeds)          : 0;
+
+  const stats = {
+    distance_km:      Math.round(totalDistance / 10) / 100,
+    duration_hours:   durationHours ? Math.round(durationHours * 10) / 10 : null,
+    elevation_up_m:   Math.round(elevationUp),
+    elevation_down_m: Math.round(elevationDown),
+    highest_point_m:  highestPoint > -Infinity ? Math.round(highestPoint) : null,
+    lowest_point_m:   lowestPoint  <  Infinity ? Math.round(lowestPoint)  : null,
+    avg_speed_kmh:    avgSpeed ? Math.round(avgSpeed * 10) / 10 : null,
+    max_speed_kmh:    Math.round(maxSpeedFiltered * 10) / 10,
+    start_lat:        firstPt.lat,
+    start_lon:        firstPt.lon,
+    start:            points[0].time             || null,
+    end:              points[points.length - 1].time || null,
+    // track_points voor kaart + bochtenberekening (niet in hoogteprofiel)
+    track_points:     trackPoints,
+  };
+
+  // Snelheidspieken rapporteren aan de UI
+  if (speedPeaks.length > 0) {
+    stats._max_speed_raw   = Math.round(maxSpeedRaw * 10) / 10;
+    stats._speed_peaks     = speedPeaks;
+    showSpeedWarning(stats, sid);
+  }
+
+  return stats;
+}
+
 function haversine(lat1, lon1, lat2, lon2) {
-  const R = 6371000;
-  const phi1 = (lat1 * Math.PI) / 180, phi2 = (lat2 * Math.PI) / 180;
-  const dPhi = ((lat2 - lat1) * Math.PI) / 180, dLambda = ((lon2 - lon1) * Math.PI) / 180;
+  const R      = 6371000;
+  const phi1   = (lat1 * Math.PI) / 180;
+  const phi2   = (lat2 * Math.PI) / 180;
+  const dPhi   = ((lat2 - lat1) * Math.PI) / 180;
+  const dLambda = ((lon2 - lon1) * Math.PI) / 180;
   const a = Math.sin(dPhi / 2) ** 2 + Math.cos(phi1) * Math.cos(phi2) * Math.sin(dLambda / 2) ** 2;
   return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 }
 
-function showSpeedWarning(gpxData, sid) {
+function showSpeedWarning(stats, sid) {
   const containerId = sid ? `gpx-stats-${sid}` : "gpx-stats-1";
-  const container = $(containerId);
+  const container   = $(containerId);
   if (!container) return;
   const existingWarn = container.querySelector(".gpx-warning");
   if (existingWarn) existingWarn.remove();
-  const maxRaw = gpxData._maxSpeedRaw, maxFiltered = gpxData.max_speed_kmh;
-  const warning = document.createElement("div");
+
+  const maxRaw      = stats._max_speed_raw;
+  const maxFiltered = stats.max_speed_kmh;
+  const warning     = document.createElement("div");
   warning.className = "gpx-warning";
-  warning.innerHTML = `<p class="gpx-warning__text">⚠️ Verdachte snelheidspiek: <strong>${maxRaw} km/u</strong> (gem. ${gpxData.avg_speed_kmh} km/u). Waarschijnlijk GPS-ruis. Gefilterd maximum: <strong>${maxFiltered} km/u</strong>.</p><div class="gpx-warning__actions"><button class="btn btn--primary btn--sm gpx-warn-ignore">Negeren (${maxFiltered} km/u)</button><button class="btn btn--ghost btn--sm gpx-warn-keep" data-raw="${maxRaw}" data-sid="${sid || 1}">Toch bewaren (${maxRaw} km/u)</button></div>`;
+  warning.innerHTML = `<p class="gpx-warning__text">⚠️ Verdachte snelheidspiek: <strong>${maxRaw} km/u</strong> (gem. ${stats.avg_speed_kmh} km/u). Waarschijnlijk GPS-ruis. Gefilterd maximum: <strong>${maxFiltered} km/u</strong>.</p><div class="gpx-warning__actions"><button class="btn btn--primary btn--sm gpx-warn-ignore">Negeren (${maxFiltered} km/u)</button><button class="btn btn--ghost btn--sm gpx-warn-keep" data-raw="${maxRaw}" data-sid="${sid || 1}">Toch bewaren (${maxRaw} km/u)</button></div>`;
   container.appendChild(warning);
+
   warning.querySelector(".gpx-warn-ignore").addEventListener("click", () => warning.remove());
   warning.querySelector(".gpx-warn-keep").addEventListener("click", (e) => {
     const segId = parseInt(e.target.dataset.sid);
-    const s = _getSeg(segId);
-    if (s?.gpx) { s.gpx.max_speed_kmh = maxRaw; const el = $(`stat-max-speed-${segId}`); if (el) el.textContent = `${maxRaw} km/u`; }
+    const s     = _getSeg(segId);
+    if (s?.gpx?.stats) {
+      s.gpx.stats.max_speed_kmh = maxRaw;
+      const el = $(`stat-max-speed-${segId}`);
+      if (el) el.textContent = `${maxRaw} km/u`;
+    }
     warning.remove();
     updatePreview();
   });
@@ -938,26 +1140,28 @@ async function fetchLocationName(lat, lon, sid) {
   const fetchBtn = document.querySelector(`.segment-fetch-location[data-sid="${sid}"]`);
   if (fetchBtn) fetchBtn.textContent = "…";
   try {
-    const url = `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json`;
+    const url  = `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json`;
     const resp = await fetch(url, { headers: { "Accept-Language": "nl" } });
     const data = await resp.json();
     const addr = data.address || {};
-    const country = addr.country || "";
-    const region = addr.state || addr.province || addr.county || addr.state_district || "";
-    const place = addr.village || addr.town || addr.city || addr.municipality || "";
+    const country  = addr.country  || "";
+    const region   = addr.state || addr.province || addr.county || addr.state_district || "";
+    const place    = addr.village || addr.town || addr.city || addr.municipality || "";
     const location = [place, region, country].filter(Boolean).join(", ");
+
     const seg = _getSeg(sid);
     if (seg) { seg.location = location; seg.country = country; seg.region = region; seg.place = place; }
-    const locInp = document.querySelector(`.segment-location[data-sid="${sid}"]`);
+
+    const locInp     = document.querySelector(`.segment-location[data-sid="${sid}"]`);
     const countryInp = document.querySelector(`.segment-country[data-sid="${sid}"]`);
-    const regionInp = document.querySelector(`.segment-region[data-sid="${sid}"]`);
-    const placeInp = document.querySelector(`.segment-place[data-sid="${sid}"]`);
-    if (locInp && location) locInp.value = location;
-    if (countryInp && country) countryInp.value = country;
-    if (regionInp && region) regionInp.value = region;
-    if (placeInp && place) placeInp.value = place;
+    const regionInp  = document.querySelector(`.segment-region[data-sid="${sid}"]`);
+    const placeInp   = document.querySelector(`.segment-place[data-sid="${sid}"]`);
+    if (locInp     && location) locInp.value     = location;
+    if (countryInp && country)  countryInp.value = country;
+    if (regionInp  && region)   regionInp.value  = region;
+    if (placeInp   && place)    placeInp.value   = place;
   } catch (err) {
-    console.warn("Nominatim fout:", err);
+    console.warn("[creator.js] Nominatim fout:", err);
   } finally {
     if (fetchBtn) fetchBtn.textContent = "↺";
     updatePreview();
@@ -970,35 +1174,64 @@ async function fetchLocationName(lat, lon, sid) {
 async function fetchWeather(sid) {
   const seg = _getSeg(sid);
   if (!seg) return;
-  const date = seg.date, lat = seg.gpx?.startLat, lon = seg.gpx?.startLon;
+  // Coördinaten komen nu uit seg.gpx.stats
+  const date = seg.date;
+  const lat  = seg.gpx?.stats?.start_lat;
+  const lon  = seg.gpx?.stats?.start_lon;
+
   if (!date) { alert("Kies eerst een datum voor dit segment."); return; }
   if (!lat || !lon) { alert("Laad eerst een GPX-bestand voor dit segment."); return; }
+
   const fetchBtn = document.querySelector(`.segment-fetch-weather[data-sid="${sid}"]`);
   if (fetchBtn) { fetchBtn.textContent = "Ophalen…"; fetchBtn.disabled = true; }
+
   try {
-    const today = new Date(); today.setHours(0, 0, 0, 0);
+    const today      = new Date(); today.setHours(0, 0, 0, 0);
     const chosenDate = new Date(date);
     if (chosenDate >= today) { alert("Weerdata is enkel beschikbaar voor datums in het verleden. Kies een datum vóór vandaag."); return; }
-    const url = `https://archive-api.open-meteo.com/v1/archive?latitude=${lat}&longitude=${lon}&start_date=${date}&end_date=${date}&daily=temperature_2m_max,temperature_2m_min,precipitation_sum,wind_speed_10m_max&timezone=Europe/Brussels`;
+
+    const url  = `https://archive-api.open-meteo.com/v1/archive?latitude=${lat}&longitude=${lon}&start_date=${date}&end_date=${date}&daily=temperature_2m_max,temperature_2m_min,precipitation_sum,wind_speed_10m_max&timezone=Europe/Brussels`;
     const resp = await fetch(url);
-    if (!resp.ok) { const errData = await resp.json().catch(() => ({})); const reason = errData?.reason || `HTTP ${resp.status}`; console.error("Open-Meteo fout:", reason); alert(`Weerdata kon niet worden opgehaald: ${reason}`); return; }
+    if (!resp.ok) {
+      const errData = await resp.json().catch(() => ({}));
+      const reason  = errData?.reason || `HTTP ${resp.status}`;
+      console.error("[creator.js] Open-Meteo fout:", reason);
+      alert(`Weerdata kon niet worden opgehaald: ${reason}`);
+      return;
+    }
+
     const data = await resp.json();
-    const d = data.daily;
+    const d    = data.daily;
     if (!d) { alert("Weerdata kon niet worden opgehaald. Open-Meteo gaf geen dagdata terug."); return; }
+
     const condInp = document.querySelector(`.segment-weather-condition[data-sid="${sid}"]`);
-    seg.weather = { date, temperature_min: d.temperature_2m_min?.[0] ?? null, temperature_max: d.temperature_2m_max?.[0] ?? null, precipitation_mm: d.precipitation_sum?.[0] ?? null, wind_kmh: d.wind_speed_10m_max?.[0] ?? null, condition: condInp?.value || "", source: "Open-Meteo" };
+    seg.weather = {
+      date,
+      temperature_min:  d.temperature_2m_min?.[0]   ?? null,
+      temperature_max:  d.temperature_2m_max?.[0]   ?? null,
+      precipitation_mm: d.precipitation_sum?.[0]    ?? null,
+      wind_kmh:         d.wind_speed_10m_max?.[0]   ?? null,
+      condition:        condInp?.value || "",
+      source:           "Open-Meteo",
+    };
+
     const set = (id, val) => { const el = $(id); if (el) el.textContent = val; };
-    set(`w-temp-min-${sid}`, seg.weather.temperature_min != null ? `${seg.weather.temperature_min}°C` : "—");
-    set(`w-temp-max-${sid}`, seg.weather.temperature_max != null ? `${seg.weather.temperature_max}°C` : "—");
-    set(`w-precip-${sid}`, seg.weather.precipitation_mm != null ? `${seg.weather.precipitation_mm} mm` : "—");
-    set(`w-wind-${sid}`, seg.weather.wind_kmh != null ? `${seg.weather.wind_kmh} km/u` : "—");
+    set(`w-temp-min-${sid}`, seg.weather.temperature_min  != null ? `${seg.weather.temperature_min}°C`  : "—");
+    set(`w-temp-max-${sid}`, seg.weather.temperature_max  != null ? `${seg.weather.temperature_max}°C`  : "—");
+    set(`w-precip-${sid}`,   seg.weather.precipitation_mm != null ? `${seg.weather.precipitation_mm} mm` : "—");
+    set(`w-wind-${sid}`,     seg.weather.wind_kmh         != null ? `${seg.weather.wind_kmh} km/u`       : "—");
+
     const weatherBlock = $(`weather-block-${sid}`);
     if (weatherBlock) weatherBlock.hidden = false;
-    if (seg.difficultyAuto && seg.gpx) { const auto = calculateSegmentDifficulty(seg); if (auto) { seg.difficulty = auto; _refreshDifficultyBlock(sid); } }
+
+    if (seg.difficultyAuto && seg.gpx) {
+      const auto = calculateSegmentDifficulty(seg);
+      if (auto) { seg.difficulty = auto; _refreshDifficultyBlock(sid); }
+    }
     if (sid === state.segments[0].id) applyCalculatedDifficulty();
     updatePreview();
   } catch (err) {
-    console.error("Weerdata fout:", err);
+    console.error("[creator.js] Weerdata fout:", err);
     alert("Weerdata kon niet worden opgehaald. Controleer datum en verbinding.");
   } finally {
     if (fetchBtn) { fetchBtn.textContent = "Weerdata ophalen"; fetchBtn.disabled = false; }
@@ -1006,13 +1239,23 @@ async function fetchWeather(sid) {
 }
 
 function calculateDifficulty() {
-  const gpx = state.segments[0]?.gpx, weather = state.segments[0]?.weather;
-  if (!gpx) return null;
+  // Leest uit seg.gpx.stats van het eerste segment
+  const stats   = state.segments[0]?.gpx?.stats;
+  const weather = state.segments[0]?.weather;
+  if (!stats) return null;
   let score = 0;
-  if (gpx.distance_km) score += gpx.distance_km;
-  if (gpx.elevation_up_m) score += gpx.elevation_up_m / 100;
-  if (weather) { if (weather.temperature_max >= 25) score += 2; if (weather.precipitation_mm >= 5) score += 2; if (weather.wind_kmh >= 30) score += 1; }
-  if (score <= 5) return "T1"; if (score <= 10) return "T2"; if (score <= 16) return "T3"; if (score <= 22) return "T4"; if (score <= 28) return "T5";
+  if (stats.distance_km)    score += stats.distance_km;
+  if (stats.elevation_up_m) score += stats.elevation_up_m / 100;
+  if (weather) {
+    if (weather.temperature_max >= 25)  score += 2;
+    if (weather.precipitation_mm >= 5)  score += 2;
+    if (weather.wind_kmh >= 30)         score += 1;
+  }
+  if (score <= 5)  return "T1";
+  if (score <= 10) return "T2";
+  if (score <= 16) return "T3";
+  if (score <= 22) return "T4";
+  if (score <= 28) return "T5";
   return "T6";
 }
 
@@ -1030,58 +1273,55 @@ function fixCloudinaryUrl(url, transform = "w_1200,f_auto") {
   return url.replace("/upload/", `/upload/${transform}/`);
 }
 
-els.inputHeroPhoto.addEventListener("blur", () => { const fixed = fixCloudinaryUrl(els.inputHeroPhoto.value.trim()); if (fixed !== els.inputHeroPhoto.value.trim()) els.inputHeroPhoto.value = fixed; updatePreview(); });
+els.inputHeroPhoto.addEventListener("blur",  () => { const fixed = fixCloudinaryUrl(els.inputHeroPhoto.value.trim()); if (fixed !== els.inputHeroPhoto.value.trim()) els.inputHeroPhoto.value = fixed; updatePreview(); });
 els.inputHeroPhoto.addEventListener("input", updatePreview);
-els.inputIntro.addEventListener("input", () => { els.introCount.textContent = `${els.inputIntro.value.length}/160`; updatePreview(); });
+els.inputIntro.addEventListener("input",     () => { els.introCount.textContent = `${els.inputIntro.value.length}/160`; updatePreview(); });
 
 // -----------------------------------------------------------
-// HOOGTEPROFIEL PREVIEW — T2-004 creator variant
+// HOOGTEPROFIEL PREVIEW — v3.0.0
+// Leest punten uit seg.gpx.tracks[].segments[].points[]
+// elk punt heeft { lat, lon, ele, time }
+// Geen gpxRaw meer nodig — data zit volledig in het unified model
 // -----------------------------------------------------------
 
 /**
- * Herpars GPX-string naar array van {lat, lon, ele} objecten.
- * Filtert punten zonder geldige elevatie.
- * Geen sampling — alle hoogtepunten voor nauwkeurigheid.
- * @param {string} gpxRaw - Volledige GPX XML als string
+ * Verzamelt alle {lat, lon, ele} punten uit het unified gpx model.
+ * Filtert punten zonder geldige ele-waarde.
+ * @param {Object} gpx - seg.gpx unified model
  * @returns {Array<{lat,lon,ele}>|null}
  */
-function _parseElevationPoints(gpxRaw) {
-  try {
-    const parser = new DOMParser();
-    const doc = parser.parseFromString(gpxRaw, "application/xml");
-    const trkpts = Array.from(doc.querySelectorAll("trkpt"));
-    const points = [];
-    for (const pt of trkpts) {
-      const lat = parseFloat(pt.getAttribute("lat"));
-      const lon = parseFloat(pt.getAttribute("lon"));
-      const eleEl = pt.querySelector("ele");
-      const ele = eleEl ? parseFloat(eleEl.textContent) : null;
-      if (!isNaN(lat) && !isNaN(lon) && ele !== null && !isNaN(ele)) {
-        points.push({ lat, lon, ele });
+function _collectElevationPoints(gpx) {
+  if (!gpx?.tracks?.length) return null;
+  const points = [];
+  for (const track of gpx.tracks) {
+    for (const segment of track.segments) {
+      for (const pt of segment.points) {
+        if (
+          !isNaN(pt.lat) && !isNaN(pt.lon) &&
+          pt.ele !== null && !isNaN(pt.ele)
+        ) {
+          points.push({ lat: pt.lat, lon: pt.lon, ele: pt.ele });
+        }
       }
     }
-    return points.length >= 2 ? points : null;
-  } catch (err) {
-    console.warn("[creator.js] Elevatie GPX parse mislukt:", err);
-    return null;
   }
+  return points.length >= 2 ? points : null;
 }
 
 /**
- * Bereken cumulatieve afstand in km tussen opeenvolgende punten.
- * Haversine formule. Aparte naam (_cumulativeDistancesEle) om
- * conflict te vermijden als route.js ook geladen zou worden.
+ * Bereken cumulatieve afstand in km tussen opeenvolgende punten (haversine).
+ * Aparte naam om conflict met route.js te vermijden als dat ook geladen is.
  * @param {Array<{lat,lon,ele}>} points
- * @returns {Array<number>} afstand per index (index 0 = 0 km)
+ * @returns {Array<number>} cumulatieve afstand per index (index 0 = 0 km)
  */
 function _cumulativeDistancesEle(points) {
-  const R = 6371;
+  const R    = 6371;
   const dist = [0];
   for (let i = 1; i < points.length; i++) {
-    const p1 = points[i - 1], p2 = points[i];
+    const p1   = points[i - 1], p2 = points[i];
     const dLat = (p2.lat - p1.lat) * Math.PI / 180;
     const dLon = (p2.lon - p1.lon) * Math.PI / 180;
-    const a = Math.sin(dLat / 2) ** 2 +
+    const a    = Math.sin(dLat / 2) ** 2 +
       Math.cos(p1.lat * Math.PI / 180) *
       Math.cos(p2.lat * Math.PI / 180) *
       Math.sin(dLon / 2) ** 2;
@@ -1095,29 +1335,29 @@ function _cumulativeDistancesEle(points) {
  * Elk segment krijgt zijn eigen kleur (TRANSPORT_COLORS).
  * Meerdere segmenten naast elkaar, gescheiden door streepjeslijn.
  * Hover tooltip toont hoogte in m + afstand in km.
- * Sectie blijft verborgen als geen enkel segment gpxRaw heeft.
+ * Sectie blijft verborgen als geen enkel segment gpx.tracks heeft met punten.
  * @param {Array} segments - state.segments array
  */
 function renderElevationPreview(segments) {
-  const wrapper = $("rp-elevation");
+  const wrapper   = $("rp-elevation");
   const container = $("rp-elevation-chart");
   if (!wrapper || !container) return;
 
-  // Bouw segmentdata op uit gpxRaw per segment
+  // Bouw segmentdata op uit seg.gpx.tracks[].segments[].points[]
   const segmentData = [];
   for (const seg of segments) {
-    if (!seg.gpxRaw) continue;
-    const points = _parseElevationPoints(seg.gpxRaw);
+    if (!seg.gpx) continue;
+    const points = _collectElevationPoints(seg.gpx);
     if (!points) continue;
     segmentData.push({
       points,
       distances: _cumulativeDistancesEle(points),
-      color: TRANSPORT_COLORS[seg.transport] || "#2C4A3B",
-      label: TRANSPORT_LABELS[seg.transport] || seg.transport || "Segment",
+      color:     TRANSPORT_COLORS[seg.transport] || "#2C4A3B",
+      label:     TRANSPORT_LABELS[seg.transport] || seg.transport || "Segment",
     });
   }
 
-  // Geen data — sectie verbergen en stoppen
+  // Geen data — sectie verbergen
   if (segmentData.length === 0) {
     wrapper.hidden = true;
     return;
@@ -1129,7 +1369,7 @@ function renderElevationPreview(segments) {
   const W = 700, H = 180, ML = 44, MR = 10, MT = 12, MB = 28;
   const plotW = W - ML - MR, plotH = H - MT - MB;
 
-  // Globale hoogte min/max + totale afstand
+  // Globale hoogte min/max + totale afstand over alle segmenten
   let globalMin = Infinity, globalMax = -Infinity, totalDist = 0;
   for (const seg of segmentData) {
     for (const pt of seg.points) {
@@ -1139,16 +1379,17 @@ function renderElevationPreview(segments) {
     totalDist += seg.distances[seg.distances.length - 1];
   }
 
-  // Padding zodat lijn niet tegen rand kleeft
-  const range = globalMax - globalMin || 1;
-  const pad = range * 0.1;
-  const eleMin = globalMin - pad, eleMax = globalMax + pad;
+  // Padding zodat profiel niet tegen de rand kleeft
+  const range  = globalMax - globalMin || 1;
+  const pad    = range * 0.1;
+  const eleMin = globalMin - pad;
+  const eleMax = globalMax + pad;
 
-  // Schaalfuncties
+  // Schaalfuncties: data-coördinaat → SVG-pixel
   const xScale = (d) => ML + (d / totalDist) * plotW;
   const yScale = (e) => MT + plotH - ((e - eleMin) / (eleMax - eleMin)) * plotH;
 
-  // SVG opbouwen
+  // SVG opbouwen als string
   let svg = `<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg"
     role="img" aria-label="Hoogteprofiel"
     style="width:100%;height:auto;display:block;overflow:visible;">`;
@@ -1157,10 +1398,10 @@ function renderElevationPreview(segments) {
   svg += `<rect x="${ML}" y="${MT}" width="${plotW}" height="${plotH}"
     fill="var(--color-surface-alt,#f8f9fa)" rx="3"/>`;
 
-  // Horizontale gridlijnen (4 stappen)
+  // Horizontale gridlijnen (4 stappen) met hoogte-labels
   for (let i = 0; i <= 4; i++) {
     const ele = eleMin + (i / 4) * (eleMax - eleMin);
-    const y = yScale(ele);
+    const y   = yScale(ele);
     svg += `<line x1="${ML}" y1="${y}" x2="${W - MR}" y2="${y}"
       stroke="var(--color-border,#e5e7eb)" stroke-width="1"/>`;
     svg += `<text x="${ML - 4}" y="${y + 4}" text-anchor="end"
@@ -1171,375 +1412,4 @@ function renderElevationPreview(segments) {
   for (let i = 0; i <= 5; i++) {
     const d = (i / 5) * totalDist;
     const x = xScale(d);
-    svg += `<text x="${x}" y="${H - 5}" text-anchor="middle"
-      font-size="9" fill="var(--color-text-muted,#6b7280)">${d.toFixed(1)} km</text>`;
-  }
-
-  // Segmenten tekenen
-  let cumDist = 0;
-  const separators = [];
-
-  for (let si = 0; si < segmentData.length; si++) {
-    const seg = segmentData[si];
-    const segDist = seg.distances[seg.distances.length - 1];
-
-    // Polyline punten voor dit segment
-    const pts = seg.points.map((pt, idx) => {
-      const x = xScale(cumDist + seg.distances[idx]);
-      const y = yScale(pt.ele);
-      return `${x},${y}`;
-    }).join(" ");
-
-    // Gevuld gebied onder de lijn
-    const firstX = xScale(cumDist + seg.distances[0]);
-    const lastX = xScale(cumDist + segDist);
-    const baseY = MT + plotH;
-    svg += `<polygon points="${firstX},${baseY} ${pts} ${lastX},${baseY}"
-      fill="${seg.color}" fill-opacity="0.12" stroke="none"/>`;
-
-    // Profiel lijn
-    svg += `<polyline points="${pts}"
-      fill="none" stroke="${seg.color}" stroke-width="2"
-      stroke-linejoin="round" stroke-linecap="round"/>`;
-
-    cumDist += segDist;
-    if (si < segmentData.length - 1) separators.push(xScale(cumDist));
-  }
-
-  // Verticale scheidingslijnen tussen segmenten
-  for (const x of separators) {
-    svg += `<line x1="${x}" y1="${MT}" x2="${x}" y2="${MT + plotH}"
-      stroke="var(--color-border,#e5e7eb)" stroke-width="1.5" stroke-dasharray="4 3"/>`;
-  }
-
-  // Interactieve hover overlay — transparante rect vangt muisevents op
-  svg += `<rect id="elev-prev-overlay" x="${ML}" y="${MT}" width="${plotW}" height="${plotH}"
-    fill="transparent" style="cursor:crosshair;"/>`;
-
-  // Tooltip elementen (beginnen verborgen)
-  svg += `<line id="elev-prev-cursor" x1="0" y1="${MT}" x2="0" y2="${MT + plotH}"
-    stroke="var(--color-text,#111)" stroke-width="1" stroke-dasharray="3 2" opacity="0"/>`;
-  svg += `<circle id="elev-prev-dot" cx="0" cy="0" r="4"
-    fill="var(--color-text,#111)" opacity="0"/>`;
-  svg += `<rect id="elev-prev-tip-bg" x="0" y="0" width="88" height="36" rx="4"
-    fill="var(--color-surface,#fff)"
-    stroke="var(--color-border,#e5e7eb)" stroke-width="1" opacity="0"/>`;
-  svg += `<text id="elev-prev-tip1" x="0" y="0" font-size="10"
-    fill="var(--color-text,#111)" opacity="0"></text>`;
-  svg += `<text id="elev-prev-tip2" x="0" y="0" font-size="10"
-    fill="var(--color-text-muted,#6b7280)" opacity="0"></text>`;
-
-  svg += `</svg>`;
-  container.innerHTML = svg;
-
-  // Hover interactie — platte lookup array voor snel dichtstbijzijnd punt
-  const svgEl = container.querySelector("svg");
-  const overlay  = container.querySelector("#elev-prev-overlay");
-  const cursor   = container.querySelector("#elev-prev-cursor");
-  const dot      = container.querySelector("#elev-prev-dot");
-  const tipBg    = container.querySelector("#elev-prev-tip-bg");
-  const tip1     = container.querySelector("#elev-prev-tip1");
-  const tip2     = container.querySelector("#elev-prev-tip2");
-
-  // Bouw lookup: {d, ele, color} voor elk punt over alle segmenten
-  const lookup = [];
-  let cumD = 0;
-  for (const seg of segmentData) {
-    for (let i = 0; i < seg.points.length; i++) {
-      lookup.push({ d: cumD + seg.distances[i], ele: seg.points[i].ele, color: seg.color });
-    }
-    cumD += seg.distances[seg.distances.length - 1];
-  }
-
-  function onHover(evt) {
-    const rect = svgEl.getBoundingClientRect();
-    const clientX = evt.touches ? evt.touches[0].clientX : evt.clientX;
-    const svgX = (clientX - rect.left) / rect.width * W;
-    if (svgX < ML || svgX > W - MR) { hideElevTip(); return; }
-
-    // Dichtstbijzijnd punt zoeken
-    const hoverDist = ((svgX - ML) / plotW) * totalDist;
-    let best = lookup[0], bestDiff = Math.abs(lookup[0].d - hoverDist);
-    for (const pt of lookup) {
-      const diff = Math.abs(pt.d - hoverDist);
-      if (diff < bestDiff) { best = pt; bestDiff = diff; }
-    }
-
-    const cx = xScale(best.d), cy = yScale(best.ele);
-    cursor.setAttribute("x1", cx); cursor.setAttribute("x2", cx); cursor.setAttribute("opacity", "0.6");
-    dot.setAttribute("cx", cx); dot.setAttribute("cy", cy); dot.setAttribute("fill", best.color); dot.setAttribute("opacity", "1");
-
-    tip1.textContent = `↑ ${Math.round(best.ele)} m`;
-    tip2.textContent = `⇌ ${best.d.toFixed(2)} km`;
-
-    // Tooltip positie — rechts van cursor, tenzij te dicht bij rand
-    const tipW = 88, tipPad = 6;
-    let tipX = cx + tipPad;
-    if (tipX + tipW > W - MR) tipX = cx - tipW - tipPad;
-    const tipY = MT + 6;
-
-    tipBg.setAttribute("x", tipX); tipBg.setAttribute("y", tipY); tipBg.setAttribute("opacity", "0.95");
-    tip1.setAttribute("x", tipX + 5); tip1.setAttribute("y", tipY + 13); tip1.setAttribute("opacity", "1");
-    tip2.setAttribute("x", tipX + 5); tip2.setAttribute("y", tipY + 27); tip2.setAttribute("opacity", "1");
-  }
-
-  function hideElevTip() {
-    cursor.setAttribute("opacity", "0");
-    dot.setAttribute("opacity", "0");
-    tipBg.setAttribute("opacity", "0");
-    tip1.setAttribute("opacity", "0");
-    tip2.setAttribute("opacity", "0");
-  }
-
-  // Desktop + mobile touch
-  overlay.addEventListener("mousemove", onHover);
-  overlay.addEventListener("mouseleave", hideElevTip);
-  overlay.addEventListener("touchmove", (e) => { e.preventDefault(); onHover(e); }, { passive: false });
-  overlay.addEventListener("touchend", hideElevTip);
-}
-
-// -----------------------------------------------------------
-// VISUELE PREVIEW
-// -----------------------------------------------------------
-function updatePreview() {
-  const title = els.inputTitle.value.trim();
-  const seg0 = state.segments[0];
-  const location = seg0?.location || "";
-  const summary = els.inputIntro.value.trim();
-  const heroUrl = els.inputHeroPhoto.value.trim();
-  const status = els.inputStatus.value;
-  const difficulty = els.inputDifficulty.value;
-  const gpx = seg0?.gpx;
-  const weather = seg0?.weather;
-
-  $("rp-title").textContent = title || "Wandeling zonder titel";
-  $("rp-location").textContent = location || "Locatie onbekend";
-  $("rp-summary").textContent = summary;
-  $("rp-summary").hidden = !summary;
-  $("rp-status-badge").textContent = status || "draft";
-
-  const heroImg = $("rp-hero-img"), heroPlaceholder = $("rp-hero-placeholder");
-  if (heroUrl) { heroImg.src = heroUrl; heroImg.hidden = false; heroPlaceholder.hidden = true; }
-  else { heroImg.hidden = true; heroPlaceholder.hidden = false; }
-
-  $("rp-distance").textContent = gpx?.distance_km ? `${gpx.distance_km} km` : "—";
-  $("rp-duration").textContent = gpx?.duration_hours ? `${gpx.duration_hours} u` : "—";
-  $("rp-elevation").textContent = gpx?.elevation_up_m ? `+${gpx.elevation_up_m} m` : "—";
-  $("rp-avg-speed").textContent = gpx?.avg_speed_kmh ? `${gpx.avg_speed_kmh} km/u` : "—";
-
-  const diffLabels = { T1: "T1 — Wandelen", T2: "T2 — Bergwandeling", T3: "T3 — Veeleisend", T4: "T4 — Alpien", T5: "T5 — Veeleisend alpien", T6: "T6 — Moeilijk alpien" };
-  $("rp-difficulty").textContent = diffLabels[difficulty] || "—";
-
-  const weatherEl = $("rp-weather");
-  if (weather) {
-    $("rp-w-temp").innerHTML = `<span class="rp-weather__icon">🌡</span> ${weather.temperature_min ?? "—"}° – ${weather.temperature_max ?? "—"}°C`;
-    $("rp-w-precip").innerHTML = `<span class="rp-weather__icon">💧</span> ${weather.precipitation_mm ?? "—"} mm`;
-    $("rp-w-wind").innerHTML = `<span class="rp-weather__icon">🍃</span> ${weather.wind_kmh ?? "—"} km/u`;
-    const dateStr = weather.date ? new Date(weather.date).toLocaleDateString("nl-BE", { day: "numeric", month: "long", year: "numeric" }) : "—";
-    $("rp-w-date").innerHTML = `<span class="rp-weather__icon">📅</span> ${dateStr}`;
-    weatherEl.hidden = false;
-  } else {
-    weatherEl.hidden = true;
-  }
-
-  const storyEl = $("rp-story");
-  storyEl.innerHTML = "";
-  state.storyBlocks.forEach((block) => {
-    if (block.type === "text" && block.value.trim()) {
-      const p = document.createElement("p"); p.className = "rp-story__text"; p.textContent = block.value; storyEl.appendChild(p);
-    } else if (block.type === "photo" && block.value.trim()) {
-      const img = document.createElement("img"); img.className = "rp-story__photo"; img.src = block.value; img.alt = ""; img.onerror = () => img.remove(); storyEl.appendChild(img);
-    }
-  });
-
-  // Kaart: teken alle segmenten met kleurcode
-  const mapEl = $("rp-map");
-  const segmentsWithGpx = state.segments.filter((s) => s.gpx?.startLat);
-  if (segmentsWithGpx.length > 0) {
-    mapEl.hidden = false;
-    const mapFrame = $("rp-map-frame");
-    if (!mapFrame.querySelector("#leaflet-preview-map")) {
-      mapFrame.innerHTML = `<div id="leaflet-preview-map" style="width:100%;height:200px;"></div>`;
-    }
-    setTimeout(() => { if (window.L) initLeafletMap(state.segments); }, 50);
-  } else {
-    mapEl.hidden = true;
-  }
-
-  // Hoogteprofiel preview — toont zodra minstens één segment gpxRaw heeft
-  renderElevationPreview(state.segments);
-}
-
-document.querySelectorAll(".input").forEach((el) => { el.addEventListener("input", updatePreview); el.addEventListener("change", updatePreview); });
-
-// -----------------------------------------------------------
-// JSON EXPORT
-// -----------------------------------------------------------
-function buildRouteJson() {
-  const id = els.inputRouteId.value.trim() || "nieuwe-route";
-  const allPhotos = [];
-  if (els.inputHeroPhoto.value.trim()) allPhotos.push({ url: els.inputHeroPhoto.value.trim(), caption: "" });
-  state.storyBlocks.filter((b) => b.type === "photo" && b.value.trim()).forEach((b) => allPhotos.push({ url: b.value.trim(), caption: "" }));
-  const storyText = state.storyBlocks.filter((b) => b.type === "text" && b.value.trim()).map((b) => b.value.trim()).join("\n\n");
-  const seg0 = state.segments[0];
-
-  const segmentsExport = state.segments.map((s) => ({
-    transport: s.transport, label: s.label || null, date: s.date || null,
-    location: s.location || null, country: s.country || null, region: s.region || null,
-    place: s.place || null, difficulty: s.difficulty || null,
-    difficulty_auto: s.difficultyAuto !== false, rough_surface: s.roughSurface || false,
-    gpx_stats: s.gpx ? {
-      distance_km: s.gpx.distance_km, duration_hours: s.gpx.duration_hours,
-      elevation_up_m: s.gpx.elevation_up_m, elevation_down_m: s.gpx.elevation_down_m,
-      avg_speed_kmh: s.gpx.avg_speed_kmh, max_speed_kmh: s.gpx.max_speed_kmh,
-      highest_point_m: s.gpx.highest_point_m, lowest_point_m: s.gpx.lowest_point_m,
-      start_lat: s.gpx.startLat || null, start_lon: s.gpx.startLon || null,
-      track_points: s.gpx.trackPoints || null,
-    } : null,
-    gpx_raw: s.gpxRaw || null,
-    weather: s.weather ? { date: s.weather.date, temperature_min: s.weather.temperature_min, temperature_max: s.weather.temperature_max, precipitation_mm: s.weather.precipitation_mm, wind_kmh: s.weather.wind_kmh, condition: s.weather.condition || "", source: "Open-Meteo" } : null,
-  }));
-
-  return {
-    id, status: els.inputStatus.value,
-    published_date: seg0?.date || null, transport: seg0?.transport ? [seg0.transport] : null,
-    location: seg0?.location || "", country: seg0?.country || "", region: seg0?.region || "", place: seg0?.place || "",
-    title: { nl: els.inputTitle.value.trim(), en: "" }, difficulty: els.inputDifficulty.value || null,
-    source_reference: els.inputSource.value.trim() || null,
-    tags: els.inputKeywords.value.split(",").map((k) => k.trim()).filter(Boolean),
-    summary: { nl: els.inputIntro.value.trim(), en: "" }, story: { nl: storyText, en: "" },
-    story_blocks: state.storyBlocks.filter((b) => (b.type === "text" ? b.value.trim() : true)).map((b) => {
-      if (b.type === "text") return { type: b.type, value: b.value.trim() };
-      if (b.type === "photo") return { type: b.type, value: b.value.trim() };
-      if (b.type === "photo-grid") return { type: b.type, cols: b.cols, photos: b.photos.filter(Boolean) };
-      if (b.type === "link") return { type: b.type, name: b.name.trim(), url: b.url.trim() };
-      return b;
-    }),
-    gallery: state.galleryPhotos.filter((p) => p.url).map((p) => ({ url: p.url })),
-    tips: { nl: els.inputTips.value.trim(), en: "" }, photos: allPhotos, segments: segmentsExport,
-    gpx_stats: seg0?.gpx ? { distance_km: seg0.gpx.distance_km, duration_hours: seg0.gpx.duration_hours, elevation_up_m: seg0.gpx.elevation_up_m, elevation_down_m: seg0.gpx.elevation_down_m, avg_speed_kmh: seg0.gpx.avg_speed_kmh, max_speed_kmh: seg0.gpx.max_speed_kmh, highest_point_m: seg0.gpx.highest_point_m, lowest_point_m: seg0.gpx.lowest_point_m, start_lat: seg0.gpx.startLat || null, start_lon: seg0.gpx.startLon || null, track_points: seg0.gpx.trackPoints || null } : null,
-    gpx_raw: seg0?.gpxRaw || null,
-    weather: seg0?.weather ? { date: seg0.weather.date, temperature_min: seg0.weather.temperature_min, temperature_max: seg0.weather.temperature_max, precipitation_mm: seg0.weather.precipitation_mm, wind_kmh: seg0.weather.wind_kmh, condition: seg0.weather.condition || "", source: "Open-Meteo" } : null,
-  };
-}
-
-els.btnExport.addEventListener("click", () => {
-  const id = els.inputRouteId.value.trim();
-  if (!id) { showInlineError(els.inputRouteId, "Geef de route een ID (bestandsnaam)."); els.inputRouteId.focus(); return; }
-  const json = buildRouteJson();
-  const blob = new Blob([JSON.stringify(json, null, 2)], { type: "application/json" });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a"); a.href = url; a.download = `${id}.json`; a.click();
-  URL.revokeObjectURL(url);
-});
-
-// -----------------------------------------------------------
-// AI GENEREREN
-// -----------------------------------------------------------
-els.btnAiGenerate.addEventListener("click", async () => {
-  if (!state.apiKeyConfirmed || !state.apiKey) { alert("Voer eerst een geldige Anthropic API-sleutel in en bevestig."); return; }
-  const keywords = els.inputKeywords.value.trim(), title = els.inputTitle.value.trim();
-  const seg0 = state.segments[0], location = seg0?.location || "", difficulty = els.inputDifficulty.value;
-  const gpx = seg0?.gpx, weather = seg0?.weather;
-  if (!title && !location && !keywords) { alert("Vul minstens een titel, locatie of steekwoorden in."); return; }
-  els.btnAiGenerate.classList.add("is-loading"); els.btnAiGenerate.textContent = "\u2746 Genereren\u2026";
-  const prompt = `Je schrijft Nederlandse wandelverhalen voor MyTrailWalks, een persoonlijk outdoor storytelling platform.\n\nGegevens van de route:\n- Titel: ${title || "onbekend"}\n- Locatie: ${location || "onbekend"}\n- Moeilijkheid: ${difficulty || "onbekend"}\n- Steekwoorden / ervaringen: ${keywords || "geen"}\n${gpx ? `- Afstand: ${gpx.distance_km} km, Duur: ${gpx.duration_hours} uur, Stijging: ${gpx.elevation_up_m} m` : ""}\n${weather ? `- Weer: min ${weather.temperature_min}°C, max ${weather.temperature_max}°C, neerslag ${weather.precipitation_mm} mm, wind ${weather.wind_kmh} km/u` : ""}\n${state.segments.length > 1 ? `- Vervoersmiddelen: ${state.segments.map((s) => TRANSPORT_LABELS[s.transport] || s.transport).join(", ")}` : ""}\n\nGenereer ALLEEN een JSON-object (geen uitleg, geen markdown) met deze velden:\n{\n  "summary": "Één zin samenvatting van max 160 tekens voor de grid-weergave.",\n  "story_blocks": [\n    { "type": "text", "value": "Eerste alinea van het verhaal." },\n    { "type": "text", "value": "Tweede alinea van het verhaal." }\n  ],\n  "tips": "2-4 praktische tips voor wandelaars, als doorlopende tekst."\n}\n\nSchrijf het verhaal in 3-5 alinea's. Persoonlijk, beschrijvend, no clickbait.`;
-  try {
-    const response = await fetch("https://api.anthropic.com/v1/messages", { method: "POST", headers: { "Content-Type": "application/json", "x-api-key": state.apiKey, "anthropic-version": "2023-06-01" }, body: JSON.stringify({ model: "claude-sonnet-4-6", max_tokens: 1000, messages: [{ role: "user", content: prompt }] }) });
-    const data = await response.json();
-    const text = data.content?.map((c) => c.text || "").join("") || "";
-    const parsed = JSON.parse(text.replace(/```json|```/g, "").trim());
-    if (parsed.summary) { els.inputIntro.value = parsed.summary; els.introCount.textContent = `${parsed.summary.length}/160`; }
-    if (parsed.story_blocks?.length) { state.storyBlocks = parsed.story_blocks; renderBlockEditor(); }
-    if (parsed.tips) els.inputTips.value = parsed.tips;
-    updatePreview();
-  } catch (err) {
-    console.error("AI generatie fout:", err); alert("AI-generatie mislukt. Controleer je API-sleutel en verbinding.");
-  } finally {
-    els.btnAiGenerate.classList.remove("is-loading"); els.btnAiGenerate.innerHTML = '<span class="btn-icon">\u2746</span> Genereer met AI';
-  }
-});
-
-// -----------------------------------------------------------
-// LEAFLET KAART
-// -----------------------------------------------------------
-let leafletMap = null;
-
-function initLeafletMap(segments) {
-  const container = document.getElementById("leaflet-preview-map");
-  if (!container) return;
-  if (leafletMap) { leafletMap.remove(); leafletMap = null; }
-  leafletMap = L.map("leaflet-preview-map", { zoomControl: true, scrollWheelZoom: false });
-  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", { attribution: "© OpenStreetMap contributors", maxZoom: 18 }).addTo(leafletMap);
-  const allBounds = [];
-  segments.forEach((seg) => {
-    if (!seg.gpx?.startLat) return;
-    const color = TRANSPORT_COLORS[seg.transport] || "#2C4A3B";
-    const lat = seg.gpx.startLat, lon = seg.gpx.startLon;
-    if (seg.gpx.trackPoints?.length > 1) { L.polyline(seg.gpx.trackPoints, { color, weight: 3, opacity: 0.85 }).addTo(leafletMap); allBounds.push(...seg.gpx.trackPoints); }
-    const label = seg.label || TRANSPORT_LABELS[seg.transport] || seg.transport;
-    L.circleMarker([lat, lon], { radius: 6, fillColor: color, color: "#fff", weight: 2, opacity: 1, fillOpacity: 1 }).addTo(leafletMap).bindPopup(label);
-  });
-  if (allBounds.length > 1) { leafletMap.fitBounds(allBounds, { padding: [16, 16] }); }
-  else if (segments[0]?.gpx?.startLat) { leafletMap.setView([segments[0].gpx.startLat, segments[0].gpx.startLon], 13); }
-}
-
-// -----------------------------------------------------------
-// ROUTES.JSON ENTRY EXPORT
-// -----------------------------------------------------------
-document.getElementById("btn-export-routes-entry").addEventListener("click", () => {
-  const id = els.inputRouteId.value.trim();
-  if (!id) { showInlineError(els.inputRouteId, "Geef de route een ID (bestandsnaam)."); els.inputRouteId.focus(); return; }
-  const seg0 = state.segments[0], heroUrl = els.inputHeroPhoto.value.trim();
-  const thumbUrl = heroUrl ? heroUrl.replace("w_1200", "w_400") : "";
-  const entry = { id, language: "nl", name: els.inputTitle.value.trim() || id, region: seg0?.region || seg0?.location || "", date_walked: seg0?.date || null, distance_km: seg0?.gpx?.distance_km || 0, duration_hours: seg0?.gpx?.duration_hours || 0, elevation_m: seg0?.gpx?.elevation_up_m || 0, difficulty: els.inputDifficulty.value || null, tags: els.inputKeywords.value.split(",").map((k) => k.trim()).filter(Boolean), hero: thumbUrl, content_json: `routes/${id}.json` };
-  const blob = new Blob([JSON.stringify(entry, null, 2)], { type: "application/json" });
-  const url = URL.createObjectURL(blob); const a = document.createElement("a"); a.href = url; a.download = `${id}-routes-entry.json`; a.click(); URL.revokeObjectURL(url);
-});
-
-// -----------------------------------------------------------
-// HULPFUNCTIES
-// -----------------------------------------------------------
-function showInlineError(inputEl, message) {
-  inputEl.style.borderColor = "var(--color-hard)";
-  const existing = inputEl.parentElement.querySelector(".inline-error");
-  if (existing) existing.remove();
-  const span = document.createElement("span"); span.className = "inline-error field__help"; span.style.color = "var(--color-hard)"; span.textContent = message;
-  inputEl.parentElement.appendChild(span);
-  setTimeout(() => { inputEl.style.borderColor = ""; span.remove(); }, 3000);
-}
-
-// -----------------------------------------------------------
-// INIT — v2.4.3
-// -----------------------------------------------------------
-window.appReady.then(() => {
-  const style = document.createElement("style");
-  style.textContent = `
-    .segment-block { border-left: 4px solid var(--color-forest); padding: 16px; margin-bottom: 16px; background: var(--color-cream, #F6F1E7); border-radius: 0 6px 6px 0; }
-    .segment-block__header { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; flex-wrap: wrap; }
-    .segment-block__num { display: inline-flex; align-items: center; justify-content: center; width: 24px; height: 24px; border-radius: 50%; background: var(--color-forest, #2C4A3B); color: #fff; font-size: 0.75rem; font-weight: 700; flex-shrink: 0; }
-    .segment-block__transport { flex-shrink: 0; }
-    .segment-label { flex: 1; min-width: 160px; }
-    .segment-remove-btn { margin-left: auto; background: none; border: none; cursor: pointer; color: var(--color-charcoal-soft, #5C5752); font-size: 1rem; padding: 2px 6px; border-radius: 4px; }
-    .segment-remove-btn:hover { color: var(--color-hard, #c0392b); background: rgba(192,57,43,0.08); }
-    .segment-gpx { margin-bottom: 12px; }
-    .segment-meta { padding-top: 8px; }
-    .segment-block .drop-zone--has-file { background: var(--color-forest, #2C4A3B); opacity: 0.08; }
-    .segment-difficulty { margin-bottom: 12px; padding: 10px 12px; background: rgba(255,255,255,0.5); border-radius: 6px; }
-    .segment-difficulty__none { margin: 0; font-style: italic; }
-    .segment-difficulty__status { display: block; margin-top: 4px; }
-    .checkbox-label { display: flex; align-items: center; gap: 6px; font-size: var(--text-sm, 0.875rem); cursor: pointer; }
-    .gpx-warning { margin-top: 12px; padding: 10px 12px; background: var(--color-warning-bg, #fff8e1); border: 1px solid var(--color-warning-border, #f0c040); border-radius: 6px; }
-    .gpx-warning__text { margin: 0 0 8px; font-size: var(--text-sm, 0.875rem); color: var(--color-charcoal, #333); line-height: 1.4; }
-    .gpx-warning__actions { display: flex; gap: 8px; flex-wrap: wrap; }
-    #btn-add-segment { margin-top: 8px; width: 100%; }
-    /* Hoogteprofiel preview */
-    .rp-elevation { margin-top: 12px; }
-    .rp-elevation #rp-elevation-chart { border-radius: 6px; overflow: hidden; }
-  `;
-  document.head.appendChild(style);
-
-  renderSegments();
-  renderBlockEditor();
-  updatePreview();
-});
+    svg += `<text x="
