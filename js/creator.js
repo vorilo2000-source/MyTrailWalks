@@ -617,12 +617,16 @@ els.jsonImportInput.addEventListener("change", () => {
   if (!file) return;
   const reader = new FileReader();
   reader.onload = (e) => {
+    console.info('[creator] JSON import gestart');
     try {
-      const data = JSON.parse(e.target.result);
+      const parsed = JSON.parse(e.target.result);
+      console.info('[creator] JSON parsed, type:', typeof parsed);
+      const data = (typeof normalizeRouteJson === 'function') ? normalizeRouteJson(parsed) : parsed;
+      console.info('[creator] JSON genormaliseerd (normalizeRouteJson toegepast)');
       loadJsonIntoForm(data);
     } catch (err) {
       alert("Ongeldig JSON-bestand. Controleer het bestand en probeer opnieuw.");
-      console.error("JSON import fout:", err);
+      console.error("[creator] JSON import fout:", err);
     }
   };
   reader.readAsText(file);
@@ -630,6 +634,7 @@ els.jsonImportInput.addEventListener("change", () => {
 });
 
 function loadJsonIntoForm(data) {
+  console.info('[creator] loadJsonIntoForm aangeroepen');
   if (data.id)               els.inputRouteId.value   = data.id;
   if (data.status)           els.inputStatus.value    = data.status;
   if (data.title?.nl)        els.inputTitle.value     = data.title.nl;
@@ -677,17 +682,8 @@ function loadJsonIntoForm(data) {
         difficultyAuto: s.difficulty_auto !== false, roughSurface: s.rough_surface || false,
       };
 
-      if (s.gpx) {
-        // Nieuw formaat: direct laden
-        seg.gpx = s.gpx;
-      } else if (s.gpx_raw) {
-        // Oud formaat met raw GPX string: opnieuw parsen naar unified model
-        const parsed = parseGpx(s.gpx_raw);
-        if (parsed) seg.gpx = parsed;
-      } else if (s.gpx_stats) {
-        // Oud formaat met enkel stats: converteren naar unified model (zonder tracks)
-        seg.gpx = _legacyStatsToGpx(s.gpx_stats);
-      }
+      // Accept only explicit `gpx` unified model in segments when importing.
+      if (s.gpx) seg.gpx = s.gpx;
 
       if (!seg.difficulty && seg.gpx) {
         const auto = calculateSegmentDifficulty(seg);
@@ -696,42 +692,89 @@ function loadJsonIntoForm(data) {
       return seg;
     });
   } else {
-    // Enkelvoudige route (oud formaat zonder segments array)
-    segmentCounter = 1;
-    const seg = state.segments[0];
-    seg.transport      = data.transport?.[0] || "walking";
-    seg.date           = data.published_date || "";
-    seg.location       = data.location || "";
-    seg.country        = data.country  || "";
-    seg.region         = data.region   || "";
-    seg.place          = data.place    || "";
-    seg.weather        = data.weather  || null;
-    seg.difficulty     = data.difficulty || "";
-    seg.difficultyAuto = !data.difficulty;
-    seg.roughSurface   = false;
-
-    if (data.gpx) {
-      // Nieuw formaat op root-niveau
-      seg.gpx = data.gpx;
-    } else if (data.gpx_raw) {
-      // Oud formaat: parsen
-      const parsed = parseGpx(data.gpx_raw);
-      if (parsed) seg.gpx = parsed;
-    } else if (data.gpx_stats) {
-      // Oud stats-only: converteren
-      seg.gpx = _legacyStatsToGpx(data.gpx_stats);
-    }
-
-    if (!seg.difficulty && seg.gpx) {
-      const auto = calculateSegmentDifficulty(seg);
-      if (auto) seg.difficulty = auto;
-    }
-    state.segments = [seg];
+    // Strict import: segments array is required.
+    console.error('[creator] Geïmporteerde JSON bevat geen `segments` array — import geannuleerd.');
+    alert('Import mislukt: dit JSON-bestand heeft niet het vereiste moderne formaat (missing segments).');
+    return;
   }
 
   renderSegments();
   renderBlockEditor();
   updatePreview();
+}
+
+// -----------------------------------------------------------
+// EXPORT: bouw en download gestandaardiseerde JSON vanuit state
+// -----------------------------------------------------------
+function _buildExportFromState() {
+  const out = {};
+  out.id = els.inputRouteId.value.trim() || state.segments[0]?.label?.toLowerCase().replace(/\s+/g, '-') || null;
+  out.status = els.inputStatus.value || 'draft';
+  out.title = { nl: els.inputTitle.value || '' };
+  out.summary = { nl: els.inputIntro.value || '' };
+  out.tips = { nl: els.inputTips.value || '' };
+  out.source_reference = els.inputSource.value || '';
+  out.tags = els.inputKeywords.value ? els.inputKeywords.value.split(/\s*,\s*/).filter(Boolean) : [];
+  out.photos = [];
+  const hero = els.inputHeroPhoto.value.trim();
+  if (hero) out.photos.push({ role: 'hero', url: hero });
+  // Additional photos from story blocks (photo blocks)
+  state.storyBlocks.forEach((b) => { if (b.type === 'photo' && b.value) out.photos.push({ url: b.value }); });
+  out.gallery = state.galleryPhotos.map((p) => ({ url: p.url || '' }));
+  out.story_blocks = state.storyBlocks.map((b) => ({ ...b }));
+
+  out.segments = state.segments.map((s) => {
+    return {
+      transport: s.transport || 'walking',
+      label: s.label || '',
+      date: s.date || null,
+      location: s.location || '',
+      country: s.country || '',
+      region: s.region || '',
+      place: s.place || '',
+      weather: s.weather || null,
+      difficulty: s.difficulty || '',
+      difficulty_auto: s.difficultyAuto !== false,
+      rough_surface: s.roughSurface || false,
+      // Keep unified gpx for editor users; provide gpx_stats for route page consumption
+      gpx: s.gpx || null,
+      gpx_stats: s.gpx?.stats || null,
+      gpx_raw: null,
+    };
+  });
+
+  // Backward compat: root-level gpx_stats and gpx_raw copied from first segment
+  out.gpx_stats = out.segments[0]?.gpx_stats || null;
+  out.gpx_raw = out.segments[0]?.gpx_raw || null;
+  return out;
+}
+
+function _downloadJson(obj, filename) {
+  const blob = new Blob([JSON.stringify(obj, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename || (obj.id ? `${obj.id}.json` : 'route.json');
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+}
+
+if (els.btnExport) {
+  els.btnExport.addEventListener('click', (e) => {
+    e.preventDefault();
+    console.info('[creator] Export gestart');
+    try {
+      const out = _buildExportFromState();
+      console.info('[creator] Export JSON gebouwd, velden:', Object.keys(out).join(', '));
+      _downloadJson(out, `${out.id || 'route'}.json`);
+      console.info('[creator] Export downloaden gestart');
+    } catch (err) {
+      console.error('[creator] Export mislukt:', err);
+      alert('Export mislukt — zie console voor details.');
+    }
+  });
 }
 
 /**
@@ -741,33 +784,7 @@ function loadJsonIntoForm(data) {
  * @param {Object} g - oud gpx_stats object
  * @returns {Object} unified gpx model
  */
-function _legacyStatsToGpx(g) {
-  return {
-    version:   null,
-    creator:   null,
-    metadata:  null,
-    waypoints: [],
-    routes:    [],
-    // Geen tracks beschikbaar in oud stats-only formaat
-    tracks: [],
-    stats: {
-      distance_km:      g.distance_km      || null,
-      duration_hours:   g.duration_hours   || null,
-      elevation_up_m:   g.elevation_up_m   || null,
-      elevation_down_m: g.elevation_down_m || null,
-      avg_speed_kmh:    g.avg_speed_kmh    || null,
-      max_speed_kmh:    g.max_speed_kmh    || null,
-      highest_point_m:  g.highest_point_m  || null,
-      lowest_point_m:   g.lowest_point_m   || null,
-      start_lat:        g.start_lat        || null,
-      start_lon:        g.start_lon        || null,
-      start:            null,
-      end:              null,
-      // track_points bewaren voor bochtenberekening
-      track_points:     g.track_points     || null,
-    },
-  };
-}
+// Legacy conversion removed per user request — no backward compatibility handling here.
 
 // -----------------------------------------------------------
 // BLOKKEN-EDITOR

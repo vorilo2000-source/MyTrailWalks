@@ -54,7 +54,11 @@ async function loadRoute(id) {
   try {
     const resp = await fetch(`/MyTrailWalks/routes/${id}.json`);
     if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
-    return await resp.json();
+    const parsed = await resp.json();
+    console.info('[route-map] Route JSON geladen, id=', id);
+    const data = (typeof normalizeRouteJson === 'function') ? normalizeRouteJson(parsed) : parsed;
+    console.info('[route-map] Route JSON genormaliseerd');
+    return data;
   } catch (err) {
     console.error("[route-map.js] Route laden mislukt:", err);
     return null;
