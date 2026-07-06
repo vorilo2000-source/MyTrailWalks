@@ -1,6 +1,7 @@
 // =======================================================
 // creator.js — MyTrailWalks
 // Route creator: GPX parse, weer, locatie, AI, JSON export
+// v3.0.1: syntax herstel in elevation preview renderer
 // v3.0.0: één unified segment.gpx model
 //         - GPX volledig uitgelezen naar segment.gpx.tracks[].segments[].points[]
 //         - segment.gpx.stats bevat alle berekende statistieken
@@ -1429,4 +1430,42 @@ function renderElevationPreview(segments) {
   for (let i = 0; i <= 5; i++) {
     const d = (i / 5) * totalDist;
     const x = xScale(d);
-    svg += `<text x="
+    svg += `<text x="${x}" y="${H - 6}" text-anchor="middle"
+      font-size="10" fill="var(--color-text-muted,#6b7280)">${d.toFixed(1)} km</text>`;
+  }
+
+  // Segmenten tekenen + scheidingslijnen
+  let cumDist = 0;
+  const separators = [];
+  for (let si = 0; si < segmentData.length; si++) {
+    const seg = segmentData[si];
+    const segTotalDist = seg.distances[seg.distances.length - 1];
+    const pts = seg.points.map((pt, idx) => {
+      const x = xScale(cumDist + seg.distances[idx]);
+      const y = yScale(pt.ele);
+      return `${x},${y}`;
+    }).join(" ");
+
+    const firstX = xScale(cumDist + seg.distances[0]);
+    const lastX = xScale(cumDist + segTotalDist);
+    const baseY = MT + plotH;
+    const polyPts = `${firstX},${baseY} ${pts} ${lastX},${baseY}`;
+
+    svg += `<polygon points="${polyPts}"
+      fill="${seg.color}" fill-opacity="0.12" stroke="none"/>`;
+    svg += `<polyline points="${pts}"
+      fill="none" stroke="${seg.color}" stroke-width="2"
+      stroke-linejoin="round" stroke-linecap="round"/>`;
+
+    cumDist += segTotalDist;
+    if (si < segmentData.length - 1) separators.push(xScale(cumDist));
+  }
+
+  for (const x of separators) {
+    svg += `<line x1="${x}" y1="${MT}" x2="${x}" y2="${MT + plotH}"
+      stroke="var(--color-border,#e5e7eb)" stroke-width="1.5" stroke-dasharray="4 3"/>`;
+  }
+
+  svg += `</svg>`;
+  container.innerHTML = svg;
+}
