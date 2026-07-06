@@ -1,6 +1,7 @@
 // =======================================================
 // route.js — MyTrailWalks
 // Route detail pagina: laadt JSON en rendert route
+// v2.4.1: fix relatief pad voor route JSON — /MyTrailWalks/routes/ → ../routes/
 // v2.4.0: rood-omcirkeld stats/weer/vervoer-blok verwijderd (dubbel met
 //         segmenten-sectie) — vervoer + label nu altijd samen in de
 //         gekleurde segment-header (voorheen ontbrak vervoer soms per
@@ -44,6 +45,18 @@ function t(key) {
   try { return i18nModule.t(`route:${key}`); } catch (_) { return key; }
 }
 
+// -----------------------------------------------------------
+// Bepaal relatief pad vanuit huidi pagina naar projectroot
+// -----------------------------------------------------------
+function getBasePath() {
+  const segments = window.location.pathname
+    .split("/")
+    .filter(Boolean)
+    .filter((seg) => !seg.endsWith(".html"));
+  const depth = Math.max(0, segments.length - 1);
+  return depth > 0 ? "../".repeat(depth) : "";
+}
+
 function getRouteId() {
   const params = new URLSearchParams(window.location.search);
   if (params.get("id")) return params.get("id");
@@ -55,8 +68,23 @@ function getRouteId() {
 
 async function loadRoute(id) {
   try {
-    const resp = await fetch(`/MyTrailWalks/routes/${id}.json`);
-    if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+    // Berekken correcte pad: vanuit huidi pagina (bijv. routes/route.html)
+    // naar JSON-bestand in routes/ directory
+    const base = getBasePath();
+    
+    // Zet .json suffix toe als niet aanwezig
+    const normalizedId = id.endsWith(".json") ? id : `${id}.json`;
+    
+    // Als id al een "/" bevat, is het volledige pad; anders voeg "routes/" toe
+    const finalUrl = id.includes("/") ? id : `${base}routes/${normalizedId}`;
+    
+    console.info('[route] Route JSON laden van:', finalUrl);
+    const resp = await fetch(finalUrl);
+    
+    if (!resp.ok) {
+      throw new Error(`HTTP ${resp.status} bij laden van route JSON: ${finalUrl}`);
+    }
+    
     const parsed = await resp.json();
     console.info('[route] Route JSON geladen, id=', id);
     const data = (typeof normalizeRouteJson === 'function') ? normalizeRouteJson(parsed) : parsed;
