@@ -1,6 +1,7 @@
 // =======================================================
 // creator.js — MyTrailWalks
 // Route creator: GPX parse, weer, locatie, AI, JSON export
+// v3.0.2: herstel updatePreview() centrale coördinator-functie
 // v3.0.1: syntax herstel in elevation preview renderer
 // v3.0.0: één unified segment.gpx model
 //         - GPX volledig uitgelezen naar segment.gpx.tracks[].segments[].points[]
@@ -1346,6 +1347,21 @@ function _cumulativeDistancesEle(points) {
     dist.push(dist[i - 1] + 2 * R * Math.asin(Math.sqrt(a)));
   }
   return dist;
+}
+
+// -----------------------------------------------------------
+// CENTRALE PREVIEW UPDATE — coördinatie van alle render-functies
+// -----------------------------------------------------------
+
+/**
+ * Centrale updatePreview() - coördineert alle visualisatie-renders:
+ * - renderSegments() → tekent segment-blokken UI
+ * - renderElevationPreview() → tekent hoogteprofiel SVG
+ * Wordt aangeroepen bij elke wijziging van state (GPX, metadata, blokken, etc.)
+ */
+function updatePreview() {
+  renderSegments();
+  renderElevationPreview(state.segments);
 }
 
 /**
