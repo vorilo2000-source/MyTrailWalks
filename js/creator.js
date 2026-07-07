@@ -712,10 +712,11 @@ function loadJsonIntoForm(data) {
   
   // Transport-array heropbouwen vanuit segmenten
   // (zorgt ervoor dat als oud JSON alleen "walking" had, maar nu ook "car" heeft, dit correct wordt gesyndied)
-  if (state.segments?.length) {
-    const uniqueTransports = [...new Set(state.segments.map(s => s.transport))];
-    console.info('[creator] Transport array gesync:', uniqueTransports);
-  }
+ if (state.segments?.length) {
+  const uniqueTransports = [...new Set(state.segments.map(s => s.transport))];
+  console.info('[creator] Transport array gesync:', uniqueTransports);
+}
+}
   
 // -----------------------------------------------------------
 // EXPORT: bouw en download gestandaardiseerde JSON vanuit state
