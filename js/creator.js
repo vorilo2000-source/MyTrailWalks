@@ -303,6 +303,34 @@ els.btnKeyConfirm.addEventListener("click", () => {
   });
 });
 
+// ======================= BASISVELDEN LIVE PREVIEW =======================
+// Koppelt vaste formuliervelden aan de nieuwe route-preview.
+[
+  els.inputTitle, // Titel in hero.
+  els.inputDifficulty, // Moeilijkheidsbadge.
+  els.inputSource, // Bronvermelding.
+  els.inputHeroPhoto, // Hero-foto.
+  els.inputKeywords, // Tags voor export.
+  els.inputIntro, // Samenvatting.
+  els.inputTips, // Tips-sectie.
+  els.inputRouteId, // Route-id voor export.
+  els.inputStatus, // Draft/final badge.
+].forEach((el) => {
+  if (!el) return; // Sla ontbrekende velden veilig over.
+
+  el.addEventListener("input", () => {
+    if (el === els.inputIntro && els.introCount) {
+      els.introCount.textContent = `${els.inputIntro.value.length}/160`; // Update teller.
+    }
+
+    updatePreview(); // Ververs rechter route-preview.
+  });
+
+  el.addEventListener("change", () => {
+    updatePreview(); // Ververs ook bij select/blur/change.
+  });
+});
+
 // -----------------------------------------------------------
 // SEGMENTEN — render + events
 // -----------------------------------------------------------
