@@ -24,7 +24,7 @@ function renderHero(route) {
   const heroPhoto = route.photos?.find((p) => p.role === "hero")?.url || route.photos?.[0]?.url || ""; // Zoek hero-foto.
 
   if (heroBg) { // Controleer of hero bestaat.
-    heroBg.style.backgroundImage = heroPhoto ? `url('${heroPhoto}')` : ""; // Zet of leeg achtergrondbeeld.
+   heroBg.style.backgroundImage = heroPhoto ? `url("${heroPhoto}")` : ""; // Zet of leeg achtergrondbeeld.
     heroBg.classList.toggle("has-photo", Boolean(heroPhoto)); // Markeer of foto bestaat.
   }
 
