@@ -17,102 +17,6 @@
 const $ = (id) => document.getElementById(id);
 
 // -----------------------------------------------------------
-// KLEURCODE PER VERVOERSMIDDEL — identiek aan creator.js
-// zodat segment-kleuren consistent zijn tussen creator en route detail
-// -----------------------------------------------------------
-const TRANSPORT_COLORS = {
-  walking:    "#E8800A",  // oranje
-  hike:       "#9B59B6",  // paars
-  cycling:    "#2980B9",  // blauw
-  motorcycle: "#E74C3C",  // rood
-  car:        "#16A085",  // teal
-  train:      "#F39C12",  // geel-oranje
-  bus:        "#8E44AD",  // violet
-  boat:       "#1ABC9C",  // turquoise
-  plane:      "#2C3E50",  // donkerblauw
-};
-
-const TRANSPORT_LABELS = {
-  // "hike" blijft de interne sleutel (bestaande route-JSON's met
-  // "transport": "hike" blijven werken) — het label is
-  // hernoem  "Hike / Trail" NIET naar "Adventure".
-  walking: "🚶 Wandelen", hike: "🥾 Hike / Trail", cycling: "🚴 Fietsen",
-  motorcycle: "🏍 Motor", car: "🚗 Auto", train: "🚆 Trein",
-  bus: "🚌 Bus", boat: "⛵ Boot", plane: "✈️ Vliegtuig",
-};
-
-function t(key) {
-  try { return i18nModule.t(`route:${key}`); } catch (_) { return key; }
-}
-
-// -----------------------------------------------------------
-// RENDER HERO
-// -----------------------------------------------------------
-function renderHero(route) {
-  const lang = i18nModule?.language?.substring(0, 2) || "nl";
-  const title = typeof route.title === "object"
-    ? route.title[lang] || route.title.nl || ""
-    : route.title || "";
-
-  $("route-title").textContent = title;
-  document.title = `${title} — MyTrailWalks`;
-
-  if (route.location) $("route-location").textContent = route.location;
-  if (route.region) $("route-region").textContent = route.region;
-
-  const heroBg = $("route-hero-bg");
-  const heroPhoto = route.photos?.find((p) => p.role === "hero")?.url || route.photos?.[0]?.url || "";
-  if (heroPhoto) {
-    heroBg.style.backgroundImage = `url('${heroPhoto}')`;
-    heroBg.classList.add("has-photo");
-  }
-
-  // Status badge
-  const statusEl = $("route-status-badge");
-  if (statusEl && route.status) {
-    const isDraft = route.status === "draft";
-    const badge = document.createElement("span");
-    badge.className = isDraft ? "route-status-badge route-status-badge--draft" : "route-status-badge route-status-badge--final";
-    badge.textContent = isDraft ? "Draft" : "Final";
-    statusEl.appendChild(badge);
-  }
-
-  // Moeilijkheid + datum badges
-  const badges = $("route-badges");
-  if (route.difficulty) {
-    const badge = document.createElement("span");
-    badge.className = "route-badge route-badge--difficulty";
-    badge.textContent = route.difficulty;
-    badges.appendChild(badge);
-  }
-  if (route.published_date) {
-    const badge = document.createElement("span");
-    badge.className = "route-badge";
-    const date = new Date(route.published_date);
-    badge.textContent = date.toLocaleDateString(lang === "en" ? "en-GB" : "nl-BE", {
-      day: "numeric", month: "long", year: "numeric"
-    });
-    badges.appendChild(badge);
-  }
-}
-
-// -----------------------------------------------------------
-// RENDER BRONVERMELDING
-// -----------------------------------------------------------
-function renderSource(route) {
-  if (!route.source_reference) return;
-  const container = $("route-source");
-  const a = document.createElement("a");
-  a.className = "route-source__link";
-  a.href = route.source_reference;
-  a.target = "_blank";
-  a.rel = "noopener noreferrer";
-  a.innerHTML = `<span>🔗</span><span>${route.source_reference.replace(/^https?:\/\//, "")}</span>`;
-  container.appendChild(a);
-  $("section-source").hidden = false;
-}
-
-// -----------------------------------------------------------
 // RENDER SEGMENTEN
 // Toont alle segmenten als compacte tabellen met vervoer-badge,
 // GPX-stats en weerdata. Alleen zichtbaar als er meerdere segmenten
@@ -130,131 +34,7 @@ function renderSource(route) {
 // "🚶 Wandelen" als er geen apart label is.
 // -----------------------------------------------------------
 
-// -----------------------------------------------------------
-// RENDER KAART
-// -----------------------------------------------------------
-// Ondersteunt twee scenario's:
-//   A) route.segments aanwezig (v2.3+ creator export) — elk segment
-//      wordt getekend als eigen polyline in de kleur van zijn
-//      vervoersmiddel, met een popup-label per startmarker.
-//   B) route.segments ontbreekt (legacy export) — fallback op het
-//      enkelvoudige route.gpx_stats zoals voorheen.
-//
-// Fallback voor ontbrekende track_points:
-//   Als gpx_stats.track_points ontbreekt maar gpx_raw aanwezig is,
-//   wordt de GPX client-side herparst om de trackpunten te herstellen.
-//   Dit dekt exports van creator.js < v2.4.1 waarbij track_points
-//   ontbrak in segments[].gpx_stats.
-// -----------------------------------------------------------
-function renderMap(route) {
-  const segments = route.segments?.filter((s) => s.gpx_stats?.start_lat) || [];
-  const hasSegments = segments.length > 0;
-  const legacy = route.gpx_stats;
 
-  if (!hasSegments && !legacy?.start_lat) return;
-
-  $("section-map").hidden = false;
-
-  // Bouw lijst van te tekenen items op — elk item heeft start_lat/lon,
-  // optionele track_points, optionele gpx_raw als fallback, transport en label
-  const items = hasSegments
-    ? segments.map((seg) => ({
-        lat: seg.gpx_stats.start_lat,
-        lon: seg.gpx_stats.start_lon,
-        trackPoints: seg.gpx_stats.track_points || null,
-        gpxRaw: seg.gpx_raw || null,
-        color: TRANSPORT_COLORS[seg.transport] || "#2C4A3B",
-        label: seg.label || TRANSPORT_LABELS[seg.transport] || seg.transport || "Segment",
-      }))
-    : [{
-        lat: legacy.start_lat,
-        lon: legacy.start_lon,
-        trackPoints: legacy.track_points || null,
-        gpxRaw: route.gpx_raw || null,
-        color: "#2C4A3B",
-        label: "Startpunt",
-      }];
-
-  setTimeout(async () => {
-    const map = L.map("route-map", { zoomControl: true, scrollWheelZoom: false });
-    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-      attribution: "© OpenStreetMap contributors",
-      maxZoom: 18,
-    }).addTo(map);
-
-    const allBounds = [];
-    let firstLat = null;
-    let firstLon = null;
-
-    for (const item of items) {
-      if (firstLat === null) { firstLat = item.lat; firstLon = item.lon; }
-
-      // track_points ophalen — ofwel direct aanwezig, ofwel herparsed uit gpx_raw
-      let trackPoints = item.trackPoints;
-      if (!trackPoints && item.gpxRaw) {
-        trackPoints = _parseTrackPointsFromGpx(item.gpxRaw);
-      }
-
-      if (trackPoints?.length > 1) {
-        L.polyline(trackPoints, { color: item.color, weight: 3, opacity: 0.85 }).addTo(map);
-        allBounds.push(...trackPoints);
-      } else {
-        allBounds.push([item.lat, item.lon]);
-      }
-
-      L.circleMarker([item.lat, item.lon], {
-        radius: 7, fillColor: item.color, color: "#fff", weight: 2, fillOpacity: 1,
-      }).addTo(map).bindPopup(item.label);
-    }
-
-    // Kaart fitten op alle segmenten
-    if (allBounds.length > 1) {
-      map.fitBounds(allBounds, { padding: [16, 16] });
-    } else if (firstLat !== null) {
-      map.setView([firstLat, firstLon], 13);
-    }
-
-    // "Route openen" knop — eerste startpunt
-    const btnMap = $("btn-open-map");
-    if (btnMap && firstLat !== null) {
-      btnMap.hidden = false;
-      btnMap.innerHTML = `<span>🗺</span> Route openen`;
-      btnMap.addEventListener("click", () => {
-  const id = getRouteId();
-  window.location.href = `/MyTrailWalks/routes/route-map.html?id=${id}`;
-});
-    }
-  }, 50);
-}
-
-/**
- * Herpars trackpunten uit een GPX-string.
- * Fallback voor JSON-bestanden geëxporteerd door creator.js < v2.4.1
- * waarbij track_points ontbrak in segments[].gpx_stats.
- * Samplet tot max 500 punten, identiek aan de creator-logica.
- * @param {string} gpxRaw - Volledige GPX XML als string
- * @returns {Array<[number,number]>|null} Array van [lat,lon] paren of null
- */
-function _parseTrackPointsFromGpx(gpxRaw) {
-  try {
-    const parser = new DOMParser();
-    const doc = parser.parseFromString(gpxRaw, "application/xml");
-    const trkpts = Array.from(doc.querySelectorAll("trkpt"));
-    if (trkpts.length < 2) return null;
-    const step = Math.max(1, Math.floor(trkpts.length / 500));
-    const points = [];
-    for (let i = 0; i < trkpts.length; i += step) {
-      points.push([
-        parseFloat(trkpts[i].getAttribute("lat")),
-        parseFloat(trkpts[i].getAttribute("lon")),
-      ]);
-    }
-    return points;
-  } catch (err) {
-    console.warn("[route.js] GPX herparsing mislukt:", err);
-    return null;
-  }
-}
 
 // =======================================================
 // renderElevation — T2-004
@@ -746,10 +526,10 @@ $("btn-share").addEventListener("click", async () => {
 // stats + weer + vervoer in de gekleurde header).
 // -----------------------------------------------------------
 window.appReady.then(async () => {
-  const id = getRouteId();
+  const id =  window.getRouteId();
   if (!id) { $("route-title").textContent = window.routeTranslate("notFound"); return; }
 
-  const route = await loadRoute(id);
+  const route = await window.loadRoute(id);
   if (!route) { $("route-title").textContent = window.routeTranslate("loadError"); return; }
 
   renderHero(route);
