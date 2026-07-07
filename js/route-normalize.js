@@ -42,33 +42,57 @@ function normalizeRouteJson(input) {
       out.story_blocks = [];
     }
 
-    // Segments normalization — strict: require `segments` array
-    if (!Array.isArray(src.segments) || src.segments.length === 0) {
-      const msg = '[route-normalize] Ongeldig/ontbrekend veld: verwacht een `segments` array in de route JSON.';
+    // Segments normalization — support both old (root-level gpx_stats) and new (segments array) formats
+    if (Array.isArray(src.segments) && src.segments.length > 0) {
+      // New format: segments array
+      console.info('[route-normalize] Nieuw formaat gedetecteerd (segments array)');
+      out.segments = src.segments.map((s) => {
+        const seg = _ensureObj(s);
+        const gpx = seg.gpx || null;
+        return {
+          transport: seg.transport || 'walking',
+          label: seg.label || '',
+          date: seg.date || seg.published_date || null,
+          location: seg.location || '',
+          country: seg.country || '',
+          region: seg.region || '',
+          place: seg.place || '',
+          weather: seg.weather || null,
+          difficulty: seg.difficulty || '',
+          difficulty_auto: seg.difficulty_auto !== false,
+          rough_surface: seg.rough_surface || false,
+          gpx: gpx,
+          gpx_stats: seg.gpx_stats || null,
+          gpx_raw: seg.gpx_raw || null,
+        };
+      });
+    } else if (src.gpx_stats) {
+      // Old format: root-level gpx_stats (single segment, backward-compat conversion)
+      console.info('[route-normalize] Oud formaat gedetecteerd (root gpx_stats → segments)');
+      const transport = (src.transport && typeof src.transport === 'string') ? src.transport : (Array.isArray(src.transport) ? src.transport[0] : 'walking');
+      
+      out.segments = [{
+        transport: transport,
+        label: '',
+        date: src.published_date || src.date || null,
+        location: src.location || '',
+        country: src.country || '',
+        region: src.region || '',
+        place: src.place || '',
+        weather: src.weather || null,
+        difficulty: src.difficulty || '',
+        difficulty_auto: src.difficulty !== false,
+        rough_surface: src.rough_surface || false,
+        gpx: src.gpx || null,
+        gpx_stats: src.gpx_stats || null,
+        gpx_raw: src.gpx_raw || null,
+      }];
+    } else {
+      // No segments and no gpx_stats — error
+      const msg = '[route-normalize] Ongeldig JSON: verwacht óf een `segments` array óf `gpx_stats` op root-niveau.';
       console.error(msg);
       throw new Error(msg);
     }
-
-    out.segments = src.segments.map((s) => {
-      const seg = _ensureObj(s);
-      const gpx = seg.gpx || null;
-      return {
-        transport: seg.transport || 'walking',
-        label: seg.label || '',
-        date: seg.date || seg.published_date || null,
-        location: seg.location || '',
-        country: seg.country || '',
-        region: seg.region || '',
-        place: seg.place || '',
-        weather: seg.weather || null,
-        difficulty: seg.difficulty || '',
-        difficulty_auto: seg.difficulty_auto !== false,
-        rough_surface: seg.rough_surface || false,
-        gpx: gpx,
-        gpx_stats: seg.gpx_stats || null,
-        gpx_raw: seg.gpx_raw || null,
-      };
-    });
 
     // Minimal metadata defaults
     out.id = out.id || (src.title ? (typeof src.title === 'string' ? src.title.toLowerCase().replace(/\s+/g, '-') : null) : null);

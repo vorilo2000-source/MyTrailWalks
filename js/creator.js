@@ -87,11 +87,11 @@ const DIFFICULTY_SCALES = {
 
 // -----------------------------------------------------------
 // MOEILIJKHEIDSBEREKENING
-// Leest uit het unified seg.gpx model (seg.gpx.stats)
+// Leest uit het unified segment model (seg.gpx_stats)
 // -----------------------------------------------------------
 function calculateSegmentDifficulty(seg) {
-  // Statistieken zitten nu in seg.gpx.stats
-  const stats = seg.gpx?.stats;
+  // Statistieken zitten in seg.gpx_stats (na normalisatie)
+  const stats = seg.gpx_stats;
   if (!stats || !stats.distance_km) return null;
 
   if (seg.transport === "walking") {
@@ -126,7 +126,7 @@ function calculateSegmentDifficulty(seg) {
 }
 
 function _calculateRoadDifficulty(seg) {
-  const stats = seg.gpx.stats;
+  const stats = seg.gpx_stats;
   const prefix = { cycling: "C", motorcycle: "M", car: "A" }[seg.transport];
 
   // trackPoints voor bochtenberekening zitten in stats
@@ -285,8 +285,8 @@ function renderSegments() {
     const isOnly = state.segments.length === 1;
     const color  = TRANSPORT_COLORS[seg.transport] || "#2C4A3B";
     const sid    = seg.id;
-    // Statistieken staan nu in seg.gpx.stats
-    const stats  = seg.gpx?.stats || null;
+    // Statistieken staan in seg.gpx_stats (unified model na normalisatie)
+    const stats  = seg.gpx_stats || null;
 
     const div = document.createElement("div");
     div.className          = "segment-block";
@@ -310,15 +310,15 @@ function renderSegments() {
       </div>
 
       <div class="segment-gpx">
-        <div class="drop-zone segment-drop-zone ${seg.gpx ? "drop-zone--has-file" : ""}" id="gpx-drop-zone-${sid}">
+        <div class="drop-zone segment-drop-zone ${stats ? "drop-zone--has-file" : ""}" id="gpx-drop-zone-${sid}">
           <input type="file" id="gpx-file-input-${sid}" accept=".gpx" hidden>
-          <div class="drop-zone__inner" id="gpx-drop-inner-${sid}" ${seg.gpx ? "hidden" : ""}>
+          <div class="drop-zone__inner" id="gpx-drop-inner-${sid}" ${stats ? "hidden" : ""}>
             <span class="drop-zone__icon">↑</span>
             <p class="drop-zone__text">Sleep je GPX-bestand hierheen</p>
             <p class="drop-zone__sub">of <button class="link-btn" id="gpx-browse-btn-${sid}">kies een bestand</button></p>
           </div>
         </div>
-        <div class="gpx-stats" id="gpx-stats-${sid}" ${seg.gpx ? "" : "hidden"}>
+        <div class="gpx-stats" id="gpx-stats-${sid}" ${stats ? "" : "hidden"}>
           <div class="stat-grid">
             <div class="stat-item"><span class="stat-value" id="stat-distance-${sid}">${stats?.distance_km ? stats.distance_km + " km" : "—"}</span><span class="stat-label">Afstand</span></div>
             <div class="stat-item"><span class="stat-value" id="stat-duration-${sid}">${stats?.duration_hours ? stats.duration_hours + " u" : "—"}</span><span class="stat-label">Duur</span></div>
@@ -329,7 +329,7 @@ function renderSegments() {
             <div class="stat-item"><span class="stat-value" id="stat-avg-speed-${sid}">${stats?.avg_speed_kmh ? stats.avg_speed_kmh + " km/u" : "—"}</span><span class="stat-label">Gem. snelheid</span></div>
             <div class="stat-item"><span class="stat-value" id="stat-max-speed-${sid}">${stats?.max_speed_kmh ? stats.max_speed_kmh + " km/u" : "—"}</span><span class="stat-label">Max. snelheid</span></div>
           </div>
-          <span class="gpx-status" id="gpx-status-${sid}">${seg.gpx ? "✓ Geladen" : ""}</span>
+          <span class="gpx-status" id="gpx-status-${sid}">${stats ? "✓ Geladen uit JSON" : ""}</span>
           <button class="link-btn link-btn--small" id="gpx-reset-btn-${sid}">Ander bestand kiezen</button>
         </div>
       </div>
@@ -545,9 +545,9 @@ function _bindSegmentEvents(sid) {
   const fetchLocBtn = document.querySelector(`.segment-fetch-location[data-sid="${sid}"]`);
   if (fetchLocBtn) {
     fetchLocBtn.addEventListener("click", () => {
-      // Startcoördinaten zitten nu in seg.gpx.stats
-      if (seg.gpx?.stats?.start_lat && seg.gpx?.stats?.start_lon) {
-        fetchLocationName(seg.gpx.stats.start_lat, seg.gpx.stats.start_lon, sid);
+      // Startcoördinaten zitten in seg.gpx_stats
+      if (seg.gpx_stats?.start_lat && seg.gpx_stats?.start_lon) {
+        fetchLocationName(seg.gpx_stats.start_lat, seg.gpx_stats.start_lon, sid);
       } else {
         alert("Laad eerst een GPX-bestand voor dit segment.");
       }
@@ -678,16 +678,22 @@ function loadJsonIntoForm(data) {
       segmentCounter++;
       const seg = {
         id: segmentCounter, transport: s.transport || "walking", label: s.label || "",
-        gpx: null, date: s.date || "", location: s.location || "",
+        gpx: null, gpx_stats: null, gpx_raw: null, date: s.date || "", location: s.location || "",
         country: s.country || "", region: s.region || "", place: s.place || "",
         weather: s.weather || null, difficulty: s.difficulty || "",
         difficultyAuto: s.difficulty_auto !== false, roughSurface: s.rough_surface || false,
       };
 
-      // Accept only explicit `gpx` unified model in segments when importing.
+      // Import both old and new format:
+      // - seg.gpx (unified model met tracks)
+      // - seg.gpx_stats (statistieken)
+      // - seg.gpx_raw (raw XML, fallback)
       if (s.gpx) seg.gpx = s.gpx;
+      if (s.gpx_stats) seg.gpx_stats = s.gpx_stats;
+      if (s.gpx_raw) seg.gpx_raw = s.gpx_raw;
 
-      if (!seg.difficulty && seg.gpx) {
+      // Moeilijkheid auto-berekenen als niet ingesteld en stats beschikbaar
+      if (!seg.difficulty && seg.gpx_stats) {
         const auto = calculateSegmentDifficulty(seg);
         if (auto) seg.difficulty = auto;
       }
@@ -703,6 +709,29 @@ function loadJsonIntoForm(data) {
   renderSegments();
   renderBlockEditor();
   updatePreview();
+  
+  // Transport-array heropbouwen vanuit segmenten
+  // (zorgt ervoor dat als oud JSON alleen "walking" had, maar nu ook "car" heeft, dit correct wordt gesyndied)
+  if (state.segments?.length) {
+    const uniqueTransports = [...new Set(state.segments.map(s => s.transport))];
+    console.info('[creator] Transport array gesync:', uniqueTransports);
+  }
+  
+  // Zorg dat de preview rechts ook bijgewerkt wordt: titel, locatie, hero-foto
+  const titleEl = document.getElementById('rp-title');
+  if (titleEl) titleEl.textContent = data.title?.nl || 'Wandeling zonder titel';
+  
+  const locationEl = document.getElementById('rp-location');
+  if (locationEl) locationEl.textContent = data.location || data.segments?.[0]?.location || 'Locatie onbekend';
+  
+  const heroEl = document.querySelector('.rp-hero img');
+  if (heroEl && data.photos?.[0]?.url) {
+    let heroUrl = data.photos[0].url;
+    if (heroUrl.includes("res.cloudinary.com") && !heroUrl.includes("w_1200")) {
+      heroUrl = heroUrl.replace("/upload/", "/upload/w_1200,f_auto/");
+    }
+    heroEl.src = heroUrl;
+  }
 }
 
 // -----------------------------------------------------------
@@ -738,10 +767,10 @@ function _buildExportFromState() {
       difficulty: s.difficulty || '',
       difficulty_auto: s.difficultyAuto !== false,
       rough_surface: s.roughSurface || false,
-      // Keep unified gpx for editor users; provide gpx_stats for route page consumption
+      // Preserve beide gpx model en gpx_stats
       gpx: s.gpx || null,
-      gpx_stats: s.gpx?.stats || null,
-      gpx_raw: null,
+      gpx_stats: s.gpx_stats || null,
+      gpx_raw: s.gpx_raw || null,
     };
   });
 
@@ -1305,26 +1334,41 @@ els.inputIntro.addEventListener("input",     () => { els.introCount.textContent 
 
 /**
  * Verzamelt alle {lat, lon, ele} punten uit het unified gpx model.
- * Filtert punten zonder geldige ele-waarde.
- * @param {Object} gpx - seg.gpx unified model
+ * Fall-back: als seg.gpx ontbreekt maar gpx_stats.track_points aanwezig is (bijv. na JSON import),
+ * zet track_points om naar het verwachte formaat.
+ * @param {Object} gpx - seg.gpx unified model (optioneel)
+ * @param {Object} gpxStats - seg.gpx_stats met track_points (fallback)
  * @returns {Array<{lat,lon,ele}>|null}
  */
-function _collectElevationPoints(gpx) {
-  if (!gpx?.tracks?.length) return null;
-  const points = [];
-  for (const track of gpx.tracks) {
-    for (const segment of track.segments) {
-      for (const pt of segment.points) {
-        if (
-          !isNaN(pt.lat) && !isNaN(pt.lon) &&
-          pt.ele !== null && !isNaN(pt.ele)
-        ) {
-          points.push({ lat: pt.lat, lon: pt.lon, ele: pt.ele });
+function _collectElevationPoints(gpx, gpxStats) {
+  // Poging 1: volle GPX model (normal flow met GPX upload)
+  if (gpx?.tracks?.length) {
+    const points = [];
+    for (const track of gpx.tracks) {
+      for (const segment of track.segments) {
+        for (const pt of segment.points) {
+          if (
+            !isNaN(pt.lat) && !isNaN(pt.lon) &&
+            pt.ele !== null && !isNaN(pt.ele)
+          ) {
+            points.push({ lat: pt.lat, lon: pt.lon, ele: pt.ele });
+          }
         }
       }
     }
+    if (points.length >= 2) return points;
   }
-  return points.length >= 2 ? points : null;
+
+  // Fallback: track_points uit gpx_stats (JSON import scenario)
+  if (gpxStats?.track_points?.length) {
+    const points = gpxStats.track_points
+      .filter((pt) => Array.isArray(pt) && pt.length >= 2)
+      .map((pt) => ({ lat: pt[0], lon: pt[1], ele: pt[2] || null }))
+      .filter((pt) => !isNaN(pt.lat) && !isNaN(pt.lon) && pt.ele !== null && !isNaN(pt.ele));
+    if (points.length >= 2) return points;
+  }
+
+  return null;
 }
 
 /**
@@ -1377,11 +1421,10 @@ function renderElevationPreview(segments) {
   const container = $("rp-elevation-chart");
   if (!wrapper || !container) return;
 
-  // Bouw segmentdata op uit seg.gpx.tracks[].segments[].points[]
+  // Bouw segmentdata op uit seg.gpx.tracks[].segments[].points[] (of fallback track_points)
   const segmentData = [];
   for (const seg of segments) {
-    if (!seg.gpx) continue;
-    const points = _collectElevationPoints(seg.gpx);
+    const points = _collectElevationPoints(seg.gpx, seg.gpx_stats);
     if (!points) continue;
     segmentData.push({
       points,
