@@ -747,10 +747,18 @@ $("btn-share").addEventListener("click", async () => {
 // -----------------------------------------------------------
 window.appReady.then(async () => {
   const id = getRouteId();
-  if (!id) { $("route-title").textContent = t("notFound"); return; }
+
+  if (!id) {
+    $("route-title").textContent = window.routeTranslate("notFound");
+    return;
+  }
 
   const route = await loadRoute(id);
-  if (!route) { $("route-title").textContent = t("loadError"); return; }
+
+  if (!route) {
+    $("route-title").textContent = window.routeTranslate("loadError");
+    return;
+  }
 
   renderHero(route);
   renderSegments(route);
