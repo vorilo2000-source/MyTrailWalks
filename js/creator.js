@@ -598,7 +598,6 @@ function _getSeg(sid) {
 }
 
 els.btnAddSegment.addEventListener("click", () => {
-  console.count("Add Segment clicked");
   segmentCounter++;
   state.segments.push({
     id: segmentCounter, transport: "walking", label: "", gpx: null,
@@ -1564,3 +1563,8 @@ function renderElevationPreview(segments) {
   svg += `</svg>`;
   container.innerHTML = svg;
 }
+// ======================= INIT CREATOR =======================
+// Startweergave van de creator-formulieren en preview.
+renderCreatorSegments(); // Toon het standaard eerste lege segment.
+renderBlockEditor(); // Toon de blokken-editor.
+updatePreview(); // Toon de eerste rechter preview.
