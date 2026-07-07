@@ -717,23 +717,6 @@ function loadJsonIntoForm(data) {
     console.info('[creator] Transport array gesync:', uniqueTransports);
   }
   
-  // Zorg dat de preview rechts ook bijgewerkt wordt: titel, locatie, hero-foto
-  const titleEl = document.getElementById('rp-title');
-  if (titleEl) titleEl.textContent = data.title?.nl || 'Wandeling zonder titel';
-  
-  const locationEl = document.getElementById('rp-location');
-  if (locationEl) locationEl.textContent = data.location || data.segments?.[0]?.location || 'Locatie onbekend';
-  
-  const heroEl = document.querySelector('.rp-hero img');
-  if (heroEl && data.photos?.[0]?.url) {
-    let heroUrl = data.photos[0].url;
-    if (heroUrl.includes("res.cloudinary.com") && !heroUrl.includes("w_1200")) {
-      heroUrl = heroUrl.replace("/upload/", "/upload/w_1200,f_auto/");
-    }
-    heroEl.src = heroUrl;
-  }
-}
-
 // -----------------------------------------------------------
 // EXPORT: bouw en download gestandaardiseerde JSON vanuit state
 // -----------------------------------------------------------
