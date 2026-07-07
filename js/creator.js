@@ -598,6 +598,7 @@ function _getSeg(sid) {
 }
 
 els.btnAddSegment.addEventListener("click", () => {
+  console.count("Add Segment clicked");
   segmentCounter++;
   state.segments.push({
     id: segmentCounter, transport: "walking", label: "", gpx: null,
