@@ -1,6 +1,10 @@
+// ======================= ROUTE CONFIG =======================
+// Centrale labels en kleuren voor route.html en later creator-preview.
 "use strict";
 
-const TRANSPORT_COLORS = {
+// ======================= TRANSPORT KLEUREN =======================
+// Kleur per vervoersmiddel. Deze kleuren worden gebruikt voor kaartlijnen en segmentheaders.
+window.TRANSPORT_COLORS = {
   walking: "#E8800A",
   hike: "#9B59B6",
   cycling: "#2980B9",
@@ -12,7 +16,9 @@ const TRANSPORT_COLORS = {
   plane: "#2C3E50"
 };
 
-const TRANSPORT_LABELS = {
+// ======================= TRANSPORT LABELS =======================
+// Label per vervoersmiddel. De key blijft belangrijk voor bestaande JSON-bestanden.
+window.TRANSPORT_LABELS = {
   walking: "🚶 Wandelen",
   hike: "🥾 Hike / Trail",
   cycling: "🚴 Fietsen",
@@ -24,15 +30,12 @@ const TRANSPORT_LABELS = {
   plane: "✈️ Vliegtuig"
 };
 
-function t(key) {
-    try {
-        return i18nModule.t(`route:${key}`);
-    }
-    catch (_) {
-        return key;
-    }
-}
-
-window.TRANSPORT_COLORS = TRANSPORT_COLORS;
-window.TRANSPORT_LABELS = TRANSPORT_LABELS;
-window.routeTranslate = t;
+// ======================= ROUTE TRANSLATE HELPER =======================
+// Veilige vertaalfunctie. Valt terug op de key als i18n niet beschikbaar is.
+window.routeTranslate = function routeTranslate(key) {
+  try {
+    return i18nModule.t(`route:${key}`);
+  } catch (_) {
+    return key;
+  }
+};
