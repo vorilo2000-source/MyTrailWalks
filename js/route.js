@@ -17,6 +17,74 @@
 const $ = (id) => document.getElementById(id);
 
 // -----------------------------------------------------------
+// RENDER HERO
+// -----------------------------------------------------------
+function renderHero(route) {
+  const lang = i18nModule?.language?.substring(0, 2) || "nl";
+
+  const title = typeof route.title === "object"
+    ? route.title[lang] || route.title.nl || ""
+    : route.title || "";
+
+  $("route-title").textContent = title;
+  document.title = `${title} — MyTrailWalks`;
+
+  if (route.location) $("route-location").textContent = route.location;
+  if (route.region) $("route-region").textContent = route.region;
+
+  const heroBg = $("route-hero-bg");
+  const heroPhoto = route.photos?.find((p) => p.role === "hero")?.url || route.photos?.[0]?.url || "";
+
+  if (heroPhoto) {
+    heroBg.style.backgroundImage = `url('${heroPhoto}')`;
+    heroBg.classList.add("has-photo");
+  }
+
+  const statusEl = $("route-status-badge");
+
+  if (statusEl && route.status) {
+    statusEl.innerHTML = "";
+
+    const isDraft = route.status === "draft";
+    const badge = document.createElement("span");
+
+    badge.className = isDraft
+      ? "route-status-badge route-status-badge--draft"
+      : "route-status-badge route-status-badge--final";
+
+    badge.textContent = isDraft ? "Draft" : "Final";
+    statusEl.appendChild(badge);
+  }
+
+  const badges = $("route-badges");
+
+  if (badges) {
+    badges.innerHTML = "";
+
+    if (route.difficulty) {
+      const badge = document.createElement("span");
+      badge.className = "route-badge route-badge--difficulty";
+      badge.textContent = route.difficulty;
+      badges.appendChild(badge);
+    }
+
+    if (route.published_date) {
+      const badge = document.createElement("span");
+      badge.className = "route-badge";
+
+      const date = new Date(route.published_date);
+
+      badge.textContent = date.toLocaleDateString(
+        lang === "en" ? "en-GB" : "nl-BE",
+        { day: "numeric", month: "long", year: "numeric" }
+      );
+
+      badges.appendChild(badge);
+    }
+  }
+}
+
+// -----------------------------------------------------------
 // RENDER SEGMENTEN
 // Toont alle segmenten als compacte tabellen met vervoer-badge,
 // GPX-stats en weerdata. Alleen zichtbaar als er meerdere segmenten
