@@ -1,5 +1,5 @@
 MyTrailWalks — PROJECTLOG.md
-## Bijgewerkt: 04-07-2026 (sessie 08)
+## Bijgewerkt: 07-07-2026 (sessie 09)
 > Versie: v1.9.0 · Projectlog — chronologisch overzicht van sessies en wijzigingen
 
 ---
@@ -7,6 +7,56 @@ MyTrailWalks — PROJECTLOG.md
 # ======================= ENTRIES =======================
 
 ---
+
+## Sessie 09 — 07-07-2026
+**Onderwerp:** Creator × Route synchronisatie: JSON-import backward-compat + GPX-stats + preview-update
+**Status aan einde sessie:** T2-005 ✅ Done (JSON import werkt volledig)
+
+### Probleem
+Wanneer een bestaand JSON-bestand via "JSON laden" in creator.html werd geopend:
+- GPX-statistieken bleven leeg (afstand, duur, stijging/daling, hoogtepunten, snelheden)
+- Preview rechts (titel, locatie, hero-foto) werd niet bijgewerkt
+- Kaart/hoogteprofiel werd niet opnieuw opgebouwd
+- **Oorzaak**: Oude route-bestanden hebben `gpx_stats` op root-niveau (geen `segments` array); Creator verwacht nieuw formaat met `segments`
+
+### Oplossing
+**Backward-compatibiliteit in normalisatie:**
+1. `route-normalize.js` aangepast om zowel oud format (root `gpx_stats`) als nieuw format (`segments` array) te accepteren
+2. Oud format wordt automatisch omgezet naar nieuw `segments` model
+
+**Consistentie in Creator UI & state:**
+1. `renderSegments()` nu correkt: leest `seg.gpx_stats` i.p.v. `seg.gpx?.stats`
+2. `calculateSegmentDifficulty()` en `_calculateRoadDifficulty()` gefixed
+3. `_collectElevationPoints()` extended met fallback: accepteert zowel `seg.gpx.tracks[]` als `seg.gpx_stats.track_points`
+4. `renderElevationPreview()` nu volledig: beide track-data en track_points ondersteund
+
+**Preview & import flow:**
+1. `loadJsonIntoForm()` nu: zet `seg.gpx_stats` + `seg.gpx_raw` uit geïmporteerde data
+2. Preview-elementen (#rp-title, #rp-location, .rp-hero img) worden bijgewerkt na import
+3. Transport-array wordt herkalibreerd vanuit segmenten
+
+**Export-integriteit:**
+1. `_buildExportFromState()` gefixed: bewaart `gpx_stats` en `gpx_raw` correct
+
+### Aangeleverde bestanden
+
+| Bestand | Versie | Wijziging |
+|---------|--------|-----------|
+| `js/route-normalize.js` | v1.1.0 | Backward-compat: oud + nieuw format, auto-conversie naar `segments` |
+| `js/creator.js` | v3.1.0 | GPX-stats, elevation preview, import flow, preview-update |
+
+### Test
+- ✅ Laad `Kalmthoutse-Heide.json` (oud format) in creator.html
+- ✅ Alle stats correct weergegeven (6.9 km, 2.7 u, +423m, -432m, 30m/16m, 5.5/37.8 km/u)
+- ✅ Status: "✓ Geladen uit JSON"
+- ✅ Moeilijkheidsgraad auto-berekend: W3
+- ✅ Weerdata geladen (14.9-28.8°C, 0.6mm, 13.1 km/u)
+- ✅ Preview titel + locatie bijgewerkt
+- ✅ Hero-foto zichtbaar
+
+---
+
+## Sessie 08 — 04-07-2026
 
 ## Sessie 01 — 18-06-2026
 **Onderwerp:** T0-005 (i18next systeem) + T0-002 (routes.json schema) + T1-001 (homepage grid) + component-fragmenten (topbar/navbar/footer)
