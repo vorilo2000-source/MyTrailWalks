@@ -85,6 +85,30 @@ function renderHero(route) {
 }
 
 // -----------------------------------------------------------
+// RENDER BRONVERMELDING
+// -----------------------------------------------------------
+function renderSource(route) {
+  if (!route.source_reference) return;
+
+  const container = $("route-source");
+  if (!container) return;
+
+  container.innerHTML = "";
+
+  const a = document.createElement("a");
+  a.className = "route-source__link";
+  a.href = route.source_reference;
+  a.target = "_blank";
+  a.rel = "noopener noreferrer";
+  a.innerHTML = `<span>🔗</span><span>${route.source_reference.replace(/^https?:\/\//, "")}</span>`;
+
+  container.appendChild(a);
+
+  const section = $("section-source");
+  if (section) section.hidden = false;
+}
+
+// -----------------------------------------------------------
 // RENDER SEGMENTEN
 // Toont alle segmenten als compacte tabellen met vervoer-badge,
 // GPX-stats en weerdata. Alleen zichtbaar als er meerdere segmenten
