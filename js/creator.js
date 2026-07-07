@@ -780,6 +780,40 @@ function _buildExportFromState() {
   return out;
 }
 
+// ======================= ROUTE PREVIEW REFRESH =======================
+// Bouwt een tijdelijk route-object en rendert de rechter preview met dezelfde renderers als route.html.
+function refreshRoutePreview() {
+  const route = _buildExportFromState(); // Hergebruik bestaande exportstructuur als previewdata.
+
+  $("route-story").innerHTML = ""; // Leeg verhaal, anders stapelt tekst zich op.
+  $("route-tips").innerHTML = ""; // Leeg tips, anders stapelt tips zich op.
+  $("route-photo-grid").innerHTML = ""; // Leeg fotogrid, anders stapelen foto's zich op.
+  $("route-source").innerHTML = ""; // Leeg bronvermelding voor nieuwe render.
+  $("route-segments").innerHTML = ""; // Leeg segmentpreview voor nieuwe render.
+  $("route-elevation").innerHTML = ""; // Leeg hoogteprofiel voor nieuwe render.
+
+  $("section-segments").hidden = true; // Reset segmentsectie.
+  $("section-source").hidden = true; // Reset bronsectie.
+  $("section-map").hidden = true; // Reset kaartsectie.
+  $("section-elevation").hidden = true; // Reset hoogtesectie.
+  $("section-story").hidden = true; // Reset verhaalsectie.
+  $("section-tips").hidden = true; // Reset tipssectie.
+  $("section-photos").hidden = true; // Reset fotosectie.
+  $("section-gallery").hidden = true; // Reset galerijsectie.
+
+  const oldMap = $("route-map"); // Pak bestaande Leaflet-container.
+  if (oldMap) oldMap.replaceWith(oldMap.cloneNode(false)); // Vervang container zodat Leaflet opnieuw kan initialiseren.
+
+  renderHero(route); // Hergebruik hero-renderer van route.html.
+  window.renderSegments(route); // Gebruik globale route-segmentrenderer; voorkomt botsing met creator renderSegments().
+  renderSource(route); // Hergebruik bron-renderer van route.html.
+  window.renderMap(route); // Hergebruik kaart-renderer van route.html.
+  window.renderElevation(route); // Hergebruik hoogteprofiel-renderer van route.html.
+  window.renderStory(route); // Hergebruik verhaal-renderer van route.html.
+  window.renderTips(route); // Hergebruik tips-renderer van route.html.
+  window.renderPhotoGrid(route); // Hergebruik fotogrid-renderer van route.html.
+}
+
 function _downloadJson(obj, filename) {
   const blob = new Blob([JSON.stringify(obj, null, 2)], { type: 'application/json' });
   const url = URL.createObjectURL(blob);
@@ -1403,9 +1437,10 @@ function _cumulativeDistancesEle(points) {
  * - renderElevationPreview() → tekent hoogteprofiel SVG
  * Wordt aangeroepen bij elke wijziging van state (GPX, metadata, blokken, etc.)
  */
+// ======================= UPDATE PREVIEW =======================
+// Centrale preview-update. Roept de nieuwe gedeelde route-preview aan.
 function updatePreview() {
-  renderSegments();
-  renderElevationPreview(state.segments);
+  refreshRoutePreview(); // Render rechter preview met dezelfde functies als route.html.
 }
 
 /**
