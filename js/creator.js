@@ -1,6 +1,7 @@
 // =======================================================
 // creator.js — MyTrailWalks
 // Route creator: GPX parse, weer, locatie, AI, JSON export
+// lat, lon, ele, time, name, cmt, desc, src, links, sym, type, fix, sat, hdop, vdop, pdop, ageofdgpsdata, dgpsid, extensions
 // v3.0.2: herstel updatePreview() centrale coördinator-functie
 // v3.0.1: syntax herstel in elevation preview renderer
 // v3.0.0: één unified segment.gpx model
