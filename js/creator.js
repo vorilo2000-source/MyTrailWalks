@@ -1042,32 +1042,18 @@ function parseGpx(xmlText, sid) {
       })),
     }));
 
-    // --- Tracks (trk/trkseg/trkpt) ---
-  points: Array.from(seg.querySelectorAll("trkpt")).map((pt) => ({
-  lat: parseFloat(pt.getAttribute("lat")), // Breedtegraad uit het lat-attribuut van trkpt.
-  lon: parseFloat(pt.getAttribute("lon")), // Lengtegraad uit het lon-attribuut van trkpt.
-  ele: pt.querySelector("ele") ? parseFloat(pt.querySelector("ele").textContent) : null, // Hoogte indien aanwezig.
-  time: pt.querySelector("time") ? pt.querySelector("time").textContent : null, // Tijdstip indien aanwezig.
-  name: pt.querySelector("name") ? pt.querySelector("name").textContent : null, // Naam van punt indien aanwezig.
-  cmt: pt.querySelector("cmt") ? pt.querySelector("cmt").textContent : null, // Commentaar indien aanwezig.
-  desc: pt.querySelector("desc") ? pt.querySelector("desc").textContent : null, // Beschrijving indien aanwezig.
-  src: pt.querySelector("src") ? pt.querySelector("src").textContent : null, // Bron indien aanwezig.
-  links: Array.from(pt.querySelectorAll("link")).map((link) => ({ // Alle GPX-link elementen.
-    href: link.getAttribute("href") || null, // Linkdoel uit href-attribuut.
-    text: link.querySelector("text") ? link.querySelector("text").textContent : null, // Linktekst indien aanwezig.
-    type: link.querySelector("type") ? link.querySelector("type").textContent : null, // Linktype indien aanwezig.
+ // --- Tracks (trk/trkseg/trkpt) ---
+const tracks = Array.from(doc.querySelectorAll("trk")).map((trk) => ({
+  name: trk.querySelector("name")?.textContent || null,
+  segments: Array.from(trk.querySelectorAll("trkseg")).map((seg) => ({
+    points: Array.from(seg.querySelectorAll("trkpt")).map((pt) => ({
+      lat: parseFloat(pt.getAttribute("lat")),
+      lon: parseFloat(pt.getAttribute("lon")),
+      ele: pt.querySelector("ele") ? parseFloat(pt.querySelector("ele").textContent) : null,
+      time: pt.querySelector("time") ? pt.querySelector("time").textContent : null,
+    })),
   })),
-  sym: pt.querySelector("sym") ? pt.querySelector("sym").textContent : null, // Symbool indien aanwezig.
-  type: pt.querySelector("type") ? pt.querySelector("type").textContent : null, // Punt-type indien aanwezig.
-  fix: pt.querySelector("fix") ? pt.querySelector("fix").textContent : null, // GPS-fix type indien aanwezig.
-  sat: pt.querySelector("sat") ? Number(pt.querySelector("sat").textContent) : null, // Aantal satellieten indien aanwezig.
-  hdop: pt.querySelector("hdop") ? Number(pt.querySelector("hdop").textContent) : null, // Horizontale nauwkeurigheid indien aanwezig.
-  vdop: pt.querySelector("vdop") ? Number(pt.querySelector("vdop").textContent) : null, // Verticale nauwkeurigheid indien aanwezig.
-  pdop: pt.querySelector("pdop") ? Number(pt.querySelector("pdop").textContent) : null, // Positionele nauwkeurigheid indien aanwezig.
-  ageofdgpsdata: pt.querySelector("ageofdgpsdata") ? Number(pt.querySelector("ageofdgpsdata").textContent) : null, // Leeftijd DGPS-data indien aanwezig.
-  dgpsid: pt.querySelector("dgpsid") ? Number(pt.querySelector("dgpsid").textContent) : null, // DGPS-station ID indien aanwezig.
-  extensions: pt.querySelector("extensions") ? pt.querySelector("extensions").innerHTML : null, // Extensions als XML-inhoud indien aanwezig.
-})),
+}));
 
     // Alle trackpunten samengevoegd voor statistiekenberekening
     const allPoints = tracks.flatMap((t) => t.segments.flatMap((s) => s.points));
