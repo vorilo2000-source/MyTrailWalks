@@ -1047,10 +1047,33 @@ const tracks = Array.from(doc.querySelectorAll("trk")).map((trk) => ({
   name: trk.querySelector("name")?.textContent || null,
   segments: Array.from(trk.querySelectorAll("trkseg")).map((seg) => ({
     points: Array.from(seg.querySelectorAll("trkpt")).map((pt) => ({
-      lat: parseFloat(pt.getAttribute("lat")),
-      lon: parseFloat(pt.getAttribute("lon")),
-      ele: pt.querySelector("ele") ? parseFloat(pt.querySelector("ele").textContent) : null,
-      time: pt.querySelector("time") ? pt.querySelector("time").textContent : null,
+  lat: parseFloat(pt.getAttribute("lat")), // Breedtegraad uit GPX trkpt.
+  lon: parseFloat(pt.getAttribute("lon")), // Lengtegraad uit GPX trkpt.
+  ele: pt.querySelector("ele") ? parseFloat(pt.querySelector("ele").textContent) : null, // Hoogte indien aanwezig.
+  time: pt.querySelector("time") ? pt.querySelector("time").textContent : null, // Tijd indien aanwezig.
+
+  name: pt.querySelector("name") ? pt.querySelector("name").textContent : null, // Naam indien aanwezig.
+  cmt: pt.querySelector("cmt") ? pt.querySelector("cmt").textContent : null, // Commentaar indien aanwezig.
+  desc: pt.querySelector("desc") ? pt.querySelector("desc").textContent : null, // Beschrijving indien aanwezig.
+  src: pt.querySelector("src") ? pt.querySelector("src").textContent : null, // Bron indien aanwezig.
+
+  links: Array.from(pt.querySelectorAll("link")).map((link) => ({ // GPX links indien aanwezig.
+    href: link.getAttribute("href") || null, // Link URL.
+    text: link.querySelector("text") ? link.querySelector("text").textContent : null, // Linktekst.
+    type: link.querySelector("type") ? link.querySelector("type").textContent : null, // Linktype.
+  })),
+
+  sym: pt.querySelector("sym") ? pt.querySelector("sym").textContent : null, // Symbool indien aanwezig.
+  type: pt.querySelector("type") ? pt.querySelector("type").textContent : null, // Punt-type indien aanwezig.
+  fix: pt.querySelector("fix") ? pt.querySelector("fix").textContent : null, // GPS fix indien aanwezig.
+  sat: pt.querySelector("sat") ? Number(pt.querySelector("sat").textContent) : null, // Satellieten indien aanwezig.
+  hdop: pt.querySelector("hdop") ? Number(pt.querySelector("hdop").textContent) : null, // Horizontale DOP.
+  vdop: pt.querySelector("vdop") ? Number(pt.querySelector("vdop").textContent) : null, // Verticale DOP.
+  pdop: pt.querySelector("pdop") ? Number(pt.querySelector("pdop").textContent) : null, // Positionele DOP.
+  ageofdgpsdata: pt.querySelector("ageofdgpsdata") ? Number(pt.querySelector("ageofdgpsdata").textContent) : null, // Leeftijd DGPS-data.
+  dgpsid: pt.querySelector("dgpsid") ? Number(pt.querySelector("dgpsid").textContent) : null, // DGPS station ID.
+  extensions: pt.querySelector("extensions") ? pt.querySelector("extensions").innerHTML : null, // GPX extensions als XML-inhoud.
+})),
     })),
   })),
 }));
