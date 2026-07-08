@@ -1528,3 +1528,12 @@ function renderElevationPreview(segments) {
   svg += `</svg>`;
   container.innerHTML = svg;
 }
+// -----------------------------------------------------------
+// INIT
+// -----------------------------------------------------------
+window.appReady.then(() => {
+  renderSegments();
+  renderBlockEditor();
+  renderGallery();
+  updatePreview();
+});
