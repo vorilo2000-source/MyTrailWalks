@@ -275,66 +275,10 @@ els.btnKeyConfirm.addEventListener("click", () => {
   els.btnKeyConfirm.disabled    = true;
 });
 
-// ======================= BASISVELDEN LIVE PREVIEW =======================
-// Koppelt vaste formuliervelden aan de nieuwe route-preview.
-[
-  els.inputTitle, // Titel in hero.
-  els.inputDifficulty, // Moeilijkheidsbadge.
-  els.inputSource, // Bronvermelding.
-  els.inputHeroPhoto, // Hero-foto.
-  els.inputKeywords, // Tags voor export.
-  els.inputIntro, // Samenvatting.
-  els.inputTips, // Tips-sectie.
-  els.inputRouteId, // Route-id voor export.
-  els.inputStatus, // Draft/final badge.
-].forEach((el) => {
-  if (!el) return; // Sla ontbrekende velden veilig over.
-
-  el.addEventListener("input", () => {
-    if (el === els.inputIntro && els.introCount) {
-      els.introCount.textContent = `${els.inputIntro.value.length}/160`; // Update teller.
-    }
-
-    updatePreview(); // Ververs rechter route-preview.
-  });
-
-  el.addEventListener("change", () => {
-    updatePreview(); // Ververs ook bij select/blur/change.
-  });
-});
-
-// ======================= BASISVELDEN LIVE PREVIEW =======================
-// Koppelt vaste formuliervelden aan de nieuwe route-preview.
-[
-  els.inputTitle, // Titel in hero.
-  els.inputDifficulty, // Moeilijkheidsbadge.
-  els.inputSource, // Bronvermelding.
-  els.inputHeroPhoto, // Hero-foto.
-  els.inputKeywords, // Tags voor export.
-  els.inputIntro, // Samenvatting.
-  els.inputTips, // Tips-sectie.
-  els.inputRouteId, // Route-id voor export.
-  els.inputStatus, // Draft/final badge.
-].forEach((el) => {
-  if (!el) return; // Sla ontbrekende velden veilig over.
-
-  el.addEventListener("input", () => {
-    if (el === els.inputIntro && els.introCount) {
-      els.introCount.textContent = `${els.inputIntro.value.length}/160`; // Update teller.
-    }
-
-    updatePreview(); // Ververs rechter route-preview.
-  });
-
-  el.addEventListener("change", () => {
-    updatePreview(); // Ververs ook bij select/blur/change.
-  });
-});
-
 // -----------------------------------------------------------
 // SEGMENTEN — render + events
 // -----------------------------------------------------------
-function renderCreatorSegments() {
+function renderSegments() {
   els.segmentList.innerHTML = "";
 
   state.segments.forEach((seg, idx) => {
@@ -518,7 +462,7 @@ function _bindSegmentEvents(sid) {
   if (removeBtn) {
     removeBtn.addEventListener("click", () => {
       state.segments = state.segments.filter((s) => s.id !== sid);
-      renderCreatorSegments();
+      renderSegments();
       updatePreview();
     });
   }
@@ -660,7 +604,7 @@ els.btnAddSegment.addEventListener("click", () => {
     date: "", location: "", country: "", region: "", place: "",
     weather: null, difficulty: "", difficultyAuto: true, roughSurface: false,
   });
-  renderCreatorSegments();
+  renderSegments();
   const newBlock = document.querySelector(`.segment-block[data-sid="${segmentCounter}"]`);
   if (newBlock) newBlock.scrollIntoView({ behavior: "smooth", block: "start" });
 });
@@ -762,18 +706,34 @@ function loadJsonIntoForm(data) {
     return;
   }
 
-  renderCreatorSegments();
+  renderSegments();
   renderBlockEditor();
   updatePreview();
   
   // Transport-array heropbouwen vanuit segmenten
   // (zorgt ervoor dat als oud JSON alleen "walking" had, maar nu ook "car" heeft, dit correct wordt gesyndied)
- if (state.segments?.length) {
-  const uniqueTransports = [...new Set(state.segments.map(s => s.transport))];
-  console.info('[creator] Transport array gesync:', uniqueTransports);
-}
-}
+  if (state.segments?.length) {
+    const uniqueTransports = [...new Set(state.segments.map(s => s.transport))];
+    console.info('[creator] Transport array gesync:', uniqueTransports);
+  }
   
+  // Zorg dat de preview rechts ook bijgewerkt wordt: titel, locatie, hero-foto
+  const titleEl = document.getElementById('rp-title');
+  if (titleEl) titleEl.textContent = data.title?.nl || 'Wandeling zonder titel';
+  
+  const locationEl = document.getElementById('rp-location');
+  if (locationEl) locationEl.textContent = data.location || data.segments?.[0]?.location || 'Locatie onbekend';
+  
+  const heroEl = document.querySelector('.rp-hero img');
+  if (heroEl && data.photos?.[0]?.url) {
+    let heroUrl = data.photos[0].url;
+    if (heroUrl.includes("res.cloudinary.com") && !heroUrl.includes("w_1200")) {
+      heroUrl = heroUrl.replace("/upload/", "/upload/w_1200,f_auto/");
+    }
+    heroEl.src = heroUrl;
+  }
+}
+
 // -----------------------------------------------------------
 // EXPORT: bouw en download gestandaardiseerde JSON vanuit state
 // -----------------------------------------------------------
@@ -818,40 +778,6 @@ function _buildExportFromState() {
   out.gpx_stats = out.segments[0]?.gpx_stats || null;
   out.gpx_raw = out.segments[0]?.gpx_raw || null;
   return out;
-}
-
-// ======================= ROUTE PREVIEW REFRESH =======================
-// Bouwt een tijdelijk route-object en rendert de rechter preview met dezelfde renderers als route.html.
-function refreshRoutePreview() {
-  const route = _buildExportFromState(); // Hergebruik bestaande exportstructuur als previewdata.
-
-  $("route-story").innerHTML = ""; // Leeg verhaal, anders stapelt tekst zich op.
-  $("route-tips").innerHTML = ""; // Leeg tips, anders stapelt tips zich op.
-  $("route-photo-grid").innerHTML = ""; // Leeg fotogrid, anders stapelen foto's zich op.
-  $("route-source").innerHTML = ""; // Leeg bronvermelding voor nieuwe render.
-  $("route-segments").innerHTML = ""; // Leeg segmentpreview voor nieuwe render.
-  $("route-elevation").innerHTML = ""; // Leeg hoogteprofiel voor nieuwe render.
-
-  $("section-segments").hidden = true; // Reset segmentsectie.
-  $("section-source").hidden = true; // Reset bronsectie.
-  $("section-map").hidden = true; // Reset kaartsectie.
-  $("section-elevation").hidden = true; // Reset hoogtesectie.
-  $("section-story").hidden = true; // Reset verhaalsectie.
-  $("section-tips").hidden = true; // Reset tipssectie.
-  $("section-photos").hidden = true; // Reset fotosectie.
-  $("section-gallery").hidden = true; // Reset galerijsectie.
-
-  const oldMap = $("route-map"); // Pak bestaande Leaflet-container.
-  if (oldMap) oldMap.replaceWith(oldMap.cloneNode(false)); // Vervang container zodat Leaflet opnieuw kan initialiseren.
-
-  renderHero(route); // Hergebruik hero-renderer van route.html.
-  window.renderSegments(route); // Gebruik globale route-segmentrenderer; voorkomt botsing met creator renderSegments().
-  renderSource(route); // Hergebruik bron-renderer van route.html.
-  window.renderMap(route); // Hergebruik kaart-renderer van route.html.
-  window.renderElevation(route); // Hergebruik hoogteprofiel-renderer van route.html.
-  window.renderStory(route); // Hergebruik verhaal-renderer van route.html.
-  window.renderTips(route); // Hergebruik tips-renderer van route.html.
-  window.renderPhotoGrid(route); // Hergebruik fotogrid-renderer van route.html.
 }
 
 function _downloadJson(obj, filename) {
@@ -1477,10 +1403,9 @@ function _cumulativeDistancesEle(points) {
  * - renderElevationPreview() → tekent hoogteprofiel SVG
  * Wordt aangeroepen bij elke wijziging van state (GPX, metadata, blokken, etc.)
  */
-// ======================= UPDATE PREVIEW =======================
-// Centrale preview-update. Roept de nieuwe gedeelde route-preview aan.
 function updatePreview() {
-  refreshRoutePreview(); // Render rechter preview met dezelfde functies als route.html.
+  renderSegments();
+  renderElevationPreview(state.segments);
 }
 
 /**
@@ -1603,8 +1528,3 @@ function renderElevationPreview(segments) {
   svg += `</svg>`;
   container.innerHTML = svg;
 }
-// ======================= INIT CREATOR =======================
-// Startweergave van de creator-formulieren en preview.
-renderCreatorSegments(); // Toon het standaard eerste lege segment.
-renderBlockEditor(); // Toon de blokken-editor.
-updatePreview(); // Toon de eerste rechter preview.
