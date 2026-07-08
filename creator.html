@@ -252,98 +252,85 @@
 
       </div><!-- /creator-form-col -->
 
-    <!-- RECHTER KOLOM: route-preview via gedeelde route-renderers -->
-<aside class="creator-preview-col">
-  <div class="preview-sticky">
-
-    <div class="preview-header">
-      <span class="preview-header__label">Voorvertoning</span>
-    </div>
-
-    <div class="route-layout route-layout--preview" id="creator-route-preview">
-
-      <section class="route-hero" id="route-hero">
-        <div class="route-hero__bg" id="route-hero-bg"></div>
-        <div class="route-hero__overlay"></div>
-        <div class="route-hero__status" id="route-status-badge"></div>
-        <div class="route-hero__content">
-          <p class="route-hero__eyebrow" id="route-region"></p>
-          <h1 class="route-hero__title" id="route-title">Voorvertoning</h1>
-          <p class="route-hero__location" id="route-location"></p>
-          <div class="route-hero__badges" id="route-badges"></div>
-        </div>
-      </section>
-
-      <div class="route-content">
-        <div class="route-grid">
-
-          <div class="route-col route-col--left">
-            <section class="route-section" id="section-segments" hidden>
-              <h2 class="route-section__title">Segmenten</h2>
-              <div id="route-segments"></div>
-            </section>
-
-            <section class="route-section" id="section-source" hidden>
-              <h2 class="route-section__title">Bronvermelding</h2>
-              <div id="route-source"></div>
-            </section>
+      <!-- RECHTER KOLOM: visuele preview -->
+      <aside class="creator-preview-col">
+        <div class="preview-sticky">
+          <div class="preview-header">
+            <span class="preview-header__label">Voorvertoning</span>
           </div>
 
-          <div class="route-col route-col--right">
-            <section class="route-section" id="section-map" hidden>
-              <h2 class="route-section__title">Route op kaart</h2>
-              <div id="route-map" class="route-map"></div>
-              <button class="route-action-btn" id="btn-open-map" hidden>
-                <span>🗺</span> Route openen
-              </button>
-            </section>
+          <div class="route-preview" id="route-preview">
 
-            <section class="route-section route-section--elevation" id="section-elevation" hidden>
-              <h2 class="route-section__title">Hoogteprofiel</h2>
-              <div class="route-elevation-placeholder" id="route-elevation"></div>
-            </section>
-          </div>
-
-        </div>
-
-        <div class="route-grid route-grid--story">
-          <div class="route-col route-col--left">
-            <section class="route-section" id="section-story" hidden>
-              <h2 class="route-section__title">Verhaal</h2>
-              <div class="route-story" id="route-story"></div>
-            </section>
-
-            <section class="route-section" id="section-tips" hidden>
-              <h2 class="route-section__title">Tips</h2>
-              <div class="route-tips" id="route-tips"></div>
-            </section>
-          </div>
-
-          <div class="route-col route-col--right">
-            <section class="route-section" id="section-photos" hidden>
-              <h2 class="route-section__title">Foto's</h2>
-              <div class="route-photo-grid" id="route-photo-grid"></div>
-            </section>
-          </div>
-        </div>
-
-        <section class="route-section" id="section-gallery" hidden>
-          <h2 class="route-section__title">Galerij</h2>
-          <div class="route-slideshow">
-            <button class="route-slideshow__btn route-slideshow__btn--prev" id="slideshow-prev" aria-label="Vorige foto">&#8249;</button>
-            <div class="route-slideshow__frame">
-              <img class="route-slideshow__img" id="slideshow-img" src="" alt="">
+            <!-- Hero foto -->
+            <div class="rp-hero" id="rp-hero">
+              <div class="rp-hero__placeholder" id="rp-hero-placeholder">
+                <span class="rp-hero__icon">↑</span>
+                <span class="rp-hero__text">Hero-foto verschijnt hier</span>
+              </div>
+              <img id="rp-hero-img" class="rp-hero__img" src="" alt="" hidden>
+              <div class="rp-status-badge" id="rp-status-badge">draft</div>
             </div>
-            <button class="route-slideshow__btn route-slideshow__btn--next" id="slideshow-next" aria-label="Volgende foto">&#8250;</button>
-          </div>
-          <div class="route-slideshow__dots" id="slideshow-dots"></div>
-        </section>
 
-      </div>
-    </div>
-  </div>
-</aside>  
-         
+            <!-- Info blok -->
+            <div class="rp-body">
+              <p class="rp-location" id="rp-location">Locatie onbekend</p>
+              <h2 class="rp-title" id="rp-title">Wandeling zonder titel</h2>
+              <p class="rp-summary" id="rp-summary"></p>
+
+              <!-- Stats -->
+              <div class="rp-stats" id="rp-stats">
+                <div class="rp-stat">
+                  <span class="rp-stat__value" id="rp-distance">—</span>
+                  <span class="rp-stat__label">afstand</span>
+                </div>
+                <div class="rp-stat">
+                  <span class="rp-stat__value" id="rp-duration">—</span>
+                  <span class="rp-stat__label">duur</span>
+                </div>
+                <div class="rp-stat">
+                  <span class="rp-stat__value" id="rp-elevation">—</span>
+                  <span class="rp-stat__label">stijging</span>
+                </div>
+                <div class="rp-stat">
+                  <span class="rp-stat__value" id="rp-avg-speed">—</span>
+                  <span class="rp-stat__label">gem. snelheid</span>
+                </div>
+                <div class="rp-stat">
+                  <span class="rp-stat__value" id="rp-difficulty">—</span>
+                  <span class="rp-stat__label">moeilijkheid</span>
+                </div>
+              </div>
+
+              <!-- Weer -->
+              <div class="rp-weather" id="rp-weather" hidden>
+                <div class="rp-weather__item" id="rp-w-temp"></div>
+                <div class="rp-weather__item" id="rp-w-precip"></div>
+                <div class="rp-weather__item" id="rp-w-wind"></div>
+                <div class="rp-weather__item" id="rp-w-date"></div>
+              </div>
+
+              <!-- Verhaal blokken preview -->
+              <div class="rp-story" id="rp-story"></div>
+
+              <!-- Kaart — toont alle segmenten met kleurcode per vervoersmiddel -->
+              <div class="rp-map" id="rp-map" hidden>
+                <p class="rp-map__label">Locatie op kaart</p>
+                <div class="rp-map__frame" id="rp-map-frame"></div>
+              </div>
+
+              <!-- Hoogteprofiel — gevuld door renderElevationPreview() in creator.js
+                   Verschijnt automatisch zodra een segment gpxRaw heeft met elevatie.
+                   Verborgen als geen GPX geladen is. -->
+              <div class="rp-elevation" id="rp-elevation" hidden>
+                <p class="rp-map__label">Hoogteprofiel</p>
+                <div id="rp-elevation-chart"></div>
+              </div>
+
+            </div><!-- /rp-body -->
+          </div><!-- /route-preview -->
+        </div>
+      </aside>
+
     </div><!-- /creator-workspace -->
 
   </main>
@@ -367,16 +354,6 @@
   <script src="js/app.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.min.js"></script>
   <script src="js/route-normalize.js"></script>
-          
-     <!-- Route preview renderers -->
-     <script src="js/route-config.js"></script>
-     <script src="js/route-hero.js"></script>
-     <script src="js/route-segments.js"></script>
-     <script src="js/route-map-renderer.js"></script>
-     <script src="js/route-elevation.js"></script>
-     <script src="js/route-story.js"></script>
-     <script src="js/route-gallery.js"></script>
- 
   <script src="js/creator.js?v=2.4.3"></script>
 
 </body>
