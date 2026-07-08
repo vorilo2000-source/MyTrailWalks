@@ -911,6 +911,7 @@ function handleGpxFile(file, sid) {
     const gpxData = parseGpx(e.target.result, sid);
     if (!gpxData) { alert("GPX-bestand kon niet worden gelezen. Controleer het bestand."); return; }
     seg.gpx = gpxData;
+    seg.gpx_stats = gpxData.stats;
 
     // Statistieken tonen vanuit seg.gpx.stats
     displayGpxStats(gpxData.stats, sid);
