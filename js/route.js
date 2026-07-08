@@ -158,6 +158,7 @@ window.appReady.then(async () => {
   renderSegments(route);
   renderSource(route);
   renderMap(route);
+  renderElevation(route);
   renderStory(route);
   renderTips(route);
   renderPhotoGrid(route);
