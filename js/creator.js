@@ -1569,6 +1569,9 @@ function _cumulativeDistancesEle(points) {
 // -----------------------------------------------------------
 // CENTRALE PREVIEW UPDATE — coördinatie van alle render-functies
 // -----------------------------------------------------------
+function refreshRoutePreview(route) {
+  console.info("[creator-preview] refreshRoutePreview aangeroepen:", route);
+}
 
 /**
  * Centrale updatePreview() - coördineert alle visualisatie-renders:
@@ -1576,11 +1579,13 @@ function _cumulativeDistancesEle(points) {
  * - renderElevationPreview() → tekent hoogteprofiel SVG
  * Wordt aangeroepen bij elke wijziging van state (GPX, metadata, blokken, etc.)
  */
+
 function updatePreview() {
   const route = buildPreviewRoute();
 
-  console.info("[creator-preview] Preview route gebouwd:", route);
+  refreshRoutePreview(route);
 }
+
 /**
  * Rendert een SVG hoogteprofiel in #rp-elevation-chart.
  * Elk segment krijgt zijn eigen kleur (TRANSPORT_COLORS).
