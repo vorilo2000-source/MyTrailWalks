@@ -1582,8 +1582,6 @@ function refreshRoutePreview(route) {
 
 function updatePreview() {
   const route = buildPreviewRoute();
-console.log("STATE", structuredClone(state));
-console.log("ROUTE", structuredClone(route));
   
   refreshRoutePreview(route);
 }
