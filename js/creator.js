@@ -1577,10 +1577,10 @@ function _cumulativeDistancesEle(points) {
  * Wordt aangeroepen bij elke wijziging van state (GPX, metadata, blokken, etc.)
  */
 function updatePreview() {
-  renderSegments();
-  renderElevationPreview(state.segments);
-}
+  const route = buildPreviewRoute();
 
+  console.info("[creator-preview] Preview route gebouwd:", route);
+}
 /**
  * Rendert een SVG hoogteprofiel in #rp-elevation-chart.
  * Elk segment krijgt zijn eigen kleur (TRANSPORT_COLORS).
