@@ -1570,9 +1570,15 @@ function _cumulativeDistancesEle(points) {
 // CENTRALE PREVIEW UPDATE — coördinatie van alle render-functies
 // -----------------------------------------------------------
 function refreshRoutePreview(route) {
-  console.info("[creator-preview] refreshRoutePreview aangeroepen:", route);
+  renderHero(route);
+  renderSegments(route);
+  renderMap(route);
+  renderElevation(route);
+  renderStory(route);
+  renderTips(route);
+  renderPhotoGrid(route);
+  renderGallery(route);
 }
-
 /**
  * Centrale updatePreview() - coördineert alle visualisatie-renders:
  * - renderSegments() → tekent segment-blokken UI
