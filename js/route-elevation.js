@@ -1,5 +1,3 @@
-
-
 // =======================================================
 // renderElevation — T2-004
 // Toevoegen aan route.js na renderMap()
@@ -15,24 +13,60 @@
 // Filtert punten zonder geldige elevatie.
 // Samplet NIET — we willen alle hoogtepunten voor nauwkeurigheid.
 // -----------------------------------------------------------
-function _parseElevationPoints(gpxRaw) {
+
+// -----------------------------------------------------------
+// Haalt hoogtepunten uit nieuw GPX-model of oude gpx_raw fallback.
+// Nieuw: seg.gpx.tracks[].segments[].points[]
+// Oud:   seg.gpx_raw XML
+// -----------------------------------------------------------
+function _parseElevationPoints(source) {
   try {
+    // Nieuw model: segment-object met seg.gpx.tracks[].segments[].points[]
+    if (source?.gpx?.tracks?.length) {
+      const points = source.gpx.tracks
+        .flatMap((track) => track.segments || [])
+        .flatMap((trackSegment) => trackSegment.points || [])
+        .filter((pt) =>
+          pt &&
+          typeof pt.lat === "number" &&
+          typeof pt.lon === "number" &&
+          pt.ele !== null &&
+          pt.ele !== undefined &&
+          !Number.isNaN(Number(pt.ele))
+        )
+        .map((pt) => ({
+          lat: pt.lat,
+          lon: pt.lon,
+          ele: Number(pt.ele),
+        }));
+
+      return points.length >= 2 ? points : null;
+    }
+
+    // Oude fallback: gpx_raw string
+    const gpxRaw = typeof source === "string" ? source : source?.gpx_raw;
+
+    if (!gpxRaw) return null;
+
     const parser = new DOMParser();
     const doc = parser.parseFromString(gpxRaw, "application/xml");
     const trkpts = Array.from(doc.querySelectorAll("trkpt"));
     const points = [];
+
     for (const pt of trkpts) {
       const lat = parseFloat(pt.getAttribute("lat"));
       const lon = parseFloat(pt.getAttribute("lon"));
       const eleEl = pt.querySelector("ele");
       const ele = eleEl ? parseFloat(eleEl.textContent) : null;
+
       if (!isNaN(lat) && !isNaN(lon) && ele !== null && !isNaN(ele)) {
         points.push({ lat, lon, ele });
       }
     }
+
     return points.length >= 2 ? points : null;
   } catch (err) {
-    console.warn("[route.js] Elevatie GPX parse mislukt:", err);
+    console.warn("[route-elevation.js] Elevatiepunten parsen mislukt:", err);
     return null;
   }
 }
@@ -77,8 +111,8 @@ function renderElevation(route) {
   if (segments.length > 0) {
     // Multi-segment route — per segment eigen GPX
     for (const seg of segments) {
-      const gpxRaw = seg.gpx_raw || null;
-      if (!gpxRaw) continue;
+      const points = _parseElevationPoints(seg);
+      if (!points) continue;
       const points = _parseElevationPoints(gpxRaw);
       if (!points) continue;
       segmentData.push({
