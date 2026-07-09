@@ -33,14 +33,18 @@ function renderStory(route) {
     // foto en photo-grid blokken worden genegeerd hier — gaan naar renderPhotoGrid
   });
 }
+
 // -----------------------------------------------------------
 // RENDER TIPS — altijd tonen, ook als leeg
 // -----------------------------------------------------------
 function renderTips(route) {
   const lang = i18nModule?.language?.substring(0, 2) || "nl";
-  const tips = route.tips?.[lang] || route.tips?.nl || route.tips;
 
-  // Altijd tonen
+  const tips = typeof route.tips === "object"
+    ? route.tips?.[lang] || route.tips?.nl || ""
+    : route.tips || "";
+
+  $("route-tips").innerHTML = "";
   $("section-tips").hidden = false;
 
   if (!tips) return;
