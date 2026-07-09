@@ -1570,7 +1570,6 @@ function _cumulativeDistancesEle(points) {
 // CENTRALE PREVIEW UPDATE — coördinatie van alle render-functies
 // -----------------------------------------------------------
 function refreshRoutePreview(route) {
-  renderHero(route);
   renderSegments(route);
   renderMap(route);
   renderElevation(route);
