@@ -110,19 +110,18 @@ function renderElevation(route) {
 
   if (segments.length > 0) {
     // Multi-segment route — per segment eigen GPX
-    for (const seg of segments) {
-      const points = _parseElevationPoints(seg);
-      if (!points) continue;
-      const points = _parseElevationPoints(gpxRaw);
-      if (!points) continue;
-      segmentData.push({
-        points,
-        distances: _cumulativeDistances(points),
-        color: TRANSPORT_COLORS[seg.transport] || "#2C4A3B",
-        label: TRANSPORT_LABELS[seg.transport] || seg.transport || "Segment",
-      });
-    }
-  }
+for (const seg of segments) {
+  const points = _parseElevationPoints(seg);
+
+  if (!points) continue;
+
+  segmentData.push({
+    points,
+    distances: _cumulativeDistances(points),
+    color: TRANSPORT_COLORS[seg.transport] || "#2C4A3B",
+    label: TRANSPORT_LABELS[seg.transport] || seg.transport || "Segment",
+  });
+}
 
   // Legacy fallback — enkelvoudige route zonder segments array
   if (segmentData.length === 0 && route.gpx_raw) {
