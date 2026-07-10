@@ -88,10 +88,14 @@ function normalizeRouteJson(input) {
         weather: src.weather || null,
         difficulty: src.difficulty || '',
         difficulty_auto: src.difficulty !== false,
-        rough_surface: src.rough_surface || false,
-        gpx: src.gpx || null,
-        gpx_stats: src.gpx_stats || null,
-        gpx_raw: src.gpx_raw || null,
+        rough_surface: src.rough_surface || false,    gpx: src.gpx || {
+        version: null,
+        creator: null,
+        metadata: {},
+        waypoints: [],
+        routes: [],
+        tracks: [],
+        stats: src.gpx_stats || {}
       }];
     } else {
       // No segments and no gpx_stats — error
