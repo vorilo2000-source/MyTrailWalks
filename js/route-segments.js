@@ -12,6 +12,7 @@ function routeHasValue(value) {
 // Toont alle segmenten als compacte tabellen met vervoer-badge,
 // GPX-stats en weerdata per segment.
 function renderSegments(route) {
+  console.log("[renderSegments] route.segments =", route.segments);
   const segments = route.segments;
 
   if (!segments?.length) return;
