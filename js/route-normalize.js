@@ -48,7 +48,15 @@ function normalizeRouteJson(input) {
       console.info('[route-normalize] Nieuw formaat gedetecteerd (segments array)');
       out.segments = src.segments.map((s) => {
         const seg = _ensureObj(s);
-        const gpx = seg.gpx || null;
+     const gpx = seg.gpx || {
+  version: null,
+  creator: null,
+  metadata: {},
+  waypoints: [],
+  routes: [],
+  tracks: [],
+  stats: {}
+};
         return {
           transport: seg.transport || 'walking',
           label: seg.label || '',
