@@ -1571,8 +1571,7 @@ function _cumulativeDistancesEle(points) {
 // -----------------------------------------------------------
 function refreshRoutePreview(route) {
   window.renderHero(route);
-  console.log("window.renderSegments =", window.renderSegments);
-window.renderSegments(route);
+  window.renderRouteSegments(route);
   window.renderSource(route);
   window.renderMap(route);
   window.renderElevation(route);
