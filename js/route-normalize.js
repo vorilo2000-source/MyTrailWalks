@@ -61,9 +61,15 @@ function normalizeRouteJson(input) {
           difficulty: seg.difficulty || '',
           difficulty_auto: seg.difficulty_auto !== false,
           rough_surface: seg.rough_surface || false,
-          gpx: gpx,
-          gpx_stats: seg.gpx_stats || null,
-          gpx_raw: seg.gpx_raw || null,
+          gpx: gpx || {
+  version: null,
+  creator: null,
+  metadata: {},
+  waypoints: [],
+  routes: [],
+  tracks: [],
+  stats: seg.gpx_stats || {}
+},
         };
       });
     } else if (src.gpx_stats) {
