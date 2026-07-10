@@ -1602,10 +1602,7 @@ function updatePreview() {
  * Sectie blijft verborgen als geen enkel segment gpx.tracks heeft met punten.
  * @param {Array} segments - state.segments array
  */
-function renderElevationPreview(segments) {
-  const wrapper   = $("rp-elevation");
-  const container = $("rp-elevation-chart");
-  if (!wrapper || !container) return;
+
 
   // Bouw segmentdata op uit seg.gpx.tracks[].segments[].points[] (of fallback track_points)
   const segmentData = [];
