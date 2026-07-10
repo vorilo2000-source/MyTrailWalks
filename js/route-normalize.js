@@ -1,9 +1,10 @@
 // ======================= ROUTE JSON NORMALIZATION =======================
-// Ondersteunt uitsluitend het nieuwe routeformaat met segments[].gpx.
-// Behoudt alle aanwezige GPX-data zonder velden te verwijderen of te wijzigen.
+// Ondersteunt het nieuwe routeformaat met segments[].gpx.
+// Segmenten zonder GPX zijn toegestaan.
+// Aanwezige GPX-data blijft volledig behouden.
 "use strict";
 
-// ======================= OBJECTCONTROLE =======================
+// ======================= OBJECT CONTROLEREN =======================
 // Geeft alleen geldige objecten terug.
 function _ensureObject(value) {
   return value && typeof value === "object" && !Array.isArray(value)
@@ -12,7 +13,7 @@ function _ensureObject(value) {
 }
 
 // ======================= TAALVELD NORMALISEREN =======================
-// Zet een string om naar { nl: "..." } en behoudt bestaande taalobjecten.
+// Zet strings om naar { nl: "..." } en behoudt bestaande taalobjecten.
 function _normalizeLanguageField(value, fallback = "") {
   if (value && typeof value === "object" && !Array.isArray(value)) {
     return value;
@@ -23,9 +24,9 @@ function _normalizeLanguageField(value, fallback = "") {
   };
 }
 
-// ======================= GPX CONTROLEREN =======================
-// Behoudt een geldig GPX-object volledig.
-// Segmenten zonder GPX blijven toegestaan.
+// ======================= GPX NORMALISEREN =======================
+// Behoudt bestaande GPX volledig.
+// Segmenten zonder GPX krijgen null.
 function _normalizeGpx(gpx) {
   if (gpx === null || gpx === undefined) {
     return null;
@@ -41,8 +42,8 @@ function _normalizeGpx(gpx) {
 }
 
 // ======================= SEGMENT NORMALISEREN =======================
-// Normaliseert routevelden, maar laat het volledige GPX-object intact.
-function _normalizeSegment(segment, index) {
+// Normaliseert één segment.
+function _normalizeSegment(segment) {
   const source = _ensureObject(segment);
 
   return {
@@ -57,12 +58,12 @@ function _normalizeSegment(segment, index) {
     difficulty: source.difficulty || "",
     difficulty_auto: source.difficulty_auto !== false,
     rough_surface: source.rough_surface === true,
-    gpx: _normalizeGpx(source.gpx, index),
+    gpx: _normalizeGpx(source.gpx),
   };
 }
 
 // ======================= ROUTE NORMALISEREN =======================
-// Retourneert één consistente routestructuur volgens het nieuwe model.
+// Retourneert één consistente routestructuur.
 function normalizeRouteJson(input) {
   console.info("[route-normalize] Normalisatie gestart");
 
@@ -75,17 +76,19 @@ function normalizeRouteJson(input) {
   }
 
   const segments = source.segments.map(_normalizeSegment);
-  const firstSegment = segments[0];
+  const firstSegment = segments[0] || {};
 
   const output = {
     id: source.id || source.route_id || null,
     status: source.status || "draft",
 
     title: _normalizeLanguageField(source.title),
+
     summary: _normalizeLanguageField(
       source.summary,
       source.intro || ""
     ),
+
     tips: _normalizeLanguageField(source.tips),
 
     source_reference:
@@ -142,13 +145,31 @@ function normalizeRouteJson(input) {
 
     segments,
 
-    // ======================= ROUTE SAMENVATTING =======================
-    // Afgeleid van het eerste segment voor hero en overzichtsweergave.
-    location: source.location || firstSegment.location || "",
-    country: source.country || firstSegment.country || "",
-    region: source.region || firstSegment.region || "",
-    place: source.place || firstSegment.place || "",
-    difficulty: source.difficulty || firstSegment.difficulty || "",
+    location:
+      source.location ||
+      firstSegment.location ||
+      "",
+
+    country:
+      source.country ||
+      firstSegment.country ||
+      "",
+
+    region:
+      source.region ||
+      firstSegment.region ||
+      "",
+
+    place:
+      source.place ||
+      firstSegment.place ||
+      "",
+
+    difficulty:
+      source.difficulty ||
+      firstSegment.difficulty ||
+      "",
+
     published_date:
       source.published_date ||
       firstSegment.date ||
@@ -156,10 +177,7 @@ function normalizeRouteJson(input) {
   };
 
   if (!output.id) {
-    const title =
-      typeof output.title?.nl === "string"
-        ? output.title.nl.trim()
-        : "";
+    const title = output.title?.nl?.trim() || "";
 
     output.id = title
       ? title
@@ -175,5 +193,5 @@ function normalizeRouteJson(input) {
 }
 
 // ======================= GLOBAL EXPORT =======================
-// Maakt de normalizer beschikbaar voor route-loader.js en creator.js.
+// Beschikbaar voor route-loader.js en creator.js.
 window.normalizeRouteJson = normalizeRouteJson;
