@@ -1603,6 +1603,11 @@ function updatePreview() {
  * @param {Array} segments - state.segments array
  */
 function renderElevationPreview(segments) {
+  const wrapper = document.getElementById("rp-elevation");
+  const container = document.getElementById("rp-elevation-chart");
+
+  if (!wrapper || !container) return;
+
 
   // Bouw segmentdata op uit seg.gpx.tracks[].segments[].points[] (of fallback track_points)
   const segmentData = [];
