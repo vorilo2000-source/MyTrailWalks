@@ -86,25 +86,28 @@ function normalizeRouteJson(input) {
       const transport = (src.transport && typeof src.transport === 'string') ? src.transport : (Array.isArray(src.transport) ? src.transport[0] : 'walking');
       
       out.segments = [{
-        transport: transport,
-        label: '',
-        date: src.published_date || src.date || null,
-        location: src.location || '',
-        country: src.country || '',
-        region: src.region || '',
-        place: src.place || '',
-        weather: src.weather || null,
-        difficulty: src.difficulty || '',
-        difficulty_auto: src.difficulty !== false,
-        rough_surface: src.rough_surface || false,    gpx: src.gpx || {
-        version: null,
-        creator: null,
-        metadata: {},
-        waypoints: [],
-        routes: [],
-        tracks: [],
-        stats: src.gpx_stats || {}
-      }];
+  transport: transport,
+  label: '',
+  date: src.published_date || src.date || null,
+  location: src.location || '',
+  country: src.country || '',
+  region: src.region || '',
+  place: src.place || '',
+  weather: src.weather || null,
+  difficulty: src.difficulty || '',
+  difficulty_auto: src.difficulty !== false,
+  rough_surface: src.rough_surface || false,
+  gpx: src.gpx || {
+    version: null,
+    creator: null,
+    metadata: {},
+    waypoints: [],
+    routes: [],
+    tracks: [],
+    stats: src.gpx_stats || {}
+  }
+}];
+      
     } else {
       // No segments and no gpx_stats — error
       const msg = '[route-normalize] Ongeldig JSON: verwacht óf een `segments` array óf `gpx_stats` op root-niveau.';
