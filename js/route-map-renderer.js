@@ -2,6 +2,7 @@
 // Rendert de Leaflet routekaart voor route.html en later creator-preview.
 // -----------------------------------------------------------
 "use strict";
+let routeMapInstance = null;
 
 function renderMap(route) {
   const segments = route.segments?.filter((s) => s.gpx_stats?.start_lat) || [];
@@ -33,7 +34,18 @@ function renderMap(route) {
       }];
 
   setTimeout(async () => {
-    const map = L.map("route-map", { zoomControl: true, scrollWheelZoom: false });
+ if (routeMapInstance) {
+  routeMapInstance.remove();
+  routeMapInstance = null;
+}
+
+routeMapInstance = L.map("route-map", {
+  zoomControl: true,
+  scrollWheelZoom: false,
+});
+
+const map = routeMapInstance;
+    
     L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
       attribution: "© OpenStreetMap contributors",
       maxZoom: 18,
