@@ -24,11 +24,16 @@ function _normalizeLanguageField(value, fallback = "") {
 }
 
 // ======================= GPX CONTROLEREN =======================
-// Behoudt het volledige GPX-object exact zoals het is aangeleverd.
-function _normalizeGpx(gpx, segmentIndex) {
-  if (!gpx || typeof gpx !== "object" || Array.isArray(gpx)) {
+// Behoudt een geldig GPX-object volledig.
+// Segmenten zonder GPX blijven toegestaan.
+function _normalizeGpx(gpx) {
+  if (gpx === null || gpx === undefined) {
+    return null;
+  }
+
+  if (typeof gpx !== "object" || Array.isArray(gpx)) {
     throw new Error(
-      `[route-normalize] Segment ${segmentIndex + 1} bevat geen geldig gpx-object.`
+      "[route-normalize] Segment bevat een ongeldig gpx-object."
     );
   }
 
