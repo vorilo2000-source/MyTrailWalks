@@ -38,7 +38,6 @@ function renderStory(route) {
 // RENDER TIPS — altijd tonen, ook als leeg
 // -----------------------------------------------------------
 function renderTips(route) {
-  console.log("[route-story.js v1.0.1] renderTips()");
   const lang = i18nModule?.language?.substring(0, 2) || "nl";
 
   const tips = typeof route.tips === "object"
