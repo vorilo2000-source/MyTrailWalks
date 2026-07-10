@@ -139,22 +139,30 @@ function renderMap(route) {
       map.setView([firstLat, firstLon], 13);
     }
 
-    const btnMap = document.getElementById("btn-open-map");
+    // ======================= ROUTE OPENEN KNOP =======================
+// Alleen tonen op route.html. In creator bestaat nog geen opgeslagen JSON-route.
+const btnMap = document.getElementById("btn-open-map");
+const isCreatorPage = Boolean(document.getElementById("route-preview-v2"));
 
-    if (btnMap && firstLat !== null) {
-      btnMap.hidden = false;
-      btnMap.innerHTML = "<span>🗺</span> Route openen";
+if (btnMap) {
+  if (isCreatorPage || firstLat === null) {
+    btnMap.hidden = true;
+    btnMap.onclick = null;
+  } else {
+    btnMap.hidden = false;
+    btnMap.innerHTML = "<span>🗺</span> Route openen";
 
-      btnMap.onclick = () => {
-        const id = window.getRouteId
-          ? window.getRouteId()
-          : null;
+    btnMap.onclick = () => {
+      const id = window.getRouteId
+        ? window.getRouteId()
+        : null;
 
-        window.location.href =
-          `/MyTrailWalks/routes/route-map.html?id=${id}`;
-      };
-    }
-  }, 50);
+      if (!id) return;
+
+      window.location.href =
+        `/MyTrailWalks/routes/route-map.html?id=${encodeURIComponent(id)}`;
+    };
+  }
 }
 
 // ======================= GLOBAL EXPORT =======================
