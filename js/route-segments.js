@@ -31,7 +31,7 @@ function renderSegments(route) {
       seg.transport ||
       "—";
 
-    const g = seg.gpx_stats;
+    const g = seg.gpx?.stats || null;
     const w = seg.weather;
     const diffLabel = seg.difficulty || "—";
 
