@@ -1,132 +1,174 @@
 // ======================= ROUTE JSON NORMALIZATION =======================
-// normalizeRouteJson(routeData)
-// - accepteert oude en nieuwe route JSON-structuren
-// - vult ontbrekende velden met veilige standaardwaarden
-// - retourneert één consistente standaardstructuur
-// - logt beknopt welke aanpassingen werden gedaan
+// Ondersteunt uitsluitend het nieuwe routeformaat met segments[].gpx.
+// Behoudt alle aanwezige GPX-data zonder velden te verwijderen of te wijzigen.
 "use strict";
 
-function _ensureObj(v) { return v && typeof v === 'object' ? v : {}; }
-
-function normalizeRouteJson(input) {
-  try {
-    console.info('[route-normalize] Normalisatie gestart');
-    const src = _ensureObj(input);
-
-    const out = {};
-    out.id = src.id || src.route_id || null;
-    out.status = src.status || 'draft';
-
-    // Title support: string or map
-    out.title = (typeof src.title === 'object') ? src.title : { nl: src.title || '' };
-
-    out.summary = (typeof src.summary === 'object') ? src.summary : { nl: src.summary || src.intro || '' };
-    out.tips = (typeof src.tips === 'object') ? src.tips : { nl: src.tips || '' };
-    out.source_reference = src.source_reference || src.source || '';
-    out.tags = Array.isArray(src.tags) ? src.tags : (typeof src.tags === 'string' ? src.tags.split(/\s*,\s*/).filter(Boolean) : []);
-
-    // Photos / gallery normalization
-    out.photos = Array.isArray(src.photos) ? src.photos.map((p) => ({ url: p.url || p, role: p.role || null })) : [];
-    out.gallery = Array.isArray(src.gallery) ? src.gallery.map((p) => ({ url: p.url || p })) : [];
-
-    // Story blocks: support legacy `story` string and `story_blocks` array
-    if (Array.isArray(src.story_blocks)) {
-      out.story_blocks = src.story_blocks.map((b) => ({ ...b, value: b.value || '' }));
-    } else if (src.story && typeof src.story === 'object') {
-      // object keyed by lang
-      const lang = Object.keys(src.story)[0] || 'nl';
-      out.story_blocks = [{ type: 'text', value: src.story[lang] }];
-    } else if (typeof src.story === 'string') {
-      out.story_blocks = [{ type: 'text', value: src.story }];
-    } else {
-      out.story_blocks = [];
-    }
-
-    // Segments normalization — support both old (root-level gpx_stats) and new (segments array) formats
-    if (Array.isArray(src.segments) && src.segments.length > 0) {
-      // New format: segments array
-      console.info('[route-normalize] Nieuw formaat gedetecteerd (segments array)');
-      out.segments = src.segments.map((s) => {
-        const seg = _ensureObj(s);
-     const gpx = seg.gpx || {
-  version: null,
-  creator: null,
-  metadata: {},
-  waypoints: [],
-  routes: [],
-  tracks: [],
-  stats: {}
-};
-        return {
-          transport: seg.transport || 'walking',
-          label: seg.label || '',
-          date: seg.date || seg.published_date || null,
-          location: seg.location || '',
-          country: seg.country || '',
-          region: seg.region || '',
-          place: seg.place || '',
-          weather: seg.weather || null,
-          difficulty: seg.difficulty || '',
-          difficulty_auto: seg.difficulty_auto !== false,
-          rough_surface: seg.rough_surface || false,
-          gpx: gpx || {
-  version: null,
-  creator: null,
-  metadata: {},
-  waypoints: [],
-  routes: [],
-  tracks: [],
-  stats: seg.gpx_stats || {}
-},
-        };
-      });
-    } else if (src.gpx_stats) {
-      // Old format: root-level gpx_stats (single segment, backward-compat conversion)
-      console.info('[route-normalize] Oud formaat gedetecteerd (root gpx_stats → segments)');
-      const transport = (src.transport && typeof src.transport === 'string') ? src.transport : (Array.isArray(src.transport) ? src.transport[0] : 'walking');
-      
-      out.segments = [{
-  transport: transport,
-  label: '',
-  date: src.published_date || src.date || null,
-  location: src.location || '',
-  country: src.country || '',
-  region: src.region || '',
-  place: src.place || '',
-  weather: src.weather || null,
-  difficulty: src.difficulty || '',
-  difficulty_auto: src.difficulty !== false,
-  rough_surface: src.rough_surface || false,
-  gpx: src.gpx || {
-    version: null,
-    creator: null,
-    metadata: {},
-    waypoints: [],
-    routes: [],
-    tracks: [],
-    stats: src.gpx_stats || {}
-  }
-}];
-      
-    } else {
-      // No segments and no gpx_stats — error
-      const msg = '[route-normalize] Ongeldig JSON: verwacht óf een `segments` array óf `gpx_stats` op root-niveau.';
-      console.error(msg);
-      throw new Error(msg);
-    }
-
-    // Minimal metadata defaults
-    out.id = out.id || (src.title ? (typeof src.title === 'string' ? src.title.toLowerCase().replace(/\s+/g, '-') : null) : null);
-
-    console.info('[route-normalize] Normalisatie voltooid (strict)');
-    return out;
-  } catch (err) {
-    console.error('[route-normalize] Fout tijdens normalisatie:', err);
-    throw err;
-  }
+// ======================= OBJECTCONTROLE =======================
+// Geeft alleen geldige objecten terug.
+function _ensureObject(value) {
+  return value && typeof value === "object" && !Array.isArray(value)
+    ? value
+    : {};
 }
 
-// Expose in window for pages
-if (typeof window !== 'undefined') window.normalizeRouteJson = normalizeRouteJson;
+// ======================= TAALVELD NORMALISEREN =======================
+// Zet een string om naar { nl: "..." } en behoudt bestaande taalobjecten.
+function _normalizeLanguageField(value, fallback = "") {
+  if (value && typeof value === "object" && !Array.isArray(value)) {
+    return value;
+  }
 
-// ======================= END ROUTE JSON NORMALIZATION =======================
+  return {
+    nl: typeof value === "string" ? value : fallback,
+  };
+}
+
+// ======================= GPX CONTROLEREN =======================
+// Behoudt het volledige GPX-object exact zoals het is aangeleverd.
+function _normalizeGpx(gpx, segmentIndex) {
+  if (!gpx || typeof gpx !== "object" || Array.isArray(gpx)) {
+    throw new Error(
+      `[route-normalize] Segment ${segmentIndex + 1} bevat geen geldig gpx-object.`
+    );
+  }
+
+  return gpx;
+}
+
+// ======================= SEGMENT NORMALISEREN =======================
+// Normaliseert routevelden, maar laat het volledige GPX-object intact.
+function _normalizeSegment(segment, index) {
+  const source = _ensureObject(segment);
+
+  return {
+    transport: source.transport || "walking",
+    label: source.label || "",
+    date: source.date || source.published_date || null,
+    location: source.location || "",
+    country: source.country || "",
+    region: source.region || "",
+    place: source.place || "",
+    weather: source.weather || null,
+    difficulty: source.difficulty || "",
+    difficulty_auto: source.difficulty_auto !== false,
+    rough_surface: source.rough_surface === true,
+    gpx: _normalizeGpx(source.gpx, index),
+  };
+}
+
+// ======================= ROUTE NORMALISEREN =======================
+// Retourneert één consistente routestructuur volgens het nieuwe model.
+function normalizeRouteJson(input) {
+  console.info("[route-normalize] Normalisatie gestart");
+
+  const source = _ensureObject(input);
+
+  if (!Array.isArray(source.segments) || source.segments.length === 0) {
+    throw new Error(
+      "[route-normalize] Ongeldig JSON: een niet-lege segments-array is verplicht."
+    );
+  }
+
+  const segments = source.segments.map(_normalizeSegment);
+  const firstSegment = segments[0];
+
+  const output = {
+    id: source.id || source.route_id || null,
+    status: source.status || "draft",
+
+    title: _normalizeLanguageField(source.title),
+    summary: _normalizeLanguageField(
+      source.summary,
+      source.intro || ""
+    ),
+    tips: _normalizeLanguageField(source.tips),
+
+    source_reference:
+      source.source_reference ||
+      source.source ||
+      "",
+
+    tags: Array.isArray(source.tags)
+      ? source.tags
+      : typeof source.tags === "string"
+        ? source.tags
+            .split(/\s*,\s*/)
+            .filter(Boolean)
+        : [],
+
+    photos: Array.isArray(source.photos)
+      ? source.photos.map((photo) => {
+          if (typeof photo === "string") {
+            return {
+              url: photo,
+              role: null,
+            };
+          }
+
+          return {
+            ...photo,
+            url: photo?.url || "",
+            role: photo?.role || null,
+          };
+        })
+      : [],
+
+    gallery: Array.isArray(source.gallery)
+      ? source.gallery.map((photo) => {
+          if (typeof photo === "string") {
+            return {
+              url: photo,
+            };
+          }
+
+          return {
+            ...photo,
+            url: photo?.url || "",
+          };
+        })
+      : [],
+
+    story_blocks: Array.isArray(source.story_blocks)
+      ? source.story_blocks.map((block) => ({
+          ...block,
+          value: block?.value || "",
+        }))
+      : [],
+
+    segments,
+
+    // ======================= ROUTE SAMENVATTING =======================
+    // Afgeleid van het eerste segment voor hero en overzichtsweergave.
+    location: source.location || firstSegment.location || "",
+    country: source.country || firstSegment.country || "",
+    region: source.region || firstSegment.region || "",
+    place: source.place || firstSegment.place || "",
+    difficulty: source.difficulty || firstSegment.difficulty || "",
+    published_date:
+      source.published_date ||
+      firstSegment.date ||
+      null,
+  };
+
+  if (!output.id) {
+    const title =
+      typeof output.title?.nl === "string"
+        ? output.title.nl.trim()
+        : "";
+
+    output.id = title
+      ? title
+          .toLowerCase()
+          .replace(/[^a-z0-9]+/g, "-")
+          .replace(/^-+|-+$/g, "")
+      : null;
+  }
+
+  console.info("[route-normalize] Nieuw GPX-model gevalideerd");
+
+  return output;
+}
+
+// ======================= GLOBAL EXPORT =======================
+// Maakt de normalizer beschikbaar voor route-loader.js en creator.js.
+window.normalizeRouteJson = normalizeRouteJson;
