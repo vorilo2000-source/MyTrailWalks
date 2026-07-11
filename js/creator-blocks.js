@@ -62,4 +62,24 @@ els.btnAddPhotoBlock.addEventListener("click",     () => { state.storyBlocks.pus
 els.btnAddPhotoGridBlock.addEventListener("click", () => { state.storyBlocks.push({ type: "photo-grid", cols: 2, photos: ["", ""] }); renderBlockEditor(); updatePreview(); });
 els.btnAddLinkBlock.addEventListener("click",      () => { state.storyBlocks.push({ type: "link",       name: "", url: "" });       renderBlockEditor(); updatePreview(); });
 
+
+// -----------------------------------------------------------
+// GALERIJ
+// -----------------------------------------------------------
+function renderGalleryEditor() {
+  if (!els.galleryList) return;
+  els.galleryList.innerHTML = "";
+  state.galleryPhotos.forEach((photo, i) => {
+    const entry = document.createElement("div");
+    entry.className = "photo-entry";
+    entry.innerHTML = `<input type="url" class="input gallery-url-input" placeholder="https://res.cloudinary.com/…" value="${photo.url || ""}" data-idx="${i}"><button class="photo-entry__remove" data-idx="${i}" title="Verwijder">✕</button>`;
+    entry.querySelector(".gallery-url-input").addEventListener("blur",  (e) => { const fixed = fixCloudinaryUrl(e.target.value.trim(), "w_800,f_auto"); e.target.value = fixed; state.galleryPhotos[i].url = fixed; updatePreview(); });
+    entry.querySelector(".gallery-url-input").addEventListener("input", (e) => { state.galleryPhotos[i].url = e.target.value; updatePreview(); });
+    entry.querySelector(".photo-entry__remove").addEventListener("click", () => { state.galleryPhotos.splice(i, 1); renderGalleryEditor(); updatePreview(); });
+    els.galleryList.appendChild(entry);
+  });
+}
+
+if (els.btnAddGalleryPhoto) els.btnAddGalleryPhoto.addEventListener("click", () => { state.galleryPhotos.push({ url: "" }); renderGalleryEditor(); });
+
 window.renderBlockEditor = renderBlockEditor;
