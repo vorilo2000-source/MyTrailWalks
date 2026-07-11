@@ -108,5 +108,18 @@ function applyCalculatedDifficulty() {
   if (difficulty && !els.inputDifficulty.value) { els.inputDifficulty.value = difficulty; updatePreview(); }
 }
 
+// -----------------------------------------------------------
+// CLOUDINARY URL AUTO-FIX
+// -----------------------------------------------------------
+function fixCloudinaryUrl(url, transform = "w_1200,f_auto") {
+  if (!url || !url.includes("res.cloudinary.com")) return url;
+  if (url.includes(transform)) return url;
+  return url.replace("/upload/", `/upload/${transform}/`);
+}
+
+els.inputHeroPhoto.addEventListener("blur",  () => { const fixed = fixCloudinaryUrl(els.inputHeroPhoto.value.trim()); if (fixed !== els.inputHeroPhoto.value.trim()) els.inputHeroPhoto.value = fixed; updatePreview(); });
+els.inputHeroPhoto.addEventListener("input", updatePreview);
+els.inputIntro.addEventListener("input",     () => { els.introCount.textContent = `${els.inputIntro.value.length}/160`; updatePreview(); });
+
 window.renderBlockEditor = renderBlockEditor;
 window.renderGalleryEditor = renderGalleryEditor;
