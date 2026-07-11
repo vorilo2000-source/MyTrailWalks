@@ -91,7 +91,7 @@ const DIFFICULTY_SCALES = {
 // Leest uit het unified segment model (seg.gpx.stats)
 // -----------------------------------------------------------
 function calculateSegmentDifficulty(seg) {
-  // Statistieken zitten in seg.gpxstats (na normalisatie)
+  // Statistieken zitten in seg.gpx.stats (na normalisatie)
   const stats = seg.gpx?.stats || null;
   if (!stats || !stats.distance_km) return null;
 
@@ -128,6 +128,7 @@ function calculateSegmentDifficulty(seg) {
 
 function _calculateRoadDifficulty(seg) {
   const stats = seg.gpx?.stats || null;
+  if (!stats || !stats.distance_km) return null;
   const prefix = { cycling: "C", motorcycle: "M", car: "A" }[seg.transport];
 
   // trackPoints voor bochtenberekening zitten in stats
