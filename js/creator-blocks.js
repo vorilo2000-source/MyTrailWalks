@@ -123,3 +123,4 @@ els.inputIntro.addEventListener("input",     () => { els.introCount.textContent 
 
 window.renderBlockEditor = renderBlockEditor;
 window.renderGalleryEditor = renderGalleryEditor;
+window.fixCloudinaryUrl = fixCloudinaryUrl;
