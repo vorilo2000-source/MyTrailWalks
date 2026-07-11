@@ -850,12 +850,9 @@ const btnExportRoutesEntry = $("btn-export-routes-entry"); // Haalt de knop op u
 if (btnExportRoutesEntry) { // Controleert of de knop bestaat voordat we een listener toevoegen.
   btnExportRoutesEntry.addEventListener("click", (e) => { // Start export wanneer op de knop wordt geklikt.
     e.preventDefault(); // Voorkomt standaard browsergedrag.
-
     const route = _buildExportFromState(); // Gebruikt dezelfde route-data als de gewone JSON-export.
-
     const firstSegment = route.segments?.[0] || {}; // Neemt het eerste segment als basis voor overzichtsdata.
-    const firstStats = firstSegment.gpx_stats || firstSegment.gpx?.stats || null; // Haalt GPX-statistieken op.
-
+    const firstStats = firstSegment.gpx?.stats || null; // Haalt GPX-statistieken uit het nieuwe model.
     const entry = { // Bouwt één compacte entry voor data/routes.json.
       id: route.id, // Route-id / bestandsnaam.
       title: route.title, // Titelobject, bijvoorbeeld { nl: "..." }.
@@ -876,15 +873,6 @@ if (btnExportRoutesEntry) { // Controleert of de knop bestaat voordat we een lis
     _downloadJson(entry, `${route.id || "route"}-routes-entry.json`); // Downloadt de routes.json entry.
   });
 }
-
-/**
- * Converteert oud gpx_stats object (zonder tracks) naar het unified gpx model.
- * Wordt enkel gebruikt bij import van pre-v3.0.0 JSON bestanden.
- * tracks en points blijven leeg — hoogteprofiel zal niet beschikbaar zijn.
- * @param {Object} g - oud gpx_stats object
- * @returns {Object} unified gpx model
- */
-// Legacy conversion removed per user request — no backward compatibility handling here.
 
 // -----------------------------------------------------------
 // BLOKKEN-EDITOR
@@ -979,8 +967,7 @@ function handleGpxFile(file, sid) {
     // parseGpx retourneert nu het volledige unified model
     const gpxData = parseGpx(e.target.result, sid);
     if (!gpxData) { alert("GPX-bestand kon niet worden gelezen. Controleer het bestand."); return; }
-    seg.gpx = gpxData;
-    seg.gpx_stats = gpxData.stats;
+   seg.gpx = gpxData;
 
     // Statistieken tonen vanuit seg.gpx.stats
     displayGpxStats(gpxData.stats, sid);
