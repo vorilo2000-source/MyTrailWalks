@@ -362,7 +362,7 @@ function renderSegments() {
 
 function _renderDifficultyBlock(seg) {
   const sid   = seg.id;
-  const scale = DIFFICULTY_SCALES[seg.transport];
+  const scale = window.DIFFICULTY_SCALES[seg.transport];
 
   if (!scale) {
     return `<p class="field__help segment-difficulty__none">Geen moeilijkheidsschaal van toepassing voor dit vervoersmiddel.</p>`;
