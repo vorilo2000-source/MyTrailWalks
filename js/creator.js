@@ -679,7 +679,7 @@ function loadJsonIntoForm(data) {
       segmentCounter++;
       const seg = {
         id: segmentCounter, transport: s.transport || "walking", label: s.label || "",
-        gpx: null, gpx.stats: null, gpx_raw: null, date: s.date || "", location: s.location || "",
+        gpx: null, gpx_stats: null, gpx_raw: null, date: s.date || "", location: s.location || "",
         country: s.country || "", region: s.region || "", place: s.place || "",
         weather: s.weather || null, difficulty: s.difficulty || "",
         difficultyAuto: s.difficulty_auto !== false, roughSurface: s.rough_surface || false,
