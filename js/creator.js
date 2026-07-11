@@ -1564,18 +1564,9 @@ function refreshRoutePreview(route) {
   window.renderPhotoGrid(route);
   window.renderGallery(route);
 }
-
-/**
- * Centrale updatePreview() - coördineert alle visualisatie-renders:
- * - renderSegments() → tekent segment-blokken UI
- * - renderElevationPreview() → tekent hoogteprofiel SVG
- * Wordt aangeroepen bij elke wijziging van state (GPX, metadata, blokken, etc.)
- */
-
 function updatePreview() {
   const route = buildPreviewRoute();
-  
-  refreshRoutePreview(route);
+    refreshRoutePreview(route);
 }
 
   // Geen data — sectie verbergen
