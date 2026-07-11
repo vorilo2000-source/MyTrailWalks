@@ -928,41 +928,6 @@ function renderGalleryEditor() {
 if (els.btnAddGalleryPhoto) els.btnAddGalleryPhoto.addEventListener("click", () => { state.galleryPhotos.push({ url: "" }); renderGalleryEditor(); });
 
 // -----------------------------------------------------------
-// LOCATIE VIA NOMINATIM
-// -----------------------------------------------------------
-async function fetchLocationName(lat, lon, sid) {
-  const fetchBtn = document.querySelector(`.segment-fetch-location[data-sid="${sid}"]`);
-  if (fetchBtn) fetchBtn.textContent = "…";
-  try {
-    const url  = `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json`;
-    const resp = await fetch(url, { headers: { "Accept-Language": "nl" } });
-    const data = await resp.json();
-    const addr = data.address || {};
-    const country  = addr.country  || "";
-    const region   = addr.state || addr.province || addr.county || addr.state_district || "";
-    const place    = addr.village || addr.town || addr.city || addr.municipality || "";
-    const location = [place, region, country].filter(Boolean).join(", ");
-
-    const seg = _getSeg(sid);
-    if (seg) { seg.location = location; seg.country = country; seg.region = region; seg.place = place; }
-
-    const locInp     = document.querySelector(`.segment-location[data-sid="${sid}"]`);
-    const countryInp = document.querySelector(`.segment-country[data-sid="${sid}"]`);
-    const regionInp  = document.querySelector(`.segment-region[data-sid="${sid}"]`);
-    const placeInp   = document.querySelector(`.segment-place[data-sid="${sid}"]`);
-    if (locInp     && location) locInp.value     = location;
-    if (countryInp && country)  countryInp.value = country;
-    if (regionInp  && region)   regionInp.value  = region;
-    if (placeInp   && place)    placeInp.value   = place;
-  } catch (err) {
-    console.warn("[creator.js] Nominatim fout:", err);
-  } finally {
-    if (fetchBtn) fetchBtn.textContent = "↺";
-    updatePreview();
-  }
-}
-
-// -----------------------------------------------------------
 // WEERDATA VIA OPEN-METEO
 // -----------------------------------------------------------
 async function fetchWeather(sid) {
