@@ -770,9 +770,7 @@ function buildPreviewRoute() {
       difficulty: seg.difficulty || "",
       difficulty_auto: seg.difficultyAuto !== false,
       rough_surface: seg.roughSurface || false,
-      gpx: seg.gpx || null,
-      gpx_stats: seg.gpx_stats || seg.gpx?.stats || null,
-      gpx_raw: seg.gpx_raw || null,
+     gpx: seg.gpx || null,
     })),
   };
 }
