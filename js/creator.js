@@ -7,12 +7,11 @@
 // v3.0.0: één unified segment.gpx model
 //         - GPX volledig uitgelezen naar segment.gpx.tracks[].segments[].points[]
 //         - segment.gpx.stats bevat alle berekende statistieken
-//         - Geen gpx_raw / gpx_stats / gpx_data meer in export
-//         - renderElevationPreview leest uit segment.gpx.tracks[].segments[].points[]
-//         - Import converteert oud formaat (gpx_raw / gpx_stats) naar nieuw model
-// v2.4.3: hoogteprofiel preview toegevoegd (renderElevationPreview)
+//         - Export gebruikt uitsluitend segment.gpx
+//         - Preview gebruikt uitsluitend segment.gpx
+//         - JSON import verwacht uitsluitend het nieuwe unified model
 // v2.4.2: datum-validatie bij weerdata ophalen (toekomstige datum)
-// v2.4.1: track_points toegevoegd aan segments[].gpx_stats export
+// v2.4.1: track_points toegevoegd aan segment.gpx.stats
 // v2.4.0: hike/trail vervoersmiddel + moeilijkheidsschaal per vervoersmiddel
 // v2.3.0: meerdere segmenten (GPX + datum/locatie per segment)
 // v2.2.0: GPX raw embed in JSON export + GPS-ruis filtering
@@ -1468,23 +1467,15 @@ els.inputHeroPhoto.addEventListener("blur",  () => { const fixed = fixCloudinary
 els.inputHeroPhoto.addEventListener("input", updatePreview);
 els.inputIntro.addEventListener("input",     () => { els.introCount.textContent = `${els.inputIntro.value.length}/160`; updatePreview(); });
 
-// -----------------------------------------------------------
-// HOOGTEPROFIEL PREVIEW — v3.0.0
-// Leest punten uit seg.gpx.tracks[].segments[].points[]
-// elk punt heeft { lat, lon, ele, time }
-// Geen gpxRaw meer nodig — data zit volledig in het unified model
-// -----------------------------------------------------------
-
 /**
- * Verzamelt alle {lat, lon, ele} punten uit het unified gpx model.
- * Fall-back: als seg.gpx ontbreekt maar gpx_stats.track_points aanwezig is (bijv. na JSON import),
- * zet track_points om naar het verwachte formaat.
- * @param {Object} gpx - seg.gpx unified model (optioneel)
- * @param {Object} gpxStats - seg.gpx_stats met track_points (fallback)
- * @returns {Array<{lat,lon,ele}>|null}
+ * Verzamelt alle {lat, lon, ele} punten uit het unified GPX-model.
+ * @param {Object} gpx - seg.gpx
+ * @returns {Array<{lat, lon, ele}>|null}
  */
 function _collectElevationPoints(gpx, gpxStats) {
-  // Poging 1: volle GPX model (normal flow met GPX upload)
+
+// Unified GPX-model:
+// seg.gpx.tracks[].segments[].points[]
   if (gpx?.tracks?.length) {
     const points = [];
     for (const track of gpx.tracks) {
@@ -1502,7 +1493,7 @@ function _collectElevationPoints(gpx, gpxStats) {
     if (points.length >= 2) return points;
   }
 
-  // Fallback: track_points uit gpx_stats (JSON import scenario)
+// Leest trackpunten uit het unified GPX-model.
   if (gpxStats?.track_points?.length) {
     const points = gpxStats.track_points
       .filter((pt) => Array.isArray(pt) && pt.length >= 2)
