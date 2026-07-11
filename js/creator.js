@@ -1578,34 +1578,6 @@ function updatePreview() {
   refreshRoutePreview(route);
 }
 
-/**
- * Rendert een SVG hoogteprofiel in #rp-elevation-chart.
- * Elk segment krijgt zijn eigen kleur (TRANSPORT_COLORS).
- * Meerdere segmenten naast elkaar, gescheiden door streepjeslijn.
- * Hover tooltip toont hoogte in m + afstand in km.
- * Sectie blijft verborgen als geen enkel segment gpx.tracks heeft met punten.
- * @param {Array} segments - state.segments array
- */
-function renderElevationPreview(segments) {
-  const wrapper = document.getElementById("rp-elevation");
-  const container = document.getElementById("rp-elevation-chart");
-
-  if (!wrapper || !container) return;
-
-
-  // Bouw segmentdata op uit seg.gpx.tracks[].segments[].points[] (of fallback track_points)
-  const segmentData = [];
-  for (const seg of segments) {
-    const points = _collectElevationPoints(seg.gpx, seg.gpx_stats);
-    if (!points) continue;
-    segmentData.push({
-      points,
-      distances: _cumulativeDistancesEle(points),
-      color:     TRANSPORT_COLORS[seg.transport] || "#2C4A3B",
-      label:     TRANSPORT_LABELS[seg.transport] || seg.transport || "Segment",
-    });
-  }
-
   // Geen data — sectie verbergen
   if (segmentData.length === 0) {
     wrapper.hidden = true;
