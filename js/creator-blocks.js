@@ -83,3 +83,4 @@ function renderGalleryEditor() {
 if (els.btnAddGalleryPhoto) els.btnAddGalleryPhoto.addEventListener("click", () => { state.galleryPhotos.push({ url: "" }); renderGalleryEditor(); });
 
 window.renderBlockEditor = renderBlockEditor;
+window.renderGalleryEditor = renderGalleryEditor;
