@@ -808,16 +808,9 @@ function _buildExportFromState() {
       difficulty: s.difficulty || '',
       difficulty_auto: s.difficultyAuto !== false,
       rough_surface: s.roughSurface || false,
-      // Preserve beide gpx model en gpx_stats
-      gpx: s.gpx || null,
-      gpx_stats: s.gpx_stats || null,
-      gpx_raw: s.gpx_raw || null,
+     gpx: s.gpx || null,
     };
   });
-
-  // Backward compat: root-level gpx_stats and gpx_raw copied from first segment
-  out.gpx_stats = out.segments[0]?.gpx_stats || null;
-  out.gpx_raw = out.segments[0]?.gpx_raw || null;
   return out;
 }
 
