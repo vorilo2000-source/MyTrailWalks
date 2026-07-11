@@ -670,7 +670,7 @@ function loadJsonIntoForm(data) {
 
   if (data.gallery?.length) {
     state.galleryPhotos = data.gallery.map((p) => ({ url: p.url || "" }));
-    renderGallery();
+    renderGalleryEditor();
   }
 
   if (data.segments?.length) {
@@ -976,7 +976,7 @@ els.btnAddLinkBlock.addEventListener("click",      () => { state.storyBlocks.pus
 // -----------------------------------------------------------
 // GALERIJ
 // -----------------------------------------------------------
-function renderGallery() {
+function renderGalleryEditor() {
   if (!els.galleryList) return;
   els.galleryList.innerHTML = "";
   state.galleryPhotos.forEach((photo, i) => {
@@ -985,12 +985,12 @@ function renderGallery() {
     entry.innerHTML = `<input type="url" class="input gallery-url-input" placeholder="https://res.cloudinary.com/…" value="${photo.url || ""}" data-idx="${i}"><button class="photo-entry__remove" data-idx="${i}" title="Verwijder">✕</button>`;
     entry.querySelector(".gallery-url-input").addEventListener("blur",  (e) => { const fixed = fixCloudinaryUrl(e.target.value.trim(), "w_800,f_auto"); e.target.value = fixed; state.galleryPhotos[i].url = fixed; updatePreview(); });
     entry.querySelector(".gallery-url-input").addEventListener("input", (e) => { state.galleryPhotos[i].url = e.target.value; updatePreview(); });
-    entry.querySelector(".photo-entry__remove").addEventListener("click", () => { state.galleryPhotos.splice(i, 1); renderGallery(); updatePreview(); });
+    entry.querySelector(".photo-entry__remove").addEventListener("click", () => { state.galleryPhotos.splice(i, 1); renderGalleryEditor(); updatePreview(); });
     els.galleryList.appendChild(entry);
   });
 }
 
-if (els.btnAddGalleryPhoto) els.btnAddGalleryPhoto.addEventListener("click", () => { state.galleryPhotos.push({ url: "" }); renderGallery(); });
+if (els.btnAddGalleryPhoto) els.btnAddGalleryPhoto.addEventListener("click", () => { state.galleryPhotos.push({ url: "" }); renderGalleryEditor(); });
 
 // -----------------------------------------------------------
 // GPX VERWERKING
@@ -1722,6 +1722,6 @@ function renderElevationPreview(segments) {
 window.appReady.then(() => {
   renderSegments();
   renderBlockEditor();
-  renderGallery();
+  renderGalleryEditor();
   updatePreview();
 });
