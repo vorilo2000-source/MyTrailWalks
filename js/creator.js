@@ -523,33 +523,6 @@ if (!seg.difficulty && seg.gpx?.stats) {
   }
 }
 
-
-function calculateDifficulty() {
-  // Leest uit seg.gpx.stats van het eerste segment
-  const stats   = state.segments[0]?.gpx?.stats;
-  const weather = state.segments[0]?.weather;
-  if (!stats) return null;
-  let score = 0;
-  if (stats.distance_km)    score += stats.distance_km;
-  if (stats.elevation_up_m) score += stats.elevation_up_m / 100;
-  if (weather) {
-    if (weather.temperature_max >= 25)  score += 2;
-    if (weather.precipitation_mm >= 5)  score += 2;
-    if (weather.wind_kmh >= 30)         score += 1;
-  }
-  if (score <= 5)  return "T1";
-  if (score <= 10) return "T2";
-  if (score <= 16) return "T3";
-  if (score <= 22) return "T4";
-  if (score <= 28) return "T5";
-  return "T6";
-}
-
-function applyCalculatedDifficulty() {
-  const difficulty = calculateDifficulty();
-  if (difficulty && !els.inputDifficulty.value) { els.inputDifficulty.value = difficulty; updatePreview(); }
-}
-
 // -----------------------------------------------------------
 // CLOUDINARY URL AUTO-FIX
 // -----------------------------------------------------------
