@@ -677,14 +677,22 @@ function loadJsonIntoForm(data) {
     segmentCounter = 0;
     state.segments = data.segments.map((s) => {
       segmentCounter++;
-      const seg = {
-        id: segmentCounter, transport: s.transport || "walking", label: s.label || "",
-        gpx: null, : null, gpx_raw: null, date: s.date || "", location: s.location || "",
-        country: s.country || "", region: s.region || "", place: s.place || "",
-        weather: s.weather || null, difficulty: s.difficulty || "",
-        difficultyAuto: s.difficulty_auto !== false, roughSurface: s.rough_surface || false,
-      };
-
+     const seg = {
+        id: segmentCounter,
+        transport: s.transport || "walking",
+        label: s.label || "",
+        gpx: null,
+        date: s.date || "",
+        location: s.location || "",
+        country: s.country || "",
+        region: s.region || "",
+        place: s.place || "",
+        weather: s.weather || null,
+        difficulty: s.difficulty || "",
+        difficultyAuto: s.difficulty_auto !== false,
+        roughSurface: s.rough_surface || false,
+};
+      
    // Importeert uitsluitend het nieuwe unified GPX-model.
 if (s.gpx) {
   seg.gpx = s.gpx;
