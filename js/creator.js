@@ -88,11 +88,11 @@ const DIFFICULTY_SCALES = {
 
 // -----------------------------------------------------------
 // MOEILIJKHEIDSBEREKENING
-// Leest uit het unified segment model (seg.gpx_stats)
+// Leest uit het unified segment model (seg.gpx.stats)
 // -----------------------------------------------------------
 function calculateSegmentDifficulty(seg) {
-  // Statistieken zitten in seg.gpx_stats (na normalisatie)
-  const stats = seg.gpx_stats;
+  // Statistieken zitten in seg.gpxstats (na normalisatie)
+  const stats = seg.gpx?.stats || null;
   if (!stats || !stats.distance_km) return null;
 
   if (seg.transport === "walking") {
@@ -127,7 +127,7 @@ function calculateSegmentDifficulty(seg) {
 }
 
 function _calculateRoadDifficulty(seg) {
-  const stats = seg.gpx_stats;
+  const stats = seg.gpx?.stats || null;
   const prefix = { cycling: "C", motorcycle: "M", car: "A" }[seg.transport];
 
   // trackPoints voor bochtenberekening zitten in stats
@@ -184,7 +184,7 @@ function _bearing(lat1, lon1, lat2, lon2) {
 // -----------------------------------------------------------
 // STATE
 // Elk segment heeft enkel nog seg.gpx (unified model).
-// gpxRaw en gpx_stats worden niet meer bewaard in state.
+// gpxRaw en gpx.stats worden niet meer bewaard in state.
 // -----------------------------------------------------------
 const state = {
   aiMode: false,
@@ -286,8 +286,8 @@ function renderSegments() {
     const isOnly = state.segments.length === 1;
     const color  = TRANSPORT_COLORS[seg.transport] || "#2C4A3B";
     const sid    = seg.id;
-    // Statistieken staan in seg.gpx_stats (unified model na normalisatie)
-    const stats  = seg.gpx_stats || null;
+    // Statistieken staan in seg.gpx.stats (unified model na normalisatie)
+    const stats  = seg.gpx.stats || null;
 
     const div = document.createElement("div");
     div.className          = "segment-block";
@@ -546,9 +546,9 @@ function _bindSegmentEvents(sid) {
   const fetchLocBtn = document.querySelector(`.segment-fetch-location[data-sid="${sid}"]`);
   if (fetchLocBtn) {
     fetchLocBtn.addEventListener("click", () => {
-      // Startcoördinaten zitten in seg.gpx_stats
-      if (seg.gpx_stats?.start_lat && seg.gpx_stats?.start_lon) {
-        fetchLocationName(seg.gpx_stats.start_lat, seg.gpx_stats.start_lon, sid);
+      // Startcoördinaten zitten in seg.gpx.stats
+      if (seg.gpx.stats?.start_lat && seg.gpx.stats?.start_lon) {
+        fetchLocationName(seg.gpx.stats.start_lat, seg.gpx.stats.start_lon, sid);
       } else {
         alert("Laad eerst een GPX-bestand voor dit segment.");
       }
@@ -612,7 +612,7 @@ els.btnAddSegment.addEventListener("click", () => {
 
 // -----------------------------------------------------------
 // JSON IMPORT
-// Ondersteunt nieuw formaat (seg.gpx) én oud formaat (gpx_raw / gpx_stats).
+// Ondersteunt nieuw formaat (seg.gpx) én oud formaat (gpx_raw / gpx.stats).
 // Export is altijd het nieuwe formaat.
 // -----------------------------------------------------------
 els.jsonImportInput.addEventListener("change", () => {
@@ -679,7 +679,7 @@ function loadJsonIntoForm(data) {
       segmentCounter++;
       const seg = {
         id: segmentCounter, transport: s.transport || "walking", label: s.label || "",
-        gpx: null, gpx_stats: null, gpx_raw: null, date: s.date || "", location: s.location || "",
+        gpx: null, gpx.stats: null, gpx_raw: null, date: s.date || "", location: s.location || "",
         country: s.country || "", region: s.region || "", place: s.place || "",
         weather: s.weather || null, difficulty: s.difficulty || "",
         difficultyAuto: s.difficulty_auto !== false, roughSurface: s.rough_surface || false,
