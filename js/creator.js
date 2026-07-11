@@ -284,12 +284,13 @@ function renderSegments() {
   els.segmentList.innerHTML = "";
 
   state.segments.forEach((seg, idx) => {
-    const isOnly = state.segments.length === 1;
-    const color  = TRANSPORT_COLORS[seg.transport] || "#2C4A3B";
-    const sid    = seg.id;
-    // Statistieken staan in seg.gpx.stats (unified model na normalisatie)
-    const stats  = seg.gpx.stats || null;
+   const isOnly = state.segments.length === 1;
+const color  = TRANSPORT_COLORS[seg.transport] || "#2C4A3B";
+const sid    = seg.id;
 
+// Statistieken staan in seg.gpx.stats.
+// Een nieuw leeg segment heeft nog geen gpx-object.
+    const stats = seg.gpx?.stats || null;
     const div = document.createElement("div");
     div.className          = "segment-block";
     div.dataset.sid        = sid;
