@@ -679,25 +679,25 @@ function loadJsonIntoForm(data) {
       segmentCounter++;
       const seg = {
         id: segmentCounter, transport: s.transport || "walking", label: s.label || "",
-        gpx: null, gpx_stats: null, gpx_raw: null, date: s.date || "", location: s.location || "",
+        gpx: null, : null, gpx_raw: null, date: s.date || "", location: s.location || "",
         country: s.country || "", region: s.region || "", place: s.place || "",
         weather: s.weather || null, difficulty: s.difficulty || "",
         difficultyAuto: s.difficulty_auto !== false, roughSurface: s.rough_surface || false,
       };
 
-      // Import both old and new format:
-      // - seg.gpx (unified model met tracks)
-      // - seg.gpx_stats (statistieken)
-      // - seg.gpx_raw (raw XML, fallback)
-      if (s.gpx) seg.gpx = s.gpx;
-      if (s.gpx_stats) seg.gpx_stats = s.gpx_stats;
-      if (s.gpx_raw) seg.gpx_raw = s.gpx_raw;
+   // Importeert uitsluitend het nieuwe unified GPX-model.
+if (s.gpx) {
+  seg.gpx = s.gpx;
+}
 
-      // Moeilijkheid auto-berekenen als niet ingesteld en stats beschikbaar
-      if (!seg.difficulty && seg.gpx_stats) {
-        const auto = calculateSegmentDifficulty(seg);
-        if (auto) seg.difficulty = auto;
-      }
+// Moeilijkheid automatisch berekenen als deze niet is ingesteld.
+if (!seg.difficulty && seg.gpx?.stats) {
+  const auto = calculateSegmentDifficulty(seg);
+
+  if (auto) {
+    seg.difficulty = auto;
+  }
+}      
       return seg;
     });
   } else {
