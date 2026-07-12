@@ -56,33 +56,15 @@
           <span class="creator-header__eyebrow">Route creator</span>
           <h1>Nieuwe wandeling</h1>
         </div>
-        <div class="creator-header__actions">
-          <!-- JSON import -->
-          <label class="btn btn--ghost btn--sm" title="Laad een bestaande route JSON om te bewerken" style="cursor:pointer;">
-            <input type="file" id="json-import-input" accept=".json" hidden>
-            JSON laden
-          </label>
-          <button class="btn btn--ghost" id="btn-mode-toggle" title="Schakel tussen handmatig en AI-modus">
-            <span class="btn-icon">✦</span>
-            <span id="mode-label">AI-modus inschakelen</span>
-          </button>
-        </div>
+    <div class="creator-header__actions">
+  <!-- JSON import -->
+  <label class="btn btn--ghost btn--sm" title="Laad een bestaande route JSON om te bewerken" style="cursor:pointer;">
+    <input type="file" id="json-import-input" accept=".json" hidden>
+    JSON laden
+  </label>
+</div>
       </div>
     </header>
-
-    <!-- API key balk (verborgen tenzij AI-modus) -->
-    <div class="api-key-bar" id="api-key-bar" hidden>
-      <div class="api-key-bar__inner">
-        <label for="input-api-key" class="api-key-bar__label">
-          Anthropic API-sleutel
-          <span class="api-key-bar__note">Wordt niet opgeslagen — enkel actief tijdens deze sessie</span>
-        </label>
-        <div class="api-key-bar__field">
-          <input type="password" id="input-api-key" class="input input--mono" placeholder="sk-ant-..." autocomplete="off">
-          <button class="btn btn--primary btn--sm" id="btn-key-confirm">Bevestigen</button>
-        </div>
-      </div>
-    </div>
 
     <!-- Werkruimte: formulier + preview naast elkaar -->
     <div class="creator-workspace">
