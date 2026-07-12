@@ -10,7 +10,10 @@ function renderStory(route) {
   const blocks = route.story_blocks;
   const container = $("route-story");
 
-  // Altijd tonen, ook als leeg
+  if (!container) return;
+
+  container.innerHTML = ""; /* Verwijdert vorige preview-inhoud */
+
   $("section-story").hidden = false;
 
   if (!blocks?.length) return;
@@ -62,10 +65,14 @@ function renderTips(route) {
 // -----------------------------------------------------------
 function renderPhotoGrid(route) {
   const container = $("route-photo-grid");
+
+  if (!container) return;
+
+  container.innerHTML = ""; /* Verwijdert vorige afbeeldingen */
+
   $("section-photos").hidden = false;
 
   const urls = new Set();
-
   // Foto blokken uit story_blocks
   (route.story_blocks || []).forEach((block) => {
     if (block.type === "photo" && block.value) {
