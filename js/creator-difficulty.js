@@ -99,5 +99,3 @@ function _bearing(lat1, lon1, lat2, lon2) {
 window.calculateSegmentDifficulty = calculateSegmentDifficulty;
 window._calculateRoadDifficulty = _calculateRoadDifficulty;
 window._countSharpTurnsPerKm = _countSharpTurnsPerKm;
-window.calculateDifficulty = calculateDifficulty;
-window.applyCalculatedDifficulty = applyCalculatedDifficulty;
