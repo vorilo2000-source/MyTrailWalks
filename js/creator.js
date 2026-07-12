@@ -51,28 +51,14 @@ const TRANSPORT_LABELS = {
 // -----------------------------------------------------------
 // AI MODUS TOGGLE
 // -----------------------------------------------------------
-els.btnModeToggle.addEventListener("click", () => {
-  state.aiMode = !state.aiMode;
-  els.modeLabel.textContent = state.aiMode ? "AI-modus uitschakelen" : "AI-modus inschakelen";
-  els.apiKeyBar.hidden   = !state.aiMode;
-  els.aiActions.hidden   = !state.aiMode;
-  els.aiStoryHint.hidden = !state.aiMode;
-  els.btnModeToggle.classList.toggle("btn--ai", state.aiMode);
-  updatePreview();
-});
+if (els.btnModeToggle) { // Voert deze code alleen uit als de AI-knop nog bestaat
+  els.btnModeToggle.addEventListener("click", () => { // Luistert naar een klik op de AI-knop
+    const isActive = !els.apiKeyBar?.hidden; // Bepaalt of de API-balk momenteel zichtbaar is
 
-els.btnKeyConfirm.addEventListener("click", () => {
-  const key = els.inputApiKey.value.trim();
-  if (!key.startsWith("sk-ant-")) {
-    showInlineError(els.inputApiKey, "Sleutel moet beginnen met sk-ant-");
-    return;
-  }
-  state.apiKey          = key;
-  state.apiKeyConfirmed = true;
-  els.inputApiKey.value        = "\u2022".repeat(20);
-  els.btnKeyConfirm.textContent = "\u2713 Bevestigd";
-  els.btnKeyConfirm.disabled    = true;
-});
+    if (els.apiKeyBar) els.apiKeyBar.hidden = isActive; // Verbergt of toont de API-balk veilig
+    if (els.modeLabel) els.modeLabel.textContent = isActive ? "AI-modus inschakelen" : "AI-modus uitschakelen"; // Past het label veilig aan
+  });
+}
 
 // -----------------------------------------------------------
 // SEGMENTEN — render + events
