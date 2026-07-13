@@ -112,45 +112,55 @@ function renderSegments(route) {
     div.className = "route-segment-block";
     div.style.borderLeftColor = color;
 
-    div.innerHTML = `
-      <div class="route-segment-block__header" style="background:${color};">
-        <span class="route-segment-block__num">${idx + 1}</span>
-        <span class="route-segment-block__label">${headerText}</span>
-      </div>
+ div.innerHTML = `
+  <div class="route-segment-block__header" style="background:${color};">
+    <span class="route-segment-block__num">${idx + 1}</span>
+    <span class="route-segment-block__label">${headerText}</span>
+  </div>
 
-      <div class="route-segment-block__tables">
-        ${
-          hasGpx
-            ? `
-          <div class="route-segment-block__col">
-            <table class="route-segment-table">
-              <tbody>${gpxRows}</tbody>
-            </table>
-          </div>
-        `
-            : ""
-        }
+  <div class="route-segment-block__tables">
 
-        ${
-          hasWeather
-            ? `
-          <div class="route-segment-block__col">
-            <p class="route-segment-table__title">Weerdata</p>
-            <table class="route-segment-table">
-              <tbody>${weatherRows}</tbody>
-            </table>
-          </div>
-        `
-            : ""
-        }
+    <!-- Linkerkolom: datum, locatie en weer -->
+    <div class="route-segment-block__col route-segment-block__col--context">
 
-        ${
-          !hasGpx && !hasWeather
-            ? `<p class="route-segment-block__empty">Geen data beschikbaar voor dit segment.</p>`
-            : ""
-        }
-      </div>
-    `;
+      <!-- Datum en locatie worden in de volgende stap toegevoegd -->
+      <div class="route-segment-block__meta"></div>
+
+      ${
+        hasWeather
+          ? `
+        <div class="route-segment-block__weather">
+          <p class="route-segment-table__title">Weerdata</p>
+
+          <table class="route-segment-table">
+            <tbody>${weatherRows}</tbody>
+          </table>
+        </div>
+      `
+          : ""
+      }
+    </div>
+
+    <!-- Rechterkolom: routegegevens -->
+    <div class="route-segment-block__col route-segment-block__col--route">
+      ${
+        hasGpx
+          ? `
+        <table class="route-segment-table">
+          <tbody>${gpxRows}</tbody>
+        </table>
+      `
+          : ""
+      }
+    </div>
+
+    ${
+      !hasGpx && !hasWeather
+        ? `<p class="route-segment-block__empty">Geen data beschikbaar voor dit segment.</p>`
+        : ""
+    }
+  </div>
+`;
 
     container.appendChild(div);
   });
