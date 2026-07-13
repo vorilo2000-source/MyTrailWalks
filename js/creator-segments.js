@@ -55,6 +55,16 @@ function renderCreatorSegments() {
         ${_renderDifficultyBlock(seg)}
       </div>
 
+    <div class="field">
+      <label class="field__label">Datum</label>
+      <input
+        type="date"
+        class="input segment-date"
+        value="${seg.date || ""}"
+        data-sid="${sid}"
+      >
+    </div>
+
 <div class="segment-meta">
   <div class="field-row">
     <div class="field">
