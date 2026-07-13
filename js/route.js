@@ -172,4 +172,3 @@ window.appReady.then(async () => {
   renderPhotoGrid(route);
   renderGallery(route);
 });
-});
