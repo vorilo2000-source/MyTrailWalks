@@ -11,7 +11,7 @@
 // -----------------------------------------------------------
 // SEGMENTEN — render + events
 // -----------------------------------------------------------
-function renderSegments() {
+function renderCreatorSegments() {
   els.segmentList.innerHTML = "";
   state.segments.forEach((seg, idx) => {
   const isOnly = state.segments.length === 1;
@@ -194,7 +194,7 @@ function _bindSegmentEvents(sid) {
   if (removeBtn) {
     removeBtn.addEventListener("click", () => {
       state.segments = state.segments.filter((s) => s.id !== sid);
-      renderSegments();
+      renderCreatorSegments();
       updatePreview();
     });
   }
@@ -336,7 +336,7 @@ els.btnAddSegment.addEventListener("click", () => {
     date: "", location: "", country: "", region: "", place: "",
     weather: null, difficulty: "", difficultyAuto: true, roughSurface: false,
   });
-  renderSegments();
+  renderCreatorSegments();
   const newBlock = document.querySelector(`.segment-block[data-sid="${segmentCounter}"]`);
   if (newBlock) newBlock.scrollIntoView({ behavior: "smooth", block: "start" });
 });
