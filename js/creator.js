@@ -155,7 +155,7 @@ if (!seg.difficulty && seg.gpx?.stats) {
     return;
   }
 
-  renderSegments();
+  renderCreatorSegments();
   renderBlockEditor();
   updatePreview();
   
@@ -232,7 +232,7 @@ function _cumulativeDistancesEle(points) {
 // -----------------------------------------------------------
 function refreshRoutePreview(route) {
   window.renderHero(route);
-  window.renderSegments(route);
+  window.renderCreatorSegments(route);
   window.renderSource(route);
   window.renderMap(route);
   window.renderElevation(route);
@@ -250,7 +250,7 @@ function updatePreview() {
 // INIT
 // -----------------------------------------------------------
 window.appReady.then(() => {
-  renderSegments();
+  renderCreatorSegments();
   renderBlockEditor();
   renderGalleryEditor();
   updatePreview();
