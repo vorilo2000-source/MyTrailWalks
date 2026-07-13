@@ -50,22 +50,7 @@ function renderCreatorSegments() {
             <p class="drop-zone__sub">of <button class="link-btn" id="gpx-browse-btn-${sid}">kies een bestand</button></p>
           </div>
         </div>
-        <div class="gpx-stats" id="gpx-stats-${sid}" ${stats ? "" : "hidden"}>
-          <div class="stat-grid">
-            <div class="stat-item"><span class="stat-value" id="stat-distance-${sid}">${stats?.distance_km ? stats.distance_km + " km" : "—"}</span><span class="stat-label">Afstand</span></div>
-            <div class="stat-item"><span class="stat-value" id="stat-duration-${sid}">${stats?.duration_hours ? stats.duration_hours + " u" : "—"}</span><span class="stat-label">Duur</span></div>
-            <div class="stat-item"><span class="stat-value" id="stat-ele-up-${sid}">${stats?.elevation_up_m ? "+" + stats.elevation_up_m + " m" : "—"}</span><span class="stat-label">Stijging</span></div>
-            <div class="stat-item"><span class="stat-value" id="stat-ele-down-${sid}">${stats?.elevation_down_m ? "-" + stats.elevation_down_m + " m" : "—"}</span><span class="stat-label">Daling</span></div>
-            <div class="stat-item"><span class="stat-value" id="stat-highest-${sid}">${stats?.highest_point_m ? stats.highest_point_m + " m" : "—"}</span><span class="stat-label">Hoogste punt</span></div>
-            <div class="stat-item"><span class="stat-value" id="stat-lowest-${sid}">${stats?.lowest_point_m ? stats.lowest_point_m + " m" : "—"}</span><span class="stat-label">Laagste punt</span></div>
-            <div class="stat-item"><span class="stat-value" id="stat-avg-speed-${sid}">${stats?.avg_speed_kmh ? stats.avg_speed_kmh + " km/u" : "—"}</span><span class="stat-label">Gem. snelheid</span></div>
-            <div class="stat-item"><span class="stat-value" id="stat-max-speed-${sid}">${stats?.max_speed_kmh ? stats.max_speed_kmh + " km/u" : "—"}</span><span class="stat-label">Max. snelheid</span></div>
-          </div>
-          <span class="gpx-status" id="gpx-status-${sid}">${stats ? "✓ Geladen uit JSON" : ""}</span>
-          <button class="link-btn link-btn--small" id="gpx-reset-btn-${sid}">Ander bestand kiezen</button>
-        </div>
-      </div>
-
+        
       <div class="segment-difficulty" id="segment-difficulty-${sid}">
         ${_renderDifficultyBlock(seg)}
       </div>
