@@ -124,7 +124,25 @@ function renderSegments(route) {
     <div class="route-segment-block__col route-segment-block__col--context">
 
       <!-- Datum en locatie worden in de volgende stap toegevoegd -->
-      <div class="route-segment-block__meta"></div>
+      <div class="route-segment-block__meta">
+  ${
+    routeHasValue(seg.date)
+      ? `<p class="route-segment-block__meta-row"><strong>📅 Datum:</strong> ${seg.date}</p>`
+      : ""
+  }
+
+  ${
+    routeHasValue(seg.location)
+      ? `<p class="route-segment-block__meta-row"><strong>📍 Locatie:</strong> ${seg.location}</p>`
+      : ""
+  }
+
+  ${
+    routeHasValue(seg.date) || routeHasValue(seg.location)
+      ? `<hr class="route-segment-block__divider">`
+      : ""
+  }
+</div>
 
       ${
         hasWeather
