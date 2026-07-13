@@ -137,11 +137,15 @@ function renderSegments(route) {
       : ""
   }
 
-  ${
-    routeHasValue(seg.date) || routeHasValue(seg.location)
-      ? `<hr class="route-segment-block__divider">`
-      : ""
-  }
+${
+  routeHasValue(seg.date) || routeHasValue(seg.location)
+    ? `
+      <br>
+      <hr class="route-segment-block__divider">
+      <br>
+    `
+    : ""
+}
 </div>
 
       ${
