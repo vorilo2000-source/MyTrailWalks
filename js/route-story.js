@@ -3,6 +3,25 @@
 "use strict";
 
 // -----------------------------------------------------------
+// RENDER KORTE SAMENVATTING
+// -----------------------------------------------------------
+function renderSummary(route) {
+  const lang = i18nModule?.language?.substring(0, 2) || "nl";
+
+  const summary = typeof route.summary === "object"
+    ? route.summary?.[lang] || route.summary?.nl || ""
+    : route.summary || "";
+
+  const container = $("route-summary");
+  const section = $("section-summary");
+
+  if (!container || !section) return;
+
+  container.textContent = summary;
+  section.hidden = !summary;
+}
+
+// -----------------------------------------------------------
 // RENDER VERHAAL — alleen tekst en link blokken
 // Foto blokken gaan altijd naar de foto grid (rechterkolom)
 // -----------------------------------------------------------
@@ -100,3 +119,4 @@ function renderPhotoGrid(route) {
 window.renderStory = renderStory;
 window.renderTips = renderTips;
 window.renderPhotoGrid = renderPhotoGrid;
+window.renderSummary = renderSummary;
