@@ -359,3 +359,6 @@ els.btnAddSegment.addEventListener("click", () => {
 // -----------------------------------------------------------
 // CREATOR SEGMENTS — EXPORTS
 // -----------------------------------------------------------
+
+
+window.renderCreatorSegments = renderCreatorSegments;
