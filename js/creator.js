@@ -155,9 +155,9 @@ if (!seg.difficulty && seg.gpx?.stats) {
     return;
   }
 
-  renderCreatorSegments();
-  renderBlockEditor();
-  update();
+renderCreatorSegments();
+renderBlockEditor();
+updatePreview();
   
   // Transport-array heropbouwen vanuit segmenten
   // (zorgt ervoor dat als oud JSON alleen "walking" had, maar nu ook "car" heeft, dit correct wordt gesyndied)
