@@ -45,6 +45,10 @@ function renderSegments(route) {
         ? `<tr><td>Afstand</td><td>${g.distance_km} km</td></tr>`
         : "",
 
+      routeHasValue(seg.date)
+        ? `<tr><td>Datum</td><td>${seg.date}</td></tr>`
+        : "",
+      
       routeHasValue(g?.duration_hours)
         ? `<tr><td>Duur</td><td>${g.duration_hours} u</td></tr>`
         : "",
