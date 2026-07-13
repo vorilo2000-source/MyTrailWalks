@@ -55,28 +55,6 @@ function renderCreatorSegments() {
         ${_renderDifficultyBlock(seg)}
       </div>
 
-      <div class="segment-meta">
-        <div class="field-row">
-          <div class="field">
-            <label class="field__label">Datum</label>
-            <input type="date" class="input segment-date" value="${seg.date || ""}" data-sid="${sid}">
-          </div>
-          <div class="field field--grow">
-            <label class="field__label">Locatie</label>
-            <div class="input-with-action">
-              <input type="text" class="input segment-location"
-                placeholder="Automatisch via GPX of handmatig"
-                value="${seg.location || ""}" data-sid="${sid}">
-              <button class="btn btn--ghost btn--sm segment-fetch-location"
-                data-sid="${sid}" title="Locatie ophalen via GPX-coördinaten">↺</button>
-            </div>
-          </div>
-        </div>
-        <div class="field-row">
-          <div class="field">
-            <label class="field__label">Land</label>
-            <input type="text" class="input segment-country" placeholder="Automatisch via GPX" value="${seg.country || ""}" data-sid="${sid}">
-          </div>
           <div class="field">
             <label class="field__label">Regio / Provincie</label>
             <input type="text" class="input segment-region" placeholder="Automatisch via GPX" value="${seg.region || ""}" data-sid="${sid}">
