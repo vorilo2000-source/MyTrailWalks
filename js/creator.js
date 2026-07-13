@@ -228,10 +228,31 @@ function _cumulativeDistancesEle(points) {
 }
 
 // -----------------------------------------------------------
-// CENTRALE PREVIEW UPDATE — tijdelijk uitgeschakeld voor iframe
+// CREATOR PREVIEW — ROUTE VERSTUREN
+// -----------------------------------------------------------
+function sendRouteToPreview(route) {
+  const iframe = document.getElementById("creator-route-preview");
+
+  if (!iframe?.contentWindow || !route) {
+    return;
+  }
+
+  iframe.contentWindow.postMessage(
+    {
+      type: "mytrailwalks-preview-route",
+      route: route,
+    },
+    window.location.origin
+  );
+}
+
+// -----------------------------------------------------------
+// CENTRALE PREVIEW UPDATE — iframe
 // -----------------------------------------------------------
 function updatePreview() {
-  // De live route wordt in een volgende stap naar het iframe gestuurd.
+  const route = buildPreviewRoute();
+
+  sendRouteToPreview(route);
 }
  
 // -----------------------------------------------------------
