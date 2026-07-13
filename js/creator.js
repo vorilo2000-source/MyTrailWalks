@@ -157,7 +157,7 @@ if (!seg.difficulty && seg.gpx?.stats) {
 
   renderCreatorSegments();
   renderBlockEditor();
-  updatePreview();
+  update();
   
   // Transport-array heropbouwen vanuit segmenten
   // (zorgt ervoor dat als oud JSON alleen "walking" had, maar nu ook "car" heeft, dit correct wordt gesyndied)
@@ -228,22 +228,10 @@ function _cumulativeDistancesEle(points) {
 }
 
 // -----------------------------------------------------------
-// CENTRALE PREVIEW UPDATE — coördinatie van alle render-functies
+// CENTRALE PREVIEW UPDATE — tijdelijk uitgeschakeld voor iframe
 // -----------------------------------------------------------
-function refreshRoutePreview(route) {
-  window.renderHero(route);
-  window.renderCreatorSegments(route);
-  window.renderSource(route);
-  window.renderMap(route);
-  window.renderElevation(route);
-  window.renderStory(route);
-  window.renderTips(route);
-  window.renderPhotoGrid(route);
-  window.renderGallery(route);
-}
 function updatePreview() {
-  const route = buildPreviewRoute();
-    refreshRoutePreview(route);
+  // De live route wordt in een volgende stap naar het iframe gestuurd.
 }
  
 // -----------------------------------------------------------
