@@ -158,6 +158,7 @@ window.addEventListener("message", async (event) => {
   renderSource(route);
   renderMap(route);
   renderElevation(route);
+  renderSummary(route);
   renderStory(route);
   renderTips(route);
   renderPhotoGrid(route);
@@ -191,6 +192,7 @@ window.appReady.then(async () => {
   renderSource(route);
   renderMap(route);
   renderElevation(route);
+  renderSummary(route);
   renderStory(route);
   renderTips(route);
   renderPhotoGrid(route);
