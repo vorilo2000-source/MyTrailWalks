@@ -16,9 +16,20 @@ function renderBlockEditor() {
     if (block.type === "text") {
       const escaped = (block.value || "").replace(/</g, "&lt;").replace(/>/g, "&gt;");
       bodyHtml = `<div class="block-item__label">Tekst</div><textarea class="block-textarea input input--textarea" rows="4" placeholder="Schrijf een alinea\u2026" data-idx="${i}">${escaped}</textarea>`;
-    } else if (block.type === "photo") {
-      bodyHtml = `<div class="block-item__label">Foto (volledig breed)</div><input type="url" class="block-url-input input" placeholder="https://res.cloudinary.com/…" value="${block.value || ""}" data-idx="${i}"><div class="block-photo-preview" data-idx="${i}">${block.value ? `<img src="${block.value}" alt="" class="block-photo-preview__img" onerror="this.parentElement.hidden=true">` : ""}</div>`;
-    } else if (block.type === "photo-grid") {
+} else if (block.type === "photo") {
+  bodyHtml = `
+    <div class="block-item__label">Foto (volledig breed)</div>
+
+    <input
+      type="url"
+      class="block-url-input input"
+      placeholder="https://res.cloudinary.com/…"
+      value="${block.value || ""}"
+      data-idx="${i}"
+    >
+  `;
+}
+  } else if (block.type === "photo-grid") {
       const cols   = block.cols   || 2;
       const photos = block.photos || ["", ""];
       const photosHtml = photos.map((url, pi) => `<div class="photo-grid-entry"><input type="url" class="block-url-input input block-grid-url" placeholder="Cloudinary URL…" value="${url}" data-idx="${i}" data-pi="${pi}">${url ? `<img src="${url}" alt="" class="block-photo-preview__img" style="margin-top:4px;" onerror="this.remove()">` : ""}</div>`).join("");
