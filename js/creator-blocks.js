@@ -120,6 +120,7 @@ function fixCloudinaryUrl(url, transform = "w_1200,f_auto") {
 els.inputHeroPhoto.addEventListener("blur",  () => { const fixed = fixCloudinaryUrl(els.inputHeroPhoto.value.trim()); if (fixed !== els.inputHeroPhoto.value.trim()) els.inputHeroPhoto.value = fixed; updatePreview(); });
 els.inputHeroPhoto.addEventListener("input", updatePreview);
 els.inputIntro.addEventListener("input",     () => { els.introCount.textContent = `${els.inputIntro.value.length}/160`; updatePreview(); });
+els.inputTitle.addEventListener("input", updatePreview);
 
 window.renderBlockEditor = renderBlockEditor;
 window.renderGalleryEditor = renderGalleryEditor;
