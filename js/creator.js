@@ -12,7 +12,7 @@
 //         - JSON import verwacht uitsluitend het nieuwe unified model
 // v2.4.2: datum-validatie bij weerdata ophalen (toekomstige datum)
 // v2.4.1: track_points toegevoegd aan segment.gpx.stats
-// v2.4.0: hike/trail vervoersmiddel + moeilijkheidsschaal per vervoersmiddel
+// v2.4.0: hike/trl vervoersmiddel + moeilijkheidsschaal per vervoersmiddel
 // v2.3.0: meerdere segmenten (GPX + datum/locatie per segment)
 // v2.2.0: GPX raw embed in JSON export + GPS-ruis filtering
 // v2.1.0: GPX raw embed in JSON export + herstel bij import
@@ -30,7 +30,7 @@ const TRANSPORT_COLORS = {
   cycling:    "#2980B9",  // blauw
   motorcycle: "#E74C3C",  // rood
   car:        "#16A085",  // teal
-  train:      "#F39C12",  // geel-oranje
+  trn:      "#F39C12",  // geel-oranje
   bus:        "#8E44AD",  // violet
   boat:       "#1ABC9C",  // turquoise
   plane:      "#2C3E50",  // donkerblauw
@@ -38,27 +38,15 @@ const TRANSPORT_COLORS = {
 
 const TRANSPORT_LABELS = {
   walking:    "🚶 Wandelen",
-  hike:       "🥾 Hike / Trail",
+  hike:       "🥾 Hike / Trl",
   cycling:    "🚴 Fietsen",
   motorcycle: "🏍 Motor",
   car:        "🚗 Auto",
-  train:      "🚆 Trein",
+  trn:      "🚆 Trein",
   bus:        "🚌 Bus",
   boat:       "⛵ Boot",
   plane:      "✈️ Vliegtuig",
 };
-
-// -----------------------------------------------------------
-// AI MODUS TOGGLE
-// -----------------------------------------------------------
-if (els.btnModeToggle) { // Voert deze code alleen uit als de AI-knop nog bestaat
-  els.btnModeToggle.addEventListener("click", () => { // Luistert naar een klik op de AI-knop
-    const isActive = !els.apiKeyBar?.hidden; // Bepaalt of de API-balk momenteel zichtbaar is
-
-    if (els.apiKeyBar) els.apiKeyBar.hidden = isActive; // Verbergt of toont de API-balk veilig
-    if (els.modeLabel) els.modeLabel.textContent = isActive ? "AI-modus inschakelen" : "AI-modus uitschakelen"; // Past het label veilig aan
-  });
-}
 
 // -----------------------------------------------------------
 // SEGMENTEN — render + events
