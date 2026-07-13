@@ -1,7 +1,7 @@
 // =======================================================
 // creator-segments.js — MyTrailWalks
 // Segmenteditor: state, rendering, events en segmentbeheer
-// v1.0.0: modulebasis aangemaakt; nog geen functies verplaatst
+// v1.0.1: modulebasis aangemaakt; nog geen functies verplaatst
 // =======================================================
 "use strict";
 
