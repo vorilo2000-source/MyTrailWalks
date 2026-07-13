@@ -142,17 +142,25 @@ $("btn-share").addEventListener("click", async () => {
 
 // -----------------------------------------------------------
 // INIT
-// v2.4.0: renderStats / renderWeather / renderTransport verwijderd —
-// die vulden het rood-omcirkelde blok bovenaan de pagina, dat dubbel
-// op was met de segmenten-sectie (elk segment toont al zijn eigen
-// stats + weer + vervoer in de gekleurde header).
 // -----------------------------------------------------------
 window.appReady.then(async () => {
-  const id =  window.getRouteId();
-  if (!id) { $("route-title").textContent = window.routeTranslate("notFound"); return; }
+  const isPreview = new URLSearchParams(window.location.search).get("preview") === "1";
+
+  if (isPreview) {
+    return;
+  }
+
+  const id = window.getRouteId();
+  if (!id) {
+    $("route-title").textContent = window.routeTranslate("notFound");
+    return;
+  }
 
   const route = await window.loadRoute(id);
-  if (!route) { $("route-title").textContent = window.routeTranslate("loadError"); return; }
+  if (!route) {
+    $("route-title").textContent = window.routeTranslate("loadError");
+    return;
+  }
 
   renderHero(route);
   renderSegments(route);
@@ -163,4 +171,5 @@ window.appReady.then(async () => {
   renderTips(route);
   renderPhotoGrid(route);
   renderGallery(route);
+});
 });
