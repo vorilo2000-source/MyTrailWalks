@@ -262,5 +262,14 @@ window.appReady.then(() => {
   renderCreatorSegments();
   renderBlockEditor();
   renderGalleryEditor();
+
+  const previewIframe = document.getElementById("creator-route-preview");
+
+  if (previewIframe) {
+    previewIframe.addEventListener("load", () => {
+      updatePreview();
+    });
+  }
+
   updatePreview();
 });
