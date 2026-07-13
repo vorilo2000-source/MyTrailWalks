@@ -422,27 +422,29 @@
 }
 
 .drop-zone__inner {
-  padding: var(--space-2xl) var(--space-xl);
+  padding: var(--space-md) var(--space-lg);
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: var(--space-sm);
+  gap: var(--space-xs);
   text-align: center;
 }
 
 .drop-zone__icon {
-  font-size: 2rem;
+  font-size: 1.35rem;
   color: var(--color-charcoal-soft);
   line-height: 1;
 }
 
 .drop-zone__text {
+  font-size: var(--text-sm);
   font-weight: var(--weight-medium);
   color: var(--color-charcoal);
 }
 
 .drop-zone__sub {
   font-size: var(--text-sm);
+  line-height: 1.2;
   color: var(--color-charcoal-soft);
 }
 
