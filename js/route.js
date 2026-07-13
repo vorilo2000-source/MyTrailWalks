@@ -141,6 +141,30 @@ $("btn-share").addEventListener("click", async () => {
 });
 
 // -----------------------------------------------------------
+// CREATOR PREVIEW — ROUTE ONTVANGEN
+// -----------------------------------------------------------
+window.addEventListener("message", async (event) => {
+  if (event.origin !== window.location.origin) return;
+
+  if (event.data?.type !== "mytrailwalks-preview-route") return;
+
+  const route = event.data.route;
+  if (!route) return;
+
+  await window.appReady;
+
+  renderHero(route);
+  renderSegments(route);
+  renderSource(route);
+  renderMap(route);
+  renderElevation(route);
+  renderStory(route);
+  renderTips(route);
+  renderPhotoGrid(route);
+  renderGallery(route);
+});
+
+// -----------------------------------------------------------
 // INIT
 // -----------------------------------------------------------
 window.appReady.then(async () => {
