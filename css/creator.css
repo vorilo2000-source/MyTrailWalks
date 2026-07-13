@@ -11,9 +11,9 @@
    6. Knoppen
    7. GPX-upload en statistieken
    8. Weer
-   9. Foto's en AI-acties
+   9. Foto's 
    10. Previewkolom
-   11. Blokken-editor
+   11. (Leeg was AI features)
    12. Routepreview
    13. Blokkern-editor
    14. Visuele route preview
@@ -187,10 +187,6 @@
   font-size: var(--text-xs);
   color: var(--color-charcoal-soft);
   margin-left: auto;
-}
-
-.ai-hint {
-  color: var(--color-earth);
 }
 
 .creator-step__body,
@@ -371,17 +367,6 @@
 .btn--ghost:hover {
   border-color: var(--color-charcoal-soft);
   color: var(--color-charcoal);
-  text-decoration: none;
-}
-
-.btn--ai {
-  background: linear-gradient(135deg, var(--color-earth), #a07840);
-  color: var(--color-white);
-  border-color: transparent;
-}
-
-.btn--ai:hover {
-  background: linear-gradient(135deg, #7a5a3a, var(--color-earth));
   text-decoration: none;
 }
 
@@ -591,29 +576,9 @@
 }
 
 /* -----------------------------------------------------------
-   11. AI ACTIES
+   11. LEEG (WAS AI FEATURES)
    ----------------------------------------------------------- */
-.ai-actions {
-  display: flex;
-  align-items: center;
-  gap: var(--space-md);
-  padding: var(--space-md);
-  background: rgba(140, 106, 79, 0.06);
-  border: 1px solid rgba(140, 106, 79, 0.2);
-  border-radius: var(--radius-md);
-}
 
-.ai-actions__note {
-  font-size: var(--text-xs);
-  color: var(--color-charcoal-soft);
-  line-height: 1.4;
-}
-
-/* Loading staat voor AI knop */
-.btn--ai.is-loading {
-  opacity: 0.7;
-  cursor: wait;
-}
 
 /* -----------------------------------------------------------
    12. PREVIEWKOLOM
