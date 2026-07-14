@@ -1,26 +1,40 @@
 // ======================= CREATOR CONTENT BLOCKS — CONFIGURATIE =======================
 
-const CREATOR_CONTENT_BLOCKS_VERSION = "1.0.2"; // Versienummer van het nieuwe Content Blocks-systeem.
+const CREATOR_CONTENT_BLOCKS_VERSION = "1.0.3"; // Versienummer van het Content Blocks-systeem.
 
-const CONTENT_BLOCK_LAYOUTS = { // Bevat alle beschikbare layouts voor een contentblok.
+const CONTENT_BLOCK_LAYOUTS = { // Bevat alle beschikbare layouts.
   TEXT_ONLY: "text-only", // Toont alleen titel en tekst.
   PHOTO_LEFT: "photo-left", // Toont foto's links en tekst rechts.
   PHOTO_RIGHT: "photo-right", // Toont tekst links en foto's rechts.
   PHOTO_TOP: "photo-top", // Toont foto's boven de tekst.
   PHOTO_BOTTOM: "photo-bottom", // Toont foto's onder de tekst.
-  PHOTO_GRID: "photo-grid", // Toont meerdere foto's in een raster.
-  PHOTOS_ONLY: "photos-only" // Toont alleen foto's zonder tekst.
+  PHOTOS_ONLY: "photos-only" // Toont alleen foto's.
 }; // Sluit CONTENT_BLOCK_LAYOUTS af.
 
-const CONTENT_BLOCK_LAYOUT_LABELS = { // Bevat de zichtbare namen van alle layouts.
+const CONTENT_BLOCK_LAYOUT_LABELS = { // Bevat de zichtbare namen van de layouts.
   [CONTENT_BLOCK_LAYOUTS.TEXT_ONLY]: "Alleen tekst", // Zichtbare naam voor text-only.
-  [CONTENT_BLOCK_LAYOUTS.PHOTO_LEFT]: "Foto links", // Zichtbare naam voor photo-left.
-  [CONTENT_BLOCK_LAYOUTS.PHOTO_RIGHT]: "Foto rechts", // Zichtbare naam voor photo-right.
-  [CONTENT_BLOCK_LAYOUTS.PHOTO_TOP]: "Foto boven", // Zichtbare naam voor photo-top.
-  [CONTENT_BLOCK_LAYOUTS.PHOTO_BOTTOM]: "Foto onder", // Zichtbare naam voor photo-bottom.
-  [CONTENT_BLOCK_LAYOUTS.PHOTO_GRID]: "Fotogrid", // Zichtbare naam voor photo-grid.
+  [CONTENT_BLOCK_LAYOUTS.PHOTO_LEFT]: "Foto's links", // Zichtbare naam voor photo-left.
+  [CONTENT_BLOCK_LAYOUTS.PHOTO_RIGHT]: "Foto's rechts", // Zichtbare naam voor photo-right.
+  [CONTENT_BLOCK_LAYOUTS.PHOTO_TOP]: "Foto's boven", // Zichtbare naam voor photo-top.
+  [CONTENT_BLOCK_LAYOUTS.PHOTO_BOTTOM]: "Foto's onder", // Zichtbare naam voor photo-bottom.
   [CONTENT_BLOCK_LAYOUTS.PHOTOS_ONLY]: "Alleen foto's" // Zichtbare naam voor photos-only.
 }; // Sluit CONTENT_BLOCK_LAYOUT_LABELS af.
+
+const CONTENT_BLOCK_PHOTO_COLUMNS = { // Bevat alle beschikbare fotoverdelingen.
+  AUTO: "auto", // Bepaalt het aantal kolommen automatisch.
+  ONE: "1", // Toont één foto per rij.
+  TWO: "2", // Toont twee foto's per rij.
+  THREE: "3", // Toont drie foto's per rij.
+  FOUR: "4" // Toont vier foto's per rij.
+}; // Sluit CONTENT_BLOCK_PHOTO_COLUMNS af.
+
+const CONTENT_BLOCK_PHOTO_COLUMN_LABELS = { // Bevat de zichtbare namen van de fotoverdelingen.
+  [CONTENT_BLOCK_PHOTO_COLUMNS.AUTO]: "Automatisch", // Zichtbare naam voor automatische verdeling.
+  [CONTENT_BLOCK_PHOTO_COLUMNS.ONE]: "1 kolom", // Zichtbare naam voor één kolom.
+  [CONTENT_BLOCK_PHOTO_COLUMNS.TWO]: "2 kolommen", // Zichtbare naam voor twee kolommen.
+  [CONTENT_BLOCK_PHOTO_COLUMNS.THREE]: "3 kolommen", // Zichtbare naam voor drie kolommen.
+  [CONTENT_BLOCK_PHOTO_COLUMNS.FOUR]: "4 kolommen" // Zichtbare naam voor vier kolommen.
+}; // Sluit CONTENT_BLOCK_PHOTO_COLUMN_LABELS af.
 
 
 // ======================= CREATOR CONTENT BLOCKS — STATE =======================
