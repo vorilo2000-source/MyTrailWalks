@@ -404,6 +404,7 @@ function updateCreatorContentPhotoField(blockId, photoId, fieldName, fieldValue)
   if (!["url", "alt", "caption"].includes(fieldName)) return; // Staat alleen bekende fotovelden toe.
 
   photo[fieldName] = fieldValue; // Slaat de nieuwe fotowaarde op.
+  window.updatePreview?.(); // Werkt de bestaande route-preview bij.
 } // Sluit updateCreatorContentPhotoField af.
 
 
