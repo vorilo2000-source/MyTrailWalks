@@ -11,6 +11,8 @@ function buildPreviewRoute() {
     id: els.inputRouteId?.value?.trim() || "preview",
     status: els.inputStatus?.value || "draft",
 
+    content_blocks: window.CreatorContentBlocks?.getBlocks?.() || [],
+    
     title: {
       nl: els.inputTitle?.value || "Wandeling zonder titel",
     },
