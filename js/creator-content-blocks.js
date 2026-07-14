@@ -69,6 +69,7 @@ function createContentBlock() { // Maakt één nieuw leeg contentblok.
       nl: "" // Bewaart voorlopig de Nederlandse tekst.
     }, // Sluit text af.
     photos: [], // Bevat later alle foto-URL's van dit blok.
+    photoColumns: CONTENT_BLOCK_PHOTO_COLUMNS.AUTO, // Gebruikt standaard automatische fotoverdeling.
     options: {} // Houdt ruimte vrij voor toekomstige instellingen.
   }; // Sluit het contentblok-object af.
 } // Sluit createContentBlock af.
@@ -93,6 +94,13 @@ function escapeContentBlockHtml(value) { // Beveiligt tekst voordat die in HTML 
     .replaceAll('"', "&quot;") // Beveiligt dubbele aanhalingstekens.
     .replaceAll("'", "&#039;"); // Beveiligt enkele aanhalingstekens.
 } // Sluit escapeContentBlockHtml af.
+
+function getContentBlockPhotoColumnOptions(selectedColumns) { // Bouwt de opties voor de fotoverdeling.
+  return Object.entries(CONTENT_BLOCK_PHOTO_COLUMN_LABELS).map(function ([columnValue, columnLabel]) { // Doorloopt alle fotoverdelingen.
+    const selected = columnValue === selectedColumns ? " selected" : ""; // Markeert de huidige keuze.
+    return `<option value="${columnValue}"${selected}>${columnLabel}</option>`; // Bouwt één keuzeoptie.
+  }).join(""); // Voegt alle opties samen.
+} // Sluit getContentBlockPhotoColumnOptions af.
 
 function getContentBlockLayoutOptions(selectedLayout) { // Bouwt de opties voor de layout-dropdown.
   const emptyOption = `<option value=""${selectedLayout === "" ? " selected" : ""}>— Kies een layout —</option>`; // Toont standaard een lege keuze.
@@ -134,6 +142,9 @@ function normalizeContentBlock(block) { // Normaliseert één volledig contentbl
     text: { // Normaliseert de tekst.
       nl: typeof sourceBlock.text?.nl === "string" ? sourceBlock.text.nl : "" // Behoudt alleen geldige Nederlandse tekst.
     }, // Sluit text af.
+    photoColumns: Object.values(CONTENT_BLOCK_PHOTO_COLUMNS).includes(sourceBlock.photoColumns) // Controleert de fotoverdeling.
+  ? sourceBlock.photoColumns // Behoudt een geldige fotoverdeling.
+  : CONTENT_BLOCK_PHOTO_COLUMNS.AUTO, // Gebruikt anders automatische verdeling.
     photos: Array.isArray(sourceBlock.photos) // Controleert of photos een lijst is.
       ? sourceBlock.photos.map(normalizeContentPhoto) // Normaliseert iedere foto.
       : [], // Gebruikt anders een lege lijst.
@@ -298,6 +309,16 @@ function renderCreatorContentBlocks() { // Bouwt de volledige Content Blocks-edi
         </div>
 
         <div class="field">
+  <label class="field__label">Fotoverdeling</label>
+
+  <select
+    class="input"
+    data-content-block-field="photoColumns">
+    ${getContentBlockPhotoColumnOptions(block.photoColumns)}
+  </select>
+</div>
+
+        <div class="field">
           <label class="field__label">Foto-URL's</label>
 
           <div class="content-block-photo-list">
@@ -340,6 +361,13 @@ function updateCreatorContentBlockField(blockId, fieldName, fieldValue) { // Wer
     renderCreatorContentBlocks(); // Bouwt opnieuw op zodat photos-only tekstvelden kan verbergen.
     return; // Stopt na het verwerken van de layout.
   } // Sluit layoutwijziging af.
+
+  if (fieldName === "photoColumns") { // Controleert of de fotoverdeling gewijzigd wordt.
+  block.photoColumns = Object.values(CONTENT_BLOCK_PHOTO_COLUMNS).includes(fieldValue) // Controleert de gekozen waarde.
+    ? fieldValue // Slaat een geldige fotoverdeling op.
+    : CONTENT_BLOCK_PHOTO_COLUMNS.AUTO; // Gebruikt anders automatische verdeling.
+  return; // Stopt na het opslaan.
+}
 
   if (fieldName === "title") { // Controleert of de titel gewijzigd wordt.
     block.title.nl = fieldValue; // Slaat de nieuwe titel op.
