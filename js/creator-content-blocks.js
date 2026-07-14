@@ -382,11 +382,11 @@ function updateCreatorContentBlockField(blockId, fieldName, fieldValue) { // Wer
   return; // Stopt na het opslaan.
 }
 
-  if (fieldName === "title") { // Controleert of de titel gewijzigd wordt.
-    block.title.nl = fieldValue; // Slaat de nieuwe titel op.
-    return; // Stopt na het verwerken van de titel.
-  } // Sluit titelwijziging af.
-
+if (fieldName === "text") { // Controleert of de tekst gewijzigd wordt.
+  block.text.nl = fieldValue; // Slaat de nieuwe tekst op.
+  window.updatePreview?.(); // Werkt de rechter preview direct bij.
+}
+  
   if (fieldName === "text") { // Controleert of de tekst gewijzigd wordt.
     block.text.nl = fieldValue; // Slaat de nieuwe tekst op.
   } // Sluit tekstwijziging af.
