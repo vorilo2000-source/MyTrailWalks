@@ -253,6 +253,16 @@ function renderContentBlockPhotos(block) { // Bouwt de foto-URL-velden van één
 
 // ======================= CREATOR CONTENT BLOCKS — BLOKEDITOR =======================
 
+function sendContentBlocksToPreview() { // Stuurt de huidige contentblokken naar de route-preview.
+  const previewFrame = document.getElementById("creator-route-preview"); // Zoekt het iframe met de route-preview.
+  if (!previewFrame || !previewFrame.contentWindow) return; // Stopt wanneer het iframe niet beschikbaar is.
+
+  previewFrame.contentWindow.postMessage({ // Stuurt een bericht naar route.html in het iframe.
+    type: "MYTRAILWALKS_CONTENT_BLOCKS_PREVIEW", // Geeft aan dat dit Content Blocks-previewdata is.
+    contentBlocks: structuredClone(creatorContentBlocks) // Stuurt een veilige kopie van alle huidige contentblokken.
+  }, window.location.origin); // Beperkt het bericht tot dezelfde website-origin.
+} // Sluit sendContentBlocksToPreview af.
+
 function renderCreatorContentBlocks() { // Bouwt de volledige Content Blocks-editor opnieuw op.
   const container = document.getElementById("creator-content-blocks"); // Zoekt de Content Blocks-container.
   if (!container) return; // Stopt wanneer de container niet in creator.html staat.
@@ -265,6 +275,8 @@ function renderCreatorContentBlocks() { // Bouwt de volledige Content Blocks-edi
   container.innerHTML = creatorContentBlocks.map(function (block, index) { // Bouwt voor ieder blok een editor.
     const hideTextFields = block.layout === CONTENT_BLOCK_LAYOUTS.PHOTOS_ONLY; // Bepaalt of titel en tekst verborgen moeten worden.
 
+    sendContentBlocksToPreview(); // Werkt de rechter preview bij na iedere wijziging.
+    
     return `
       <div class="block-editor__item content-block-editor" data-content-block-id="${block.id}">
 
