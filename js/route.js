@@ -160,7 +160,13 @@ window.addEventListener("message", async (event) => {
   renderElevation(route);
   renderSummary(route);
   renderStory(route);
-  renderTips(route);
+
+window.RouteContentBlocks?.render?.(
+  route.content_blocks || [],
+  "#route-content-blocks"
+);
+
+renderTips(route);
   renderPhotoGrid(route);
   renderGallery(route);
 });
@@ -194,7 +200,13 @@ window.appReady.then(async () => {
   renderElevation(route);
   renderSummary(route);
   renderStory(route);
-  renderTips(route);
+
+window.RouteContentBlocks?.render?.(
+  route.content_blocks || [],
+  "#route-content-blocks"
+);
+
+renderTips(route);
   renderPhotoGrid(route);
   renderGallery(route);
 });
