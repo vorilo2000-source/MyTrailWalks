@@ -263,9 +263,13 @@ function renderRouteContentBlocks(blocks, containerOrSelector) { // Rendert een 
     return renderRouteContentBlock(block, index); // Bouwt één contentblok.
   }).join(""); // Voegt alle contentblokken samen.
 
-  container.innerHTML = blocksHtml; // Plaatst de contentblokken in de routepagina.
-  container.hidden = blocksHtml.trim() === ""; // Verbergt de container wanneer geen zichtbare content bestaat.
-} // Sluit renderRouteContentBlocks af.
+container.innerHTML = blocksHtml; // Plaatst de contentblokken in de routepagina.
+
+const section = document.getElementById("section-content-blocks"); // Zoekt de buitenste Content Blocks-sectie.
+
+if (section) { // Controleert of de buitenste sectie bestaat.
+  section.hidden = blocksHtml.trim() === ""; // Toont de sectie zodra er zichtbare content is.
+} // Sluit de sectiecontrole af.
 
 
 // ======================= ROUTE CONTENT BLOCKS — PREVIEWBERICHT =======================
