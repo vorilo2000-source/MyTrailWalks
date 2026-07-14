@@ -275,6 +275,7 @@ if (section) { // Controleert of de buitenste sectie bestaat.
 // ======================= ROUTE CONTENT BLOCKS — PREVIEWBERICHT =======================
 
 function handleRouteContentBlocksPreviewMessage(event) { // Ontvangt live previewdata vanuit creator.html.
+  console.log("[ContentBlocks preview] Bericht ontvangen:", event.data); // Controleert of Creator-data de preview bereikt.
   const message = event.data; // Leest het ontvangen previewbericht.
 
   if (!message || typeof message !== "object") return; // Stopt bij ongeldige berichtdata.
