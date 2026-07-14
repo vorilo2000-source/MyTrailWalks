@@ -367,30 +367,35 @@ function updateCreatorContentBlockField(blockId, fieldName, fieldValue) { // Wer
   const block = getContentBlockById(blockId); // Zoekt het gekozen blok.
   if (!block) return; // Stopt wanneer het blok niet bestaat.
 
-  if (fieldName === "layout") { // Controleert of de layout gewijzigd wordt.
-    block.layout = Object.values(CONTENT_BLOCK_LAYOUTS).includes(fieldValue) // Controleert de nieuwe layout.
-      ? fieldValue // Gebruikt de geldige layout.
-      : CONTENT_BLOCK_LAYOUTS.TEXT_ONLY; // Valt anders terug op Alleen tekst.
-    renderCreatorContentBlocks(); // Bouwt opnieuw op zodat photos-only tekstvelden kan verbergen.
-    return; // Stopt na het verwerken van de layout.
-  } // Sluit layoutwijziging af.
+  if (fieldName === "layout") { // Verwerkt de layout.
+    block.layout = Object.values(CONTENT_BLOCK_LAYOUTS).includes(fieldValue)
+      ? fieldValue
+      : "";
+    renderCreatorContentBlocks();
+    window.updatePreview?.();
+    return;
+  }
 
-  if (fieldName === "photoColumns") { // Controleert of de fotoverdeling gewijzigd wordt.
-  block.photoColumns = Object.values(CONTENT_BLOCK_PHOTO_COLUMNS).includes(fieldValue) // Controleert de gekozen waarde.
-    ? fieldValue // Slaat een geldige fotoverdeling op.
-    : CONTENT_BLOCK_PHOTO_COLUMNS.AUTO; // Gebruikt anders automatische verdeling.
-  return; // Stopt na het opslaan.
-}
+  if (fieldName === "photoColumns") { // Verwerkt de fotoverdeling.
+    block.photoColumns = Object.values(CONTENT_BLOCK_PHOTO_COLUMNS).includes(fieldValue)
+      ? fieldValue
+      : CONTENT_BLOCK_PHOTO_COLUMNS.AUTO;
+    window.updatePreview?.();
+    return;
+  }
 
-if (fieldName === "text") { // Controleert of de tekst gewijzigd wordt.
-  block.text.nl = fieldValue; // Slaat de nieuwe tekst op.
-  window.updatePreview?.(); // Werkt de rechter preview direct bij.
+  if (fieldName === "title") { // Verwerkt de titel.
+    block.title.nl = fieldValue;
+    window.updatePreview?.();
+    return;
+  }
+
+  if (fieldName === "text") { // Verwerkt de tekst.
+    block.text.nl = fieldValue;
+    window.updatePreview?.();
+    return;
+  }
 }
-  
-  if (fieldName === "text") { // Controleert of de tekst gewijzigd wordt.
-    block.text.nl = fieldValue; // Slaat de nieuwe tekst op.
-  } // Sluit tekstwijziging af.
-} // Sluit updateCreatorContentBlockField af.
 
 function updateCreatorContentPhotoField(blockId, photoId, fieldName, fieldValue) { // Werkt één veld van een foto bij.
   const block = getContentBlockById(blockId); // Zoekt het gekozen blok.
