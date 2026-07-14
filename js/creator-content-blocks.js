@@ -1,6 +1,6 @@
 // ======================= CREATOR CONTENT BLOCKS — CONFIGURATIE =======================
 
-const CREATOR_CONTENT_BLOCKS_VERSION = "1.0.5"; // Versienummer van het Content Blocks-systeem.
+const CREATOR_CONTENT_BLOCKS_VERSION = "1.0.6"; // Versienummer van het Content Blocks-systeem.
 
 const CONTENT_BLOCK_LAYOUTS = { // Bevat alle beschikbare layouts.
   TEXT_ONLY: "text-only", // Toont alleen titel en tekst.
