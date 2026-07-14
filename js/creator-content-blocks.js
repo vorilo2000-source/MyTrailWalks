@@ -276,7 +276,7 @@ function renderCreatorContentBlocks() { // Bouwt de volledige Content Blocks-edi
           </select>
         </div>
 
-        <div class="field"${hideTextFields ? ' hidden' : ""}>
+        <div class="field"${hideTextFields ? ' style="display:none;"' : ""}>
           <label class="field__label">Titel</label>
 
           <input
@@ -287,7 +287,7 @@ function renderCreatorContentBlocks() { // Bouwt de volledige Content Blocks-edi
             placeholder="Titel van het contentblok">
         </div>
 
-        <div class="field"${hideTextFields ? ' hidden' : ""}>
+        <div class="field"${hideTextFields ? ' style="display:none;"' : ""}>
           <label class="field__label">Tekst</label>
 
           <textarea
