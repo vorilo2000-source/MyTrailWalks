@@ -1,6 +1,6 @@
 // ======================= CREATOR CONTENT BLOCKS — CONFIGURATIE =======================
 
-const CREATOR_CONTENT_BLOCKS_VERSION = "1.0.3"; // Versienummer van het Content Blocks-systeem.
+const CREATOR_CONTENT_BLOCKS_VERSION = "1.0.5"; // Versienummer van het Content Blocks-systeem.
 
 const CONTENT_BLOCK_LAYOUTS = { // Bevat alle beschikbare layouts.
   TEXT_ONLY: "text-only", // Toont alleen titel en tekst.
@@ -128,9 +128,11 @@ function normalizeContentPhoto(photo) { // Normaliseert één foto-entry.
 
 function normalizeContentBlock(block) { // Normaliseert één volledig contentblok.
   const sourceBlock = block && typeof block === "object" ? block : {}; // Gebruikt alleen een geldig object.
-  const normalizedLayout = Object.values(CONTENT_BLOCK_LAYOUTS).includes(sourceBlock.layout) // Controleert of de layout bestaat.
+  const normalizedLayout = sourceBlock.layout === "" // Controleert of nog geen layout gekozen is.
+  ? "" // Behoudt de lege layoutkeuze.
+  : Object.values(CONTENT_BLOCK_LAYOUTS).includes(sourceBlock.layout) // Controleert of de gekozen layout geldig is.
     ? sourceBlock.layout // Behoudt een geldige layout.
-    : CONTENT_BLOCK_LAYOUTS.TEXT_ONLY; // Gebruikt anders Alleen tekst.
+    : ""; // Gebruikt bij een ongeldige layout opnieuw een lege keuze.
 
   return { // Geeft een veilig contentblok terug.
     id: sourceBlock.id || createContentBlockId(), // Hergebruikt of maakt een blok-ID.
