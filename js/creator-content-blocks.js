@@ -64,7 +64,7 @@ function createContentBlock() { // Maakt één nieuw leeg contentblok.
     title: { // Bevat de meertalige titel.
       nl: "" // Bewaart voorlopig de Nederlandse titel.
     }, // Sluit title af.
-    layout: CONTENT_BLOCK_LAYOUTS.TEXT_ONLY, // Gebruikt standaard de layout Alleen tekst.
+    layout: "", // Start zonder gekozen layout.
     text: { // Bevat de meertalige tekst.
       nl: "" // Bewaart voorlopig de Nederlandse tekst.
     }, // Sluit text af.
@@ -94,12 +94,16 @@ function escapeContentBlockHtml(value) { // Beveiligt tekst voordat die in HTML 
     .replaceAll("'", "&#039;"); // Beveiligt enkele aanhalingstekens.
 } // Sluit escapeContentBlockHtml af.
 
-function getContentBlockLayoutOptions(selectedLayout) { // Bouwt alle opties voor de layout-dropdown.
-  return Object.entries(CONTENT_BLOCK_LAYOUT_LABELS).map(function ([layoutValue, layoutLabel]) { // Doorloopt alle layouts.
-    const selected = layoutValue === selectedLayout ? " selected" : ""; // Markeert de huidige layout.
-    return `<option value="${layoutValue}"${selected}>${layoutLabel}</option>`; // Bouwt één option-element.
-  }).join(""); // Voegt alle option-elementen samen.
-} // Sluit getContentBlockLayoutOptions af.
+function getContentBlockLayoutOptions(selectedLayout) { // Bouwt de opties voor de layout-dropdown.
+  const emptyOption = `<option value=""${selectedLayout === "" ? " selected" : ""}>— Kies een layout —</option>`; // Toont standaard een lege keuze.
+
+  const layoutOptions = Object.entries(CONTENT_BLOCK_LAYOUT_LABELS).map(function ([layoutValue, layoutLabel]) { // Doorloopt alle layouts.
+    const selected = layoutValue === selectedLayout ? " selected" : ""; // Markeert de gekozen layout.
+    return `<option value="${layoutValue}"${selected}>${layoutLabel}</option>`; // Bouwt één layoutoptie.
+  }).join(""); // Voegt alle layoutopties samen.
+
+  return emptyOption + layoutOptions; // Zet de lege keuze bovenaan.
+}
 
 
 // ======================= CREATOR CONTENT BLOCKS — NORMALISATIE =======================
