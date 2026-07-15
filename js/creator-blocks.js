@@ -1,9 +1,10 @@
 // ======================= CREATOR BLOCKS =======================
 "use strict";
-// -----------------------------------------------------------
+// -function renderBlockEditor() {----------------------------------------------------------
 // BLOKKEN-EDITOR
 // -----------------------------------------------------------
 function renderBlockEditor() {
+  if (!els.blockList) return; // Stopt omdat de oude Verhaal-editor niet meer in creator.html staat.
   els.blockList.innerHTML = "";
   state.storyBlocks.forEach((block, i) => {
     const item = document.createElement("div");
@@ -72,11 +73,10 @@ function handleBlockAction(e) {
   updatePreview();
 }
 
-els.btnAddTextBlock.addEventListener("click",      () => { state.storyBlocks.push({ type: "text",       value: "" });               renderBlockEditor(); updatePreview(); });
-els.btnAddPhotoBlock.addEventListener("click",     () => { state.storyBlocks.push({ type: "photo",      value: "" });               renderBlockEditor(); updatePreview(); });
-els.btnAddPhotoGridBlock.addEventListener("click", () => { state.storyBlocks.push({ type: "photo-grid", cols: 2, photos: ["", ""] }); renderBlockEditor(); updatePreview(); });
-els.btnAddLinkBlock.addEventListener("click",      () => { state.storyBlocks.push({ type: "link",       name: "", url: "" });       renderBlockEditor(); updatePreview(); });
-
+if (els.btnAddTextBlock) els.btnAddTextBlock.addEventListener("click", () => { state.storyBlocks.push({ type: "text", value: "" }); renderBlockEditor(); updatePreview(); });
+if (els.btnAddPhotoBlock) els.btnAddPhotoBlock.addEventListener("click", () => { state.storyBlocks.push({ type: "photo", value: "" }); renderBlockEditor(); updatePreview(); });
+if (els.btnAddPhotoGridBlock) els.btnAddPhotoGridBlock.addEventListener("click", () => { state.storyBlocks.push({ type: "photo-grid", cols: 2, photos: ["", ""] }); renderBlockEditor(); updatePreview(); });
+if (els.btnAddLinkBlock) els.btnAddLinkBlock.addEventListener("click", () => { state.storyBlocks.push({ type: "link", name: "", url: "" }); renderBlockEditor(); updatePreview(); });
 
 // -----------------------------------------------------------
 // GALERIJ
