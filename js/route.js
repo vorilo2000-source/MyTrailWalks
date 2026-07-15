@@ -165,7 +165,7 @@ window.RouteContentBlocks?.render?.(
 );
 
   renderPhotoGrid(route);
-  renderGallery(route);
+
 });
 
 // -----------------------------------------------------------
@@ -202,5 +202,5 @@ window.RouteContentBlocks?.render?.(
 );
 
   renderPhotoGrid(route);
-  renderGallery(route);
+
 });
