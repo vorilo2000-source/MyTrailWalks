@@ -100,4 +100,3 @@ function renderPhotoGrid(route) {
 window.renderStory = renderStory;
 window.renderTips = renderTips;
 window.renderPhotoGrid = renderPhotoGrid;
-window.renderSummary = renderSummary;
