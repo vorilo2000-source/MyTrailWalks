@@ -158,7 +158,6 @@ window.addEventListener("message", async (event) => {
   renderSource(route);
   renderMap(route);
   renderElevation(route);
-  renderSummary(route);
   renderStory(route);
 
 window.RouteContentBlocks?.render?.(
@@ -198,7 +197,6 @@ window.appReady.then(async () => {
   renderSource(route);
   renderMap(route);
   renderElevation(route);
-  renderSummary(route);
   renderStory(route);
 
 window.RouteContentBlocks?.render?.(
