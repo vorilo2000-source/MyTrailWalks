@@ -179,7 +179,7 @@ function renderRouteContentBlock(block, index) { // Bouwt één volledig routeco
 
   if (!hasText && !hasPhotos) return ""; // Slaat volledig lege contentblokken over.
 
-  if (normalizedBlock.layout === ROUTE_CONTENT_BLOCK_LAYOUTS.TEXT_ONLY) { // Controleert de layout Alleen tekst.
+  if ( === ROUTE_CONTENT_BLOCK_LAYOUTS.TEXT_ONLY) { // Controleert de layout Alleen tekst.
     if (!hasText) return ""; // Slaat een leeg tekstblok over.
 
     return ` 
@@ -191,19 +191,24 @@ function renderRouteContentBlock(block, index) { // Bouwt één volledig routeco
     `; // Geeft de Alleen tekst-layout terug.
   } // Sluit Alleen tekst af.
 
-  if (normalizedBlock.layout === ROUTE_CONTENT_BLOCK_LAYOUTS.PHOTOS_ONLY) { // Controleert de layout Alleen foto's.
-    if (!hasPhotos) return ""; // Slaat een fotoblok zonder foto's over.
+if (normalizedBlock.layout === ROUTE_CONTENT_BLOCK_LAYOUTS.PHOTOS_ONLY) { // Controleert de layout Alleen foto's.
+  if (!hasPhotos) return ""; // Slaat een fotoblok zonder foto's over.
 
-    return ` 
-      <article
-        class="route-content-block route-content-block--photos-only"
-        data-content-block-index="${index}">
-        ${photosHtml}
-      </article>
-    `; // Geeft de Alleen foto's-layout terug.
-  } // Sluit Alleen foto's af.
+  const titleHtml = normalizedBlock.title.trim() !== "" // Controleert of een titel aanwezig is.
+    ? `<h2 class="route-content-block__title">${escapeRouteContentBlockHtml(normalizedBlock.title)}</h2>` // Bouwt alleen de titel.
+    : ""; // Toont niets wanneer de titel leeg is.
 
-  if (normalizedBlock.layout === ROUTE_CONTENT_BLOCK_LAYOUTS.PHOTO_LEFT) { // Controleert de layout Foto's links.
+  return ` 
+    <article
+      class="route-content-block route-content-block--photos-only"
+      data-content-block-index="${index}">
+      ${titleHtml}
+      ${photosHtml}
+    </article>
+  `; // Geeft titel en foto's terug, zonder tekstblok.
+}.
+
+  if ( === ROUTE_CONTENT_BLOCK_LAYOUTS.PHOTO_LEFT) { // Controleert de layout Foto's links.
     return ` 
       <article
         class="route-content-block route-content-block--photo-left"
