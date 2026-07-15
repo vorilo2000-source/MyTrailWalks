@@ -543,3 +543,55 @@
   font-style: italic;
   margin: 0;
 }
+
+/* ======================= ROUTE CONTENT BLOCKS ======================= */
+
+.route-content-block {
+  width: 100%; /* Laat ieder contentblok de volledige beschikbare breedte gebruiken. */
+}
+
+.route-content-block__photos {
+  display: grid; /* Plaatst meerdere foto’s in een flexibel raster. */
+  grid-template-columns: repeat(var(--route-content-photo-columns, 1), minmax(0, 1fr)); /* Verdeelt de beschikbare breedte gelijkmatig over het gekozen aantal kolommen. */
+  gap: 12px; /* Voegt ruimte tussen de foto’s toe. */
+  width: 100%; /* Laat het fotoraster de volledige beschikbare breedte gebruiken. */
+}
+
+.route-content-block__figure {
+  margin: 0; /* Verwijdert de standaardmarge van figure-elementen. */
+  min-width: 0; /* Voorkomt dat brede afbeeldingen het raster uitrekken. */
+}
+
+.route-content-block__image {
+  display: block; /* Verwijdert ongewenste witruimte onder afbeeldingen. */
+  width: 100%; /* Laat de afbeelding zich aanpassen aan de beschikbare kolombreedte. */
+  max-width: 100%; /* Voorkomt dat de afbeelding breder wordt dan de container. */
+  height: auto; /* Behoudt de originele beeldverhouding. */
+  object-fit: cover; /* Vult het beschikbare vlak netjes wanneer later een vaste hoogte wordt gebruikt. */
+}
+
+.route-content-block--photo-left,
+.route-content-block--photo-right {
+  display: grid; /* Plaatst foto’s en tekst naast elkaar. */
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); /* Geeft foto’s en tekst ieder de helft van de beschikbare breedte. */
+  gap: 20px; /* Voegt ruimte tussen foto’s en tekst toe. */
+  align-items: start; /* Lijnt beide delen bovenaan uit. */
+}
+
+.route-content-block--photo-top,
+.route-content-block--photo-bottom,
+.route-content-block--photos-only,
+.route-content-block--text-only {
+  display: block; /* Plaatst de onderdelen onder elkaar. */
+}
+
+@media (max-width: 700px) {
+  .route-content-block--photo-left,
+  .route-content-block--photo-right {
+    grid-template-columns: 1fr; /* Zet foto’s en tekst onder elkaar bij een smalle preview. */
+  }
+
+  .route-content-block__photos {
+    grid-template-columns: repeat(min(var(--route-content-photo-columns, 1), 2), minmax(0, 1fr)); /* Beperkt smalle schermen tot maximaal twee fotokolommen. */
+  }
+}
