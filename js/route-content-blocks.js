@@ -270,10 +270,9 @@ const section = document.getElementById("section-content-blocks"); // Zoekt de b
 if (section) { // Controleert of de buitenste sectie bestaat.
   section.hidden = blocksHtml.trim() === ""; // Toont de sectie zodra er zichtbare content is.
 } // Sluit de sectiecontrole af.
-
+} // Sluit renderRouteContentBlocks af.
 
 // ======================= ROUTE CONTENT BLOCKS — PREVIEWBERICHT =======================
-
 function handleRouteContentBlocksPreviewMessage(event) { // Ontvangt live previewdata vanuit creator.html.
   console.log("[ContentBlocks preview] Bericht ontvangen:", event.data); // Controleert of Creator-data de preview bereikt.
   const message = event.data; // Leest het ontvangen previewbericht.
