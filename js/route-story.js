@@ -62,6 +62,5 @@ function renderPhotoGrid(route) {
     container.appendChild(img);
   });
 }
-window.renderStory = renderStory;
 window.renderTips = renderTips;
 window.renderPhotoGrid = renderPhotoGrid;
