@@ -191,7 +191,7 @@ if (normalizedBlock.layout === ROUTE_CONTENT_BLOCK_LAYOUTS.TEXT_ONLY) { // Contr
     `; // Geeft de Alleen tekst-layout terug.
   } // Sluit Alleen tekst af.
 
-if (normalizedBlock.layout === ROUTE_CONTENT_BLOCK_LAYOUTS.PHOTOS_ONLY) { // Controleert de layout Alleen foto's.
+if (normalizedBlock.layout === ROUTE_CONTENT_BLOCK_LAYOUTS.PHOTO_LEFT) { // Controleert de layout Alleen foto's.
   if (!hasPhotos) return ""; // Slaat een fotoblok zonder foto's over.
 
   const titleHtml = normalizedBlock.title.trim() !== "" // Controleert of een titel aanwezig is.
@@ -208,7 +208,7 @@ if (normalizedBlock.layout === ROUTE_CONTENT_BLOCK_LAYOUTS.PHOTOS_ONLY) { // Con
   `; // Geeft titel en foto's terug, zonder tekstblok.
 }
 
-  if ( === ROUTE_CONTENT_BLOCK_LAYOUTS.PHOTO_LEFT) { // Controleert de layout Foto's links.
+  if (normalizedBlock.layout === ROUTE_CONTENT_BLOCK_LAYOUTS.PHOTO_LEFT) { // Controleert de layout Foto's links.
     return ` 
       <article
         class="route-content-block route-content-block--photo-left"
