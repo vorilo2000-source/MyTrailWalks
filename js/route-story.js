@@ -41,5 +41,4 @@ function renderPhotoGrid(route) {
     container.appendChild(img);
   });
 }
-window.renderTips = renderTips;
 window.renderPhotoGrid = renderPhotoGrid;
