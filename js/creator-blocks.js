@@ -128,10 +128,12 @@ function applyCalculatedDifficulty() {
 // -----------------------------------------------------------
 els.inputTitle.addEventListener("input", updatePreview);
 
-els.inputIntro.addEventListener("input", () => {
-  els.introCount.textContent = `${els.inputIntro.value.length}/160`;
-  updatePreview();
-});
+if (els.inputIntro && els.introCount) { // Controleert of de verwijderde samenvattingsvelden nog bestaan.
+  els.inputIntro.addEventListener("input", () => { // Luistert alleen wanneer het veld aanwezig is.
+    els.introCount.textContent = `${els.inputIntro.value.length}/160`; // Werkt de tekenteller bij.
+    updatePreview(); // Werkt de route-preview bij.
+  }); // Sluit de listener af.
+} // Sluit de controle af.
 
 // -----------------------------------------------------------
 // CLOUDINARY URL AUTO-FIX
