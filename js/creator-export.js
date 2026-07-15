@@ -67,39 +67,5 @@ if (els.btnExport) {
     }
   });
 }
-
-
-// -----------------------------------------------------------
-// EXPORT: routes.json entry downloaden
-// -----------------------------------------------------------
-const btnExportRoutesEntry = $("btn-export-routes-entry"); // Haalt de knop op uit creator.html.
-
-if (btnExportRoutesEntry) { // Controleert of de knop bestaat voordat we een listener toevoegen.
-  btnExportRoutesEntry.addEventListener("click", (e) => { // Start export wanneer op de knop wordt geklikt.
-    e.preventDefault(); // Voorkomt standaard browsergedrag.
-    const route = _buildExportFromState(); // Gebruikt dezelfde route-data als de gewone JSON-export.
-    const firstSegment = route.segments?.[0] || {}; // Neemt het eerste segment als basis voor overzichtsdata.
-    const firstStats = firstSegment.gpx?.stats || null; // Haalt GPX-statistieken uit het nieuwe model.
-    const entry = { // Bouwt één compacte entry voor data/routes.json.
-      id: route.id, // Route-id / bestandsnaam.
-      title: route.title, // Titelobject, bijvoorbeeld { nl: "..." }.
-      location: firstSegment.location || "", // Locatie uit eerste segment.
-      region: firstSegment.region || "", // Regio uit eerste segment.
-      country: firstSegment.country || "", // Land uit eerste segment.
-      status: route.status || "draft", // Draft of published.
-      difficulty: firstSegment.difficulty || route.difficulty || "", // Moeilijkheidsgraad.
-      distance_km: firstStats?.distance_km || null, // Afstand uit GPX-statistieken.
-      duration_hours: firstStats?.duration_hours || null, // Duur uit GPX-statistieken.
-      elevation_up_m: firstStats?.elevation_up_m || null, // Hoogtemeters stijging.
-      transport: firstSegment.transport || "walking", // Vervoersmiddel.
-      hero: route.photos?.find((p) => p.role === "hero")?.url || route.photos?.[0]?.url || "", // Hero-afbeelding.
-      file: `${route.id}.json`, // Bestandsnaam van de route JSON.
-      tags: route.tags || [] // Tags / keywords.
-    };
-
-    _downloadJson(entry, `${route.id || "route"}-routes-entry.json`); // Downloadt de routes.json entry.
-  });
-}
-
 window._buildExportFromState = _buildExportFromState;
 window._downloadJson = _downloadJson;
