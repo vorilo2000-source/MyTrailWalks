@@ -164,7 +164,6 @@ window.RouteContentBlocks?.render?.(
   "#route-content-blocks"
 );
 
-renderTips(route);
   renderPhotoGrid(route);
   renderGallery(route);
 });
@@ -202,7 +201,6 @@ window.RouteContentBlocks?.render?.(
   "#route-content-blocks"
 );
 
-renderTips(route);
   renderPhotoGrid(route);
   renderGallery(route);
 });
