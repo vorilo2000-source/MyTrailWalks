@@ -206,7 +206,7 @@ if (normalizedBlock.layout === ROUTE_CONTENT_BLOCK_LAYOUTS.PHOTOS_ONLY) { // Con
       ${photosHtml}
     </article>
   `; // Geeft titel en foto's terug, zonder tekstblok.
-}.
+}
 
   if ( === ROUTE_CONTENT_BLOCK_LAYOUTS.PHOTO_LEFT) { // Controleert de layout Foto's links.
     return ` 
