@@ -104,6 +104,7 @@ function loadJsonIntoForm(data) {
   } else if (data.story?.nl) {
     state.storyBlocks = [{ type: "text", value: data.story.nl }];
   }
+  window.CreatorContentBlocks?.setBlocks?.(data.content_blocks || []); // Laadt de Content Blocks uit de route-JSON.
   if (!data.story_blocks && data.photos?.length > 1) {
     data.photos.slice(1).forEach((p) => { if (p.url) state.storyBlocks.push({ type: "photo", value: p.url }); });
   }
