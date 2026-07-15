@@ -277,25 +277,8 @@ if (section) { // Controleert of de buitenste sectie bestaat.
 } // Sluit de sectiecontrole af.
 } // Sluit renderRouteContentBlocks af.
 
-// ======================= ROUTE CONTENT BLOCKS — PREVIEWBERICHT =======================
-function handleRouteContentBlocksPreviewMessage(event) { // Ontvangt live previewdata vanuit creator.html.
-  console.log("[ContentBlocks preview] Bericht ontvangen:", event.data); // Controleert of Creator-data de preview bereikt.
-  const message = event.data; // Leest het ontvangen previewbericht.
-
-  if (!message || typeof message !== "object") return; // Stopt bij ongeldige berichtdata.
-  if (message.type !== "MYTRAILWALKS_CONTENT_BLOCKS_PREVIEW") return; // Reageert alleen op Content Blocks-previewberichten.
-
-  renderRouteContentBlocks( // Rendert de ontvangen contentblokken.
-    message.contentBlocks, // Gebruikt de contentblokken uit het previewbericht.
-    "#route-content-blocks" // Gebruikt de vaste routecontainer.
-  ); // Sluit renderRouteContentBlocks aanroep af.
-} // Sluit handleRouteContentBlocksPreviewMessage af.
-
-window.addEventListener("message", handleRouteContentBlocksPreviewMessage); // Luistert naar live previewberichten vanuit de Creator.
-
 
 // ======================= ROUTE CONTENT BLOCKS — PUBLIEKE API =======================
-
 window.RouteContentBlocks = { // Maakt de renderer beschikbaar voor andere routemodules.
   version: ROUTE_CONTENT_BLOCKS_VERSION, // Maakt het versienummer beschikbaar.
   layouts: ROUTE_CONTENT_BLOCK_LAYOUTS, // Maakt de ondersteunde layouts beschikbaar.
