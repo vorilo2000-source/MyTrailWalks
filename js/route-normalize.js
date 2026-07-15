@@ -19,8 +19,6 @@ function normalizeRouteJson(input) {
 
     // Title support: string or map
     out.title = (typeof src.title === 'object') ? src.title : { nl: src.title || '' };
-
-    out.summary = (typeof src.summary === 'object') ? src.summary : { nl: src.summary || src.intro || '' };
     out.tips = (typeof src.tips === 'object') ? src.tips : { nl: src.tips || '' };
     out.source_reference = src.source_reference || src.source || '';
     out.tags = Array.isArray(src.tags) ? src.tags : (typeof src.tags === 'string' ? src.tags.split(/\s*,\s*/).filter(Boolean) : []);
