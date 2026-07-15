@@ -22,23 +22,6 @@ function normalizeRouteJson(input) {
     out.source_reference = src.source_reference || src.source || '';
     out.tags = Array.isArray(src.tags) ? src.tags : (typeof src.tags === 'string' ? src.tags.split(/\s*,\s*/).filter(Boolean) : []);
 
-    // Photos / gallery normalization
-    out.photos = Array.isArray(src.photos) ? src.photos.map((p) => ({ url: p.url || p, role: p.role || null })) : [];
-    out.gallery = Array.isArray(src.gallery) ? src.gallery.map((p) => ({ url: p.url || p })) : [];
-
-    // Story blocks: support legacy `story` string and `story_blocks` array
-    if (Array.isArray(src.story_blocks)) {
-      out.story_blocks = src.story_blocks.map((b) => ({ ...b, value: b.value || '' }));
-    } else if (src.story && typeof src.story === 'object') {
-      // object keyed by lang
-      const lang = Object.keys(src.story)[0] || 'nl';
-      out.story_blocks = [{ type: 'text', value: src.story[lang] }];
-    } else if (typeof src.story === 'string') {
-      out.story_blocks = [{ type: 'text', value: src.story }];
-    } else {
-      out.story_blocks = [];
-    }
-
     // Content Blocks normalization
     out.content_blocks = Array.isArray(src.content_blocks)
     ? src.content_blocks.map((block) => ({ ...block }))
