@@ -19,6 +19,7 @@ function _buildExportFromState() {
   state.storyBlocks.forEach((b) => { if (b.type === 'photo' && b.value) out.photos.push({ url: b.value }); });
   out.gallery = state.galleryPhotos.map((p) => ({ url: p.url || '' }));
   out.story_blocks = state.storyBlocks.map((b) => ({ ...b }));
+  content_blocks: window.CreatorContentBlocks?.getBlocks?.() || [], // Voegt de nieuwe Content Blocks toe aan de volledige route-JSON.
 
   out.segments = state.segments.map((s) => {
     return {
