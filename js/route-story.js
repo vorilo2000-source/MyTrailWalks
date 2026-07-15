@@ -3,41 +3,6 @@
 "use strict";
 
 // -----------------------------------------------------------
-// RENDER VERHAAL — alleen tekst en link blokken
-// Foto blokken gaan altijd naar de foto grid (rechterkolom)
-// -----------------------------------------------------------
-function renderStory(route) {
-  const blocks = route.story_blocks;
-  const container = $("route-story");
-
-  if (!container) return;
-
-  container.innerHTML = ""; /* Verwijdert vorige preview-inhoud */
-
-  $("section-story").hidden = false;
-
-  if (!blocks?.length) return;
-
-  blocks.forEach((block) => {
-    if (block.type === "text" && block.value) {
-      const p = document.createElement("p");
-      p.className = "route-story__text";
-      p.textContent = block.value;
-      container.appendChild(p);
-    } else if (block.type === "link" && block.url) {
-      const a = document.createElement("a");
-      a.className = "route-story__link";
-      a.href = block.url;
-      a.target = "_blank";
-      a.rel = "noopener noreferrer";
-      a.innerHTML = `<span>🔗</span><span>${block.name || block.url}</span>`;
-      container.appendChild(a);
-    }
-    // foto en photo-grid blokken worden genegeerd hier — gaan naar renderPhotoGrid
-  });
-}
-
-// -----------------------------------------------------------
 // RENDER TIPS — altijd tonen, ook als leeg
 // -----------------------------------------------------------
 function renderTips(route) {
