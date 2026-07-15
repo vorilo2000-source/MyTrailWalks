@@ -42,6 +42,11 @@ function normalizeRouteJson(input) {
       out.story_blocks = [];
     }
 
+    // Content Blocks normalization
+    out.content_blocks = Array.isArray(src.content_blocks)
+    ? src.content_blocks.map((block) => ({ ...block }))
+    : [];
+    
     // Segments normalization — support both old (root-level gpx_stats) and new (segments array) formats
     if (Array.isArray(src.segments) && src.segments.length > 0) {
       // New format: segments array
