@@ -1,6 +1,6 @@
 // ======================= ROUTE CONTENT BLOCKS — CONFIGURATIE =======================
 
-const ROUTE_CONTENT_BLOCKS_VERSION = "1.0.1"; // Versienummer van de Content Blocks-renderer.
+const ROUTE_CONTENT_BLOCKS_VERSION = "1.0.2"; // Versienummer van de Content Blocks-renderer.
 
 const ROUTE_CONTENT_BLOCK_LAYOUTS = { // Bevat alle ondersteunde contentblok-layouts.
   TEXT_ONLY: "text-only", // Toont alleen titel en tekst.
