@@ -179,7 +179,7 @@ function renderRouteContentBlock(block, index) { // Bouwt één volledig routeco
 
   if (!hasText && !hasPhotos) return ""; // Slaat volledig lege contentblokken over.
 
- if (normalizedBlock.layout === ROUTE_CONTENT_BLOCK_LAYOUTS.TEXT_ONLY) { // Controleert de layout Alleen tekst.
+if (normalizedBlock.layout === ROUTE_CONTENT_BLOCK_LAYOUTS.TEXT_ONLY) { // Controleert de layout Alleen tekst.
     if (!hasText) return ""; // Slaat een leeg tekstblok over.
 
     return ` 
