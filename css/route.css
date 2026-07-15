@@ -443,7 +443,6 @@
 /* =======================================================
    route-segment-block — compacte segmenten-tabel per segment
    ======================================================= */
-
 .route-segment-block {
   border-left: 4px solid var(--color-line, #DDD4C2);
   border-radius: 0 6px 6px 0;
@@ -545,7 +544,6 @@
 }
 
 /* ======================= ROUTE CONTENT BLOCKS ======================= */
-
 .route-content-block {
   width: 100%; /* Laat ieder contentblok de volledige beschikbare breedte gebruiken. */
 }
@@ -591,4 +589,9 @@
     grid-template-columns: 1fr; /* Zet foto’s en tekst onder elkaar bij een smalle preview. */
   }
   
+}
+
+/* ======================= AFSTAND TUSSEN CONTENTBLOKKEN ======================= */
+.route-content-block + .route-content-block {
+  margin-top: 20px; /* Voegt ruimte toe tussen opeenvolgende contentblokken. */
 }
