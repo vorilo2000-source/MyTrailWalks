@@ -163,9 +163,6 @@ window.RouteContentBlocks?.render?.(
   route.content_blocks || [],
   "#route-content-blocks"
 );
-
-  renderPhotoGrid(route);
-
 });
 
 // -----------------------------------------------------------
@@ -200,7 +197,4 @@ window.RouteContentBlocks?.render?.(
   route.content_blocks || [],
   "#route-content-blocks"
 );
-
-  renderPhotoGrid(route);
-
 });
