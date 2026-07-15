@@ -250,16 +250,6 @@ function renderContentBlockPhotos(block) { // Bouwt de foto-URL-velden van één
   }).join(""); // Voegt alle foto-velden samen.
 } // Sluit renderContentBlockPhotos af.
 
-// ======================= CREATOR CONTENT BLOCKS — BLOKEDITOR =======================
-  const previewFrame = document.getElementById("creator-route-preview"); // Zoekt het iframe met de route-preview.
-  if (!previewFrame || !previewFrame.contentWindow) return; // Stopt wanneer het iframe niet beschikbaar is.
-
-  previewFrame.contentWindow.postMessage({ // Stuurt een bericht naar route.html in het iframe.
-    type: "MYTRAILWALKS_CONTENT_BLOCKS_PREVIEW", // Geeft aan dat dit Content Blocks-previewdata is.
-    contentBlocks: structuredClone(creatorContentBlocks) // Stuurt een veilige kopie van alle huidige contentblokken.
-  }, window.location.origin); // Beperkt het bericht tot dezelfde website-origin.
-} // Sluit sendContentBlocksToPreview af.
-
 function renderCreatorContentBlocks() { // Bouwt de volledige Content Blocks-editor opnieuw op.
   const container = document.getElementById("creator-content-blocks"); // Zoekt de Content Blocks-container.
   if (!container) return; // Stopt wanneer de container niet in creator.html staat.
