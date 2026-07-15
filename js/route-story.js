@@ -3,27 +3,6 @@
 "use strict";
 
 // -----------------------------------------------------------
-// RENDER TIPS — altijd tonen, ook als leeg
-// -----------------------------------------------------------
-function renderTips(route) {
-  const lang = i18nModule?.language?.substring(0, 2) || "nl";
-
-  const tips = typeof route.tips === "object"
-    ? route.tips?.[lang] || route.tips?.nl || ""
-    : route.tips || "";
-
-  $("route-tips").innerHTML = "";
-  $("section-tips").hidden = false;
-
-  if (!tips) return;
-
-  const p = document.createElement("p");
-  p.className = "route-tips__text";
-  p.textContent = tips;
-  $("route-tips").appendChild(p);
-}
-
-// -----------------------------------------------------------
 // RENDER FOTO GRID (rechterkolom verhaal)
 // Combineert foto blokken uit story_blocks + photos[1+]
 // Altijd tonen
