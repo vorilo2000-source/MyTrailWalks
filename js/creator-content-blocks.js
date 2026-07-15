@@ -251,8 +251,6 @@ function renderContentBlockPhotos(block) { // Bouwt de foto-URL-velden van één
 } // Sluit renderContentBlockPhotos af.
 
 // ======================= CREATOR CONTENT BLOCKS — BLOKEDITOR =======================
-
-function sendContentBlocksToPreview() { // Stuurt de huidige contentblokken naar de route-preview.
   const previewFrame = document.getElementById("creator-route-preview"); // Zoekt het iframe met de route-preview.
   if (!previewFrame || !previewFrame.contentWindow) return; // Stopt wanneer het iframe niet beschikbaar is.
 
