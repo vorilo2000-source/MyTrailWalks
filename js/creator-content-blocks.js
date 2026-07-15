@@ -274,7 +274,7 @@ function renderCreatorContentBlocks() { // Bouwt de volledige Content Blocks-edi
   } // Sluit lege status af.
 
   container.innerHTML = creatorContentBlocks.map(function (block, index) { // Bouwt voor ieder blok een editor.
-    const hideTextFields = block.layout === CONTENT_BLOCK_LAYOUTS.PHOTOS_ONLY; // Bepaalt of titel en tekst verborgen moeten worden.
+   const hideTextField = block.layout === CONTENT_BLOCK_LAYOUTS.PHOTOS_ONLY; // Verbergt alleen het tekstveld.
     
     return `
       <div class="block-editor__item content-block-editor" data-content-block-id="${block.id}">
@@ -300,7 +300,7 @@ function renderCreatorContentBlocks() { // Bouwt de volledige Content Blocks-edi
           </select>
         </div>
 
-        <div class="field"${hideTextFields ? ' style="display:none;"' : ""}>
+       <div class="field">
           <label class="field__label">Titel</label>
 
           <input
@@ -311,7 +311,7 @@ function renderCreatorContentBlocks() { // Bouwt de volledige Content Blocks-edi
             placeholder="Titel van het contentblok">
         </div>
 
-        <div class="field"${hideTextFields ? ' style="display:none;"' : ""}>
+      <div class="field"${hideTextField ? ' style="display:none;"' : ""}>
           <label class="field__label">Tekst</label>
 
           <textarea
