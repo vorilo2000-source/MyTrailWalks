@@ -1,96 +1,125 @@
 // ======================= ROUTE JSON NORMALIZATION =======================
-// normalizeRouteJson(routeData)
-// - accepteert oude en nieuwe route JSON-structuren
-// - vult ontbrekende velden met veilige standaardwaarden
-// - retourneert één consistente standaardstructuur
-// - logt beknopt welke aanpassingen werden gedaan
-"use strict";
+// Normaliseert route-JSON naar één consistente datastructuur.
 
-function _ensureObj(v) { return v && typeof v === 'object' ? v : {}; }
+"use strict"; // Voorkomt onbedoelde globale variabelen en andere stille JavaScript-fouten.
 
-function normalizeRouteJson(input) {
-  try {
-    console.info('[route-normalize] Normalisatie gestart');
-    const src = _ensureObj(input);
+// ======================= HULPFUNCTIES =======================
 
-    const out = {};
-    out.id = src.id || src.route_id || null;
-    out.status = src.status || 'draft';
+function _ensureObj(value) { // Zorgt dat alleen geldige objecten worden verwerkt.
+  return value && typeof value === "object" ? value : {}; // Geeft een leeg object terug bij ongeldige invoer.
+}
 
-    // Title support: string or map
-    out.title = (typeof src.title === 'object') ? src.title : { nl: src.title || '' };
-    out.source_reference = src.source_reference || src.source || '';
-    out.tags = Array.isArray(src.tags) ? src.tags : (typeof src.tags === 'string' ? src.tags.split(/\s*,\s*/).filter(Boolean) : []);
+// ======================= ROUTE NORMALISEREN =======================
 
-    // Content Blocks normalization
-    out.content_blocks = Array.isArray(src.content_blocks)
-    ? src.content_blocks.map((block) => ({ ...block }))
-    : [];
-    
-    // Segments normalization — support both old (root-level gpx_stats) and new (segments array) formats
-    if (Array.isArray(src.segments) && src.segments.length > 0) {
-      // New format: segments array
-      console.info('[route-normalize] Nieuw formaat gedetecteerd (segments array)');
-      out.segments = src.segments.map((s) => {
-        const seg = _ensureObj(s);
-        const gpx = seg.gpx || null;
-        return {
-          transport: seg.transport || 'walking',
-          label: seg.label || '',
-          date: seg.date || seg.published_date || null,
-          location: seg.location || '',
-          country: seg.country || '',
-          region: seg.region || '',
-          place: seg.place || '',
-          weather: seg.weather || null,
-          difficulty: seg.difficulty || '',
-          difficulty_auto: seg.difficulty_auto !== false,
-          rough_surface: seg.rough_surface || false,
-          gpx: gpx,
-          gpx_stats: seg.gpx_stats || null,
-          gpx_raw: seg.gpx_raw || null,
-        };
-      });
-    } else if (src.gpx_stats) {
-      // Old format: root-level gpx_stats (single segment, backward-compat conversion)
-      console.info('[route-normalize] Oud formaat gedetecteerd (root gpx_stats → segments)');
-      const transport = (src.transport && typeof src.transport === 'string') ? src.transport : (Array.isArray(src.transport) ? src.transport[0] : 'walking');
-      
-      out.segments = [{
-        transport: transport,
-        label: '',
-        date: src.published_date || src.date || null,
-        location: src.location || '',
-        country: src.country || '',
-        region: src.region || '',
-        place: src.place || '',
-        weather: src.weather || null,
-        difficulty: src.difficulty || '',
-        difficulty_auto: src.difficulty !== false,
-        rough_surface: src.rough_surface || false,
-        gpx: src.gpx || null,
-        gpx_stats: src.gpx_stats || null,
-        gpx_raw: src.gpx_raw || null,
-      }];
-    } else {
-      // No segments and no gpx_stats — error
-      const msg = '[route-normalize] Ongeldig JSON: verwacht óf een `segments` array óf `gpx_stats` op root-niveau.';
-      console.error(msg);
-      throw new Error(msg);
+function normalizeRouteJson(input) { // Normaliseert een volledig route-object.
+  try { // Vangt fouten tijdens de normalisatie gecontroleerd op.
+    console.info("[route-normalize] Normalisatie gestart"); // Meldt het begin van de normalisatie.
+
+    const src = _ensureObj(input); // Zet de invoer om naar een veilig bronobject.
+    const out = {}; // Maakt het nieuwe genormaliseerde route-object.
+
+    // ======================= BASISGEGEVENS =======================
+
+    out.id = src.id || src.route_id || null; // Gebruikt het huidige ID of een oud route_id.
+    out.status = src.status || "draft"; // Gebruikt standaard de status draft.
+
+    out.title = typeof src.title === "object" // Controleert of de titel al een taalobject is.
+      ? src.title // Behoudt het bestaande taalobject.
+      : { nl: src.title || "" }; // Zet een teksttitel om naar een Nederlands taalobject.
+
+    out.source_reference = src.source_reference || src.source || ""; // Ondersteunt de huidige en oude bronveldnaam.
+
+    out.tags = Array.isArray(src.tags) // Controleert of tags al een array zijn.
+      ? src.tags // Behoudt de bestaande tag-array.
+      : typeof src.tags === "string" // Controleert of tags als tekst zijn opgeslagen.
+        ? src.tags.split(/\s*,\s*/).filter(Boolean) // Splitst kommagescheiden tags en verwijdert lege waarden.
+        : []; // Gebruikt een lege array wanneer tags ontbreken.
+
+    // ======================= CONTENT BLOCKS =======================
+
+    out.content_blocks = Array.isArray(src.content_blocks) // Controleert of Content Blocks aanwezig zijn.
+      ? src.content_blocks.map((block) => ({ ...block })) // Maakt van ieder Content Block een veilige kopie.
+      : []; // Gebruikt een lege array wanneer Content Blocks ontbreken.
+
+    // ======================= SEGMENTEN =======================
+
+    if (Array.isArray(src.segments) && src.segments.length > 0) { // Controleert of het nieuwe segmentformaat aanwezig is.
+      console.info("[route-normalize] Nieuw formaat gedetecteerd (segments array)"); // Meldt dat het nieuwe formaat wordt gebruikt.
+
+      out.segments = src.segments.map((segment) => { // Normaliseert ieder segment afzonderlijk.
+        const seg = _ensureObj(segment); // Zet het segment om naar een veilig object.
+
+        return { // Bouwt het genormaliseerde segment.
+          transport: seg.transport || "walking", // Gebruikt standaard wandelen als vervoerstype.
+          label: seg.label || "", // Gebruikt een leeg label wanneer dit ontbreekt.
+          date: seg.date || seg.published_date || null, // Ondersteunt de huidige en oude datumveldnaam.
+          location: seg.location || "", // Gebruikt een lege locatie wanneer deze ontbreekt.
+          country: seg.country || "", // Gebruikt een leeg land wanneer dit ontbreekt.
+          region: seg.region || "", // Gebruikt een lege regio wanneer deze ontbreekt.
+          place: seg.place || "", // Gebruikt een lege plaats wanneer deze ontbreekt.
+          weather: seg.weather || null, // Behoudt weerdata of gebruikt null.
+          difficulty: seg.difficulty || "", // Gebruikt een lege moeilijkheidsgraad wanneer deze ontbreekt.
+          difficulty_auto: seg.difficulty_auto !== false, // Schakelt automatische moeilijkheid standaard in.
+          rough_surface: seg.rough_surface || false, // Gebruikt standaard geen ruw wegdek.
+          gpx: seg.gpx || null, // Behoudt het gekoppelde GPX-object.
+          gpx_stats: seg.gpx_stats || null, // Behoudt de berekende GPX-statistieken.
+          gpx_raw: seg.gpx_raw || null, // Behoudt de ruwe GPX-data.
+        }; // Sluit het genormaliseerde segment af.
+      }); // Sluit de segmentnormalisatie af.
+    } else if (src.gpx_stats) { // Controleert of een oud routeformaat met GPX-data aanwezig is.
+      console.info("[route-normalize] Oud formaat gedetecteerd (root gpx_stats → segments)"); // Meldt de conversie van oud naar nieuw formaat.
+
+      const transport = typeof src.transport === "string" // Controleert of transport één tekstwaarde is.
+        ? src.transport // Gebruikt de bestaande tekstwaarde.
+        : Array.isArray(src.transport) // Controleert of transport als array is opgeslagen.
+          ? src.transport[0] || "walking" // Gebruikt het eerste array-item of wandelen.
+          : "walking"; // Gebruikt wandelen wanneer transport ontbreekt.
+
+      out.segments = [{ // Zet de oude routegegevens om naar één segment.
+        transport: transport, // Gebruikt het vastgestelde vervoerstype.
+        label: "", // Oude routes hebben standaard geen segmentlabel.
+        date: src.published_date || src.date || null, // Ondersteunt beide oude datumvelden.
+        location: src.location || "", // Neemt de oude locatie over.
+        country: src.country || "", // Neemt het oude land over.
+        region: src.region || "", // Neemt de oude regio over.
+        place: src.place || "", // Neemt de oude plaats over.
+        weather: src.weather || null, // Neemt oude weerdata over.
+        difficulty: src.difficulty || "", // Neemt de oude moeilijkheidsgraad over.
+        difficulty_auto: src.difficulty_auto !== false, // Schakelt automatische moeilijkheid standaard in.
+        rough_surface: src.rough_surface || false, // Neemt de oude waarde voor ruw wegdek over.
+        gpx: src.gpx || null, // Neemt het oude GPX-object over.
+        gpx_stats: src.gpx_stats || null, // Neemt de oude GPX-statistieken over.
+        gpx_raw: src.gpx_raw || null, // Neemt de oude ruwe GPX-data over.
+      }]; // Sluit het automatisch aangemaakte segment af.
+    } else { // Wordt uitgevoerd wanneer geen bruikbare segmentdata aanwezig is.
+      const message = "[route-normalize] Ongeldig JSON: verwacht een `segments` array of `gpx_stats` op root-niveau."; // Maakt een duidelijke foutmelding.
+      console.error(message); // Schrijft de fout naar de console.
+      throw new Error(message); // Stopt de normalisatie met een fout.
     }
 
-    // Minimal metadata defaults
-    out.id = out.id || (src.title ? (typeof src.title === 'string' ? src.title.toLowerCase().replace(/\s+/g, '-') : null) : null);
+    // ======================= ID FALLBACK =======================
 
-    console.info('[route-normalize] Normalisatie voltooid (strict)');
-    return out;
-  } catch (err) {
-    console.error('[route-normalize] Fout tijdens normalisatie:', err);
-    throw err;
+    if (!out.id && typeof src.title === "string") { // Maakt alleen een ID wanneer dit ontbreekt en de titel tekst is.
+      out.id = src.title // Gebruikt de titel als basis.
+        .toLowerCase() // Zet de titel om naar kleine letters.
+        .trim() // Verwijdert spaties aan het begin en einde.
+        .replace(/[^a-z0-9]+/g, "-") // Vervangt ongeschikte tekens door koppeltekens.
+        .replace(/^-+|-+$/g, ""); // Verwijdert koppeltekens aan het begin en einde.
+    }
+
+    console.info("[route-normalize] Normalisatie voltooid"); // Meldt dat de normalisatie succesvol is afgerond.
+
+    return out; // Geeft het genormaliseerde route-object terug.
+  } catch (error) { // Vangt iedere fout tijdens het normaliseren op.
+    console.error("[route-normalize] Fout tijdens normalisatie:", error); // Schrijft de fout met context naar de console.
+    throw error; // Geeft de fout door aan de aanroepende code.
   }
 }
 
-// Expose in window for pages
-if (typeof window !== 'undefined') window.normalizeRouteJson = normalizeRouteJson;
+// ======================= PUBLIEKE API =======================
+
+if (typeof window !== "undefined") { // Controleert of de code in een browser wordt uitgevoerd.
+  window.normalizeRouteJson = normalizeRouteJson; // Maakt de normalisatiefunctie globaal beschikbaar.
+}
 
 // ======================= END ROUTE JSON NORMALIZATION =======================
