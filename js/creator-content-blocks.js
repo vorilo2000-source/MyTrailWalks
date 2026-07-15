@@ -251,17 +251,6 @@ function renderContentBlockPhotos(block) { // Bouwt de foto-URL-velden van één
 } // Sluit renderContentBlockPhotos af.
 
 // ======================= CREATOR CONTENT BLOCKS — BLOKEDITOR =======================
-
-function sendContentBlocksToPreview() { // Stuurt de huidige contentblokken naar de route-preview.
-  const previewFrame = document.getElementById("creator-route-preview"); // Zoekt het iframe met de route-preview.
-  if (!previewFrame || !previewFrame.contentWindow) return; // Stopt wanneer het iframe niet beschikbaar is.
-
-  previewFrame.contentWindow.postMessage({ // Stuurt een bericht naar route.html in het iframe.
-    type: "MYTRAILWALKS_CONTENT_BLOCKS_PREVIEW", // Geeft aan dat dit Content Blocks-previewdata is.
-    contentBlocks: structuredClone(creatorContentBlocks) // Stuurt een veilige kopie van alle huidige contentblokken.
-  }, window.location.origin); // Beperkt het bericht tot dezelfde website-origin.
-} // Sluit sendContentBlocksToPreview af.
-
 function renderCreatorContentBlocks() { // Bouwt de volledige Content Blocks-editor opnieuw op.
   const container = document.getElementById("creator-content-blocks"); // Zoekt de Content Blocks-container.
   if (!container) return; // Stopt wanneer de container niet in creator.html staat.
@@ -269,8 +258,7 @@ function renderCreatorContentBlocks() { // Bouwt de volledige Content Blocks-edi
   if (!creatorContentBlocks.length) { // Controleert of er nog geen contentblokken zijn.
     container.innerHTML = `<p class="field__help">Nog geen contentblokken toegevoegd.</p>`; // Toont de lege status.
 
-    sendContentBlocksToPreview(); // Werkt ook een lege preview direct bij.
-    return; // Stopt omdat er niets anders hoeft te worden opgebouwd.
+   return; // Stopt omdat er niets anders hoeft te worden opgebouwd.
   } // Sluit lege status af.
 
   container.innerHTML = creatorContentBlocks.map(function (block, index) { // Bouwt voor ieder blok een editor.
