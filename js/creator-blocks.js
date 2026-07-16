@@ -1,5 +1,3 @@
-<!-- ======================= CREATOR BLOCKS ======================= -->
-```javascript
 // ======================= CREATOR BLOCKS =======================
 "use strict"; // Voorkomt onbedoelde globale variabelen en stille JavaScript-fouten.
 
