@@ -72,30 +72,6 @@
       <!-- LINKER KOLOM: stap-voor-stap formulier -->
       <div class="creator-form-col">
 
-        <!-- STAP 1: Route segmenten -->
-        <section class="creator-step" id="step-segments">
-          <div class="creator-step__header">
-            <span class="creator-step__num">1</span>
-            <h2 class="creator-step__title">Route segmenten</h2>
-            <span class="creator-step__hint">GPX + datum/locatie per vervoersmiddel</span>
-          </div>
-          <div class="creator-step__body">
-            <p class="field__help" style="margin-bottom: 14px;">
-              Eén segment per vervoersmiddel. Voor een route met bijvoorbeeld trein + wandeling:
-              voeg een tweede segment toe en upload de bijhorende GPX.
-            </p>
-
-            <!-- Wordt volledig gevuld door renderSegments() in creator.js -->
-            <div id="segment-list"></div>
-
-            <button class="btn btn--ghost" id="btn-add-segment">
-              <span class="btn-icon">+</span> Segment toevoegen
-            </button>
-          </div>
-        </section>
-
-        <hr class="step-divider">
-
         <!-- STAP 2: Route info -->
         <section class="creator-step" id="step-info">
           <div class="creator-step__header">
@@ -147,6 +123,28 @@
 
         <hr class="step-divider">
 
+           <!-- STAP 1: Route segmenten -->
+        <section class="creator-step" id="step-segments">
+          <div class="creator-step__header">
+            <span class="creator-step__num">1</span>
+            <h2 class="creator-step__title">Route segmenten</h2>
+            <span class="creator-step__hint">GPX + datum/locatie per vervoersmiddel</span>
+          </div>
+          <div class="creator-step__body">
+            <p class="field__help" style="margin-bottom: 14px;">
+              Eén segment per vervoersmiddel. Voor een route met bijvoorbeeld trein + wandeling:
+              voeg een tweede segment toe en upload de bijhorende GPX.
+            </p>
+
+            <!-- Wordt volledig gevuld door renderSegments() in creator.js -->
+            <div id="segment-list"></div>
+
+            <button class="btn btn--ghost" id="btn-add-segment">
+              <span class="btn-icon">+</span> Segment toevoegen
+            </button>
+          </div>
+        </section>
+           
                    <!-- ======================= STAP 4: CONTENTBLOKKEN ======================= -->
         <section class="creator-step" id="step-content-blocks">
           <div class="creator-step__header">
