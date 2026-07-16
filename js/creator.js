@@ -129,7 +129,6 @@ if (!seg.difficulty && seg.gpx?.stats) {
   }
 
 renderCreatorSegments();
-renderBlockEditor();
 updatePreview();
   
   // Transport-array heropbouwen vanuit segmenten
