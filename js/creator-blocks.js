@@ -4,17 +4,17 @@
 // ======================= MOEILIJKHEID BEREKENEN =======================
 
 function calculateDifficulty() { // Berekent automatisch de moeilijkheid van het eerste segment.
-  const stats = state.segments[0]?.gpx?.stats; // Leest de GPX-statistieken van het eerste segment.
-  const weather = state.segments[0]?.weather; // Leest de weerdata van het eerste segment.
+  const stats = state.segments[0]?.gpx?.stats; // Leest de GPX-statistieken.
+  const weather = state.segments[0]?.weather; // Leest de weergegevens.
 
   if (!stats) return null; // Stopt wanneer geen GPX-statistieken beschikbaar zijn.
 
-  let score = 0; // Start de score.
+  let score = 0; // Start de moeilijkheidsscore.
 
   if (stats.distance_km) score += stats.distance_km; // Verwerkt de afstand.
   if (stats.elevation_up_m) score += stats.elevation_up_m / 100; // Verwerkt de hoogtemeters.
 
-  if (weather) { // Controleert of weerdata aanwezig is.
+  if (weather) { // Controleert of weergegevens aanwezig zijn.
     if (weather.temperature_max >= 25) score += 2; // Verhoogt de score bij warmte.
     if (weather.precipitation_mm >= 5) score += 2; // Verhoogt de score bij neerslag.
     if (weather.wind_kmh >= 30) score += 1; // Verhoogt de score bij sterke wind.
@@ -32,7 +32,7 @@ function calculateDifficulty() { // Berekent automatisch de moeilijkheid van het
 function applyCalculatedDifficulty() { // Past de berekende moeilijkheid toe.
   const difficulty = calculateDifficulty(); // Berekent de moeilijkheid.
 
-  if (difficulty && !els.inputDifficulty.value) { // Controleert of het veld nog leeg is.
+  if (difficulty && !els.inputDifficulty.value) { // Controleert of het veld leeg is.
     els.inputDifficulty.value = difficulty; // Vult het moeilijkheidsveld.
     updatePreview(); // Werkt de preview bij.
   }
@@ -40,19 +40,21 @@ function applyCalculatedDifficulty() { // Past de berekende moeilijkheid toe.
 
 // ======================= LIVE PREVIEW =======================
 
-els.inputTitle.addEventListener("input", updatePreview); // Werkt de preview bij bij titelwijziging.
+els.inputTitle.addEventListener("input", updatePreview); // Werkt de preview bij na een titelwijziging.
 
 // ======================= CLOUDINARY =======================
 
-function fixCloudinaryUrl(url, transform = "w_1200,f_auto") { // Normaliseert een Cloudinary-URL.
+function fixCloudinaryUrl(url, transform) { // Normaliseert een Cloudinary-URL.
+  transform = transform || "w_1200,f_auto"; // Stelt de standaardtransformatie in.
+
   if (!url || !url.includes("res.cloudinary.com")) return url; // Laat andere URL's ongewijzigd.
   if (url.includes(transform)) return url; // Voorkomt dubbele transformaties.
 
-  return url.replace("/upload/", `/upload/${transform}/`); // Voegt de transformatie toe.
+  return url.replace("/upload/", "/upload/" + transform + "/"); // Voegt de transformatie toe.
 }
 
-els.inputHeroPhoto.addEventListener("blur", () => { // Corrigeert de URL bij verlaten van het veld.
-  const fixed = fixCloudinaryUrl(els.inputHeroPhoto.value.trim()); // Maakt de gecorrigeerde URL.
+els.inputHeroPhoto.addEventListener("blur", function () { // Corrigeert de URL na het verlaten van het veld.
+  const fixed = fixCloudinaryUrl(els.inputHeroPhoto.value.trim()); // Bouwt de gecorrigeerde URL.
 
   if (fixed !== els.inputHeroPhoto.value.trim()) { // Controleert of de URL is gewijzigd.
     els.inputHeroPhoto.value = fixed; // Schrijft de gecorrigeerde URL terug.
