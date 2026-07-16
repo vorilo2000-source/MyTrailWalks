@@ -8,18 +8,8 @@ function _buildExportFromState() {
   out.id = els.inputRouteId.value.trim() || state.segments[0]?.label?.toLowerCase().replace(/\s+/g, '-') || null;
   out.status = els.inputStatus.value || 'draft';
   out.title = { nl: els.inputTitle.value || '' };
-  out.tips = { nl: "" }; // Het oude tipsveld uit 4A is verwijderd.
   out.source_reference = els.inputSource.value || ""; // Behoudt de bronvermelding.
-  out.tags = []; // Het oude steekwoordenveld uit 4A is verwijderd.
-  out.photos = [];
-  const hero = els.inputHeroPhoto.value.trim();
-  if (hero) out.photos.push({ role: 'hero', url: hero });
-  // Additional photos from story blocks (photo blocks)
-  state.storyBlocks.forEach((b) => { if (b.type === 'photo' && b.value) out.photos.push({ url: b.value }); });
-  out.gallery = state.galleryPhotos.map((p) => ({ url: p.url || '' }));
-  out.story_blocks = state.storyBlocks.map((b) => ({ ...b }));
   out.content_blocks = window.CreatorContentBlocks?.getBlocks?.() || []; // Voegt de nieuwe Content Blocks toe aan de export toe.
-
   out.segments = state.segments.map((s) => {
     return {
       transport: s.transport || 'walking',
