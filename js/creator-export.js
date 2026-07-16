@@ -8,6 +8,9 @@ function _buildExportFromState() {
   out.id = els.inputRouteId.value.trim() || state.segments[0]?.label?.toLowerCase().replace(/\s+/g, '-') || null;
   out.status = els.inputStatus.value || 'draft';
   out.title = { nl: els.inputTitle.value || '' };
+  out.hero = { // Slaat de hero-afbeelding apart op in de route-JSON.
+  url: els.inputHeroPhoto.value.trim() || "" // Leest de hero-URL uit het invoerveld.
+};
   out.source_reference = els.inputSource.value || ""; // Behoudt de bronvermelding.
   out.content_blocks = window.CreatorContentBlocks?.getBlocks?.() || []; // Voegt de nieuwe Content Blocks toe aan de export toe.
   out.segments = state.segments.map((s) => {
