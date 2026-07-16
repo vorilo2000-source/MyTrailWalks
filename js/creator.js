@@ -83,37 +83,9 @@ function loadJsonIntoForm(data) {
   if (data.title?.nl)        els.inputTitle.value     = data.title.nl;
   if (data.difficulty)       els.inputDifficulty.value = data.difficulty;
   if (data.source_reference) els.inputSource.value    = data.source_reference;
-  if (data.tags?.length)     els.inputKeywords.value  = data.tags.join(", ");
-  if (data.summary?.nl) {
-    els.inputIntro.value     = data.summary.nl;
-    els.introCount.textContent = `${data.summary.nl.length}/160`;
-  }
-  if (data.tips?.nl) els.inputTips.value = data.tips.nl;
 
-  if (data.photos?.length) {
-    let heroUrl = data.photos[0].url || "";
-    if (heroUrl && heroUrl.includes("res.cloudinary.com") && !heroUrl.includes("w_1200")) {
-      heroUrl = heroUrl.replace("/upload/", "/upload/w_1200,f_auto/");
-    }
-    els.inputHeroPhoto.value = heroUrl;
-  }
-
-  state.storyBlocks = [];
-  if (data.story_blocks?.length) {
-    state.storyBlocks = data.story_blocks.map((b) => ({ ...b, value: b.value || "" }));
-  } else if (data.story?.nl) {
-    state.storyBlocks = [{ type: "text", value: data.story.nl }];
-  }
   window.CreatorContentBlocks?.setBlocks?.(data.content_blocks || []); // Laadt de Content Blocks uit de route-JSON.
-  if (!data.story_blocks && data.photos?.length > 1) {
-    data.photos.slice(1).forEach((p) => { if (p.url) state.storyBlocks.push({ type: "photo", value: p.url }); });
-  }
-
-  if (data.gallery?.length) {
-    state.galleryPhotos = data.gallery.map((p) => ({ url: p.url || "" }));
-    renderGalleryEditor();
-  }
-
+  
   if (data.segments?.length) {
     segmentCounter = 0;
     state.segments = data.segments.map((s) => {
