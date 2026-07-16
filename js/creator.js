@@ -233,8 +233,6 @@ function updatePreview() {
 // -----------------------------------------------------------
 window.appReady.then(() => {
   renderCreatorSegments();
-  renderBlockEditor();
-  renderGalleryEditor();
 
   const previewIframe = document.getElementById("creator-route-preview");
 
