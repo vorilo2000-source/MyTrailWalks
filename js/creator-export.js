@@ -8,7 +8,6 @@ function _buildExportFromState() {
   out.id = els.inputRouteId.value.trim() || state.segments[0]?.label?.toLowerCase().replace(/\s+/g, '-') || null;
   out.status = els.inputStatus.value || 'draft';
   out.title = { nl: els.inputTitle.value || '' };
-   out.summary = { nl: "" }; // Het oude samenvattingsveld uit 4A is verwijderd.
   out.tips = { nl: "" }; // Het oude tipsveld uit 4A is verwijderd.
   out.source_reference = els.inputSource.value || ""; // Behoudt de bronvermelding.
   out.tags = []; // Het oude steekwoordenveld uit 4A is verwijderd.
