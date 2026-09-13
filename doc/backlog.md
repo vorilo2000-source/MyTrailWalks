@@ -33,6 +33,15 @@ Zie vorige versie van dit document.
 
 ---
 
+## Productie-hardening — 13-09-2026
+
+| ID | Tags | Taak | Omschrijving | Type | Prioriteit | Status |
+|----|------|------|--------------|------|-----------|--------|
+| ORS-901 | cleanup, supabase, auth, analytics | Supabase volledig verwijderen | Supabase SDK, authenticatie, login/register/reset UI, analytics, auth-i18n en runtime-verwijzingen verwijderd. Topbar aangepast. Productie gevalideerd met HTTP 200, 0 consolefouten en exacte bronvergelijking. Commit `f76e50066018`. | Cleanup | 🔴 High | ✅ Done — 13-09-2026 |
+| ORS-902 | seo | Meta description toevoegen | Meta description toegevoegd aan `index.html`. Website Quality en regressietest PASS. Productie exact gelijk aan lokale Pages source. Commit `a9b12acec5c4`. | SEO | 🟡 Medium | ✅ Done — 13-09-2026 |
+
+---
+
 ## TECHNISCHE SCHULD
 
 | ID | Tags | Taak | Omschrijving | Type | Status |
