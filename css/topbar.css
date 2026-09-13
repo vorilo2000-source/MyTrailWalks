@@ -24,15 +24,10 @@
   align-items: center;
   gap: var(--space-md);
 }
-/* --- Auth slot (links) --- */
-.topbar__auth {
-  display: flex;
-  align-items: center;
-  justify-content: flex-start;
-  position: relative; /* v2.1.0: nodig voor dropdown positionering */
-}
+
 /* --- Logo + merknaam (midden) --- */
 .topbar__brand {
+  grid-column: 2;
   display: flex;
   align-items: center;
   gap: var(--space-sm);
@@ -57,6 +52,7 @@
 }
 /* --- Taalwisselaar (rechts) --- */
 .topbar__right {
+  grid-column: 3;
   display: flex;
   align-items: center;
   justify-content: flex-end;

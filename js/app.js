@@ -9,7 +9,7 @@
 //   2. topbar + footer injecteren
 //   3. window.i18nReady + window.appReady exporteren
 //   Paginascripts wachten op window.appReady.
-//   topbar-auth.js wacht op window.i18nReady.
+
 //   home.js en creator.js roepen geen i18nModule.init() meer aan.
 // =======================================================
 "use strict";
@@ -69,9 +69,9 @@ function getPageNamespace() {
 async function initApp() {
   const base = getBasePath();
 
-  // 1. i18next initialiseren — altijd common + auth + paginaspecifieke namespace
+  // 1. i18next initialiseren — common + paginaspecifieke namespace
   const pageNs = getPageNamespace();
-  const namespaces = ["common", "auth", pageNs];
+  const namespaces = ["common", pageNs];
 
   try {
     await i18nModule.init(namespaces);
@@ -79,7 +79,7 @@ async function initApp() {
     console.error("app.js: i18n init mislukt", error);
   }
 
-  // 2. i18nReady resolven — topbar-auth.js wacht hierop
+  // 2. i18nReady resolven
   if (window._i18nResolve) window._i18nResolve();
 
   // 3. Componenten injecteren (sequentieel zodat vertalingen per component werken)
@@ -99,7 +99,7 @@ async function initApp() {
 }
 
 // window.i18nReady: resolvet zodra i18next klaar is
-// topbar-auth.js wacht hierop vóór modal te renderen
+
 window.i18nReady = new Promise((resolve) => {
   window._i18nResolve = resolve;
 });

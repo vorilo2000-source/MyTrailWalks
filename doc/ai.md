@@ -240,15 +240,6 @@ Deze volgorde is een aanpassing van AI.md's eerdere algemene script-laadvolgorde
 StoryEngine.render(routeId);
 ```
 
-## Supabase structuur (concept, post-MVP — zie BACKLOG.md Fase 6+)
-
-```
-routes
-story_blocks
-media
-gps_tracks
-users
-```
 
 ---
 

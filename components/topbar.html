@@ -1,15 +1,10 @@
 <!-- components/topbar.html v2.3.0
      v2.3.0: absolute paden voor logo en home link (werkt vanuit alle submappen)
-     v2.2.0: fallback login knop verwijderd — topbar-auth.js vult #top-auth volledig in
-     v2.0.0: auth slot toegevoegd (#top-auth), Supabase login integratie
-             Logo2.png + merknaam midden, taalswitch rechts, login links
+
 -->
 <header class="topbar" role="banner">
   <div class="topbar__inner">
-    <!-- Links: auth widget — gevuld door topbar-auth.js -->
-    <div class="topbar__auth" id="top-auth">
-      <button onclick="TopBarAuth && TopBarAuth.openModal()" class="top-auth-login">Inloggen</button>
-    </div>
+
     <!-- Midden: logo + merknaam -->
     <a href="/MyTrailWalks/" class="topbar__brand" aria-label="MyTrailWalks — naar homepage">
       <img src="/MyTrailWalks/assets/images/Logo2.png" alt="" class="topbar__logo" aria-hidden="true">

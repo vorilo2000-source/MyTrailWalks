@@ -50,7 +50,7 @@ Volledige architectuur: zie DATA STRUCTUUR-sectie hieronder en CLAUDE.md, sectie
 
 - 🤖 AI route-samenvattingen
 - 📊 Analytics per route (afstand, tijd, hoogte, trends over tijd)
-- ☁️ Cloud sync (Supabase) + accounts
+- ☁️ Cloud sync + accounts (post-MVP; backend/provider nog te bepalen)
 - 👥 Gedeelde routes / community trails
 
 ---
@@ -146,7 +146,6 @@ Het `language`-veld is verplicht en bepaalt — onafhankelijk van de browser- of
 - **i18next** (+ i18next-http-backend, i18next-browser-languagedetector) — enige toegestane externe library, uitsluitend voor het i18n-systeem. Zie CLAUDE.md, sectie CODE PRINCIPES, voor de motivatie van deze uitzondering op de vanilla-aanpak.
 
 **Hosting:** GitHub Pages (primair), later uitbreidbaar naar Netlify/Vercel
-**Cloud (post-MVP):** Supabase — https://supabase.com/dashboard
 
 ---
 
@@ -225,7 +224,6 @@ Het `language`-veld is verplicht en bepaalt — onafhankelijk van de browser- of
 **Live:** nog niet live (placeholder)
 **Broncode:** github.com/vorilo2000-source/MyTrailWalks
 **Stack:** Vanilla HTML + CSS + JavaScript + i18next (enige externe dependency, zie CODE PRINCIPES in CLAUDE.md)
-**Cloud (post-MVP):** Supabase — https://supabase.com/dashboard
 
 ---
 

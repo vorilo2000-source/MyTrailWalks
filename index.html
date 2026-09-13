@@ -7,7 +7,6 @@
      v2.6.0: dagtrips sectie toegevoegd, identiek qua opbouw aan wandelingen
      v2.5.0: wandelingen sectie met 3 recente routes + link naar wandelingen.html
      v2.4.0: alle scripts verplaatst naar onderaan <body>
-     v2.3.0: Supabase SDK + auth.js + topbar-auth.js toegevoegd
      v2.2.0: Favicon toegevoegd
      ======================================================= -->
 <!DOCTYPE html>
@@ -78,17 +77,12 @@
       </section>
     </main>
     <div id="footer-placeholder" class="footer-placeholder" aria-hidden="true"></div>
-    <!-- Supabase SDK -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
     <!-- i18next CDN -->
     <script src="https://cdn.jsdelivr.net/npm/i18next@23/i18next.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/i18next-http-backend@2/i18nextHttpBackend.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/i18next-browser-languagedetector@7/i18nextBrowserLanguageDetector.min.js"></script>
     <!-- Scripts: volgorde conform architectuurafspraken -->
     <script src="js/i18n.js"></script>
-    <script src="js/auth.js?v=1.1.0"></script>
-    <script src="js/topbar-auth.js?v=1.3.0"></script>
-    <script src="js/analytics.js?v=1.1.0"></script>
     <script src="js/app.js"></script>
     <script src="js/home.js?v=2.7.0"></script>
   </body>
