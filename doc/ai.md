@@ -1,6 +1,6 @@
-# MyTrailWalks — CLAUDE.md
+# MyTrailWalks — AI.md
 ## Bijgewerkt: 17-06-2026
-> Versie: v2.1.0 · Project:  MyTrailWalks · Doel: regels voor Claude Code bij dit project
+> Versie: v2.1.0 · Project:  MyTrailWalks · Doel: regels voor AI Code bij dit project
 
 ---
 
@@ -26,23 +26,23 @@
 
 ## Referentievoorbeelden uit andere projecten
 
-Soms wordt een bestand uit een ander project (bv. MyFamTreeCollab) als voorbeeld gedeeld om een patroon te illustreren (zie `develop/standaardpagina.html`, gedeeld 17-06-2026 — bron voor i18next-architectuur en component-injectie). Dit is **inspiratie/referentie**, geen letterlijk te kopiëren code. Patronen worden bewust overgenomen (met motivatie in CLAUDE.md/PROJECT.md vastgelegd), niet klakkeloos geplakt — MyTrailWalks heeft een eigen scope (geen auth/analytics in MVP) en eigen vanilla-principes die alleen voor i18next bewust doorbroken worden.
+Soms wordt een bestand uit een ander project (bv. MyFamTreeCollab) als voorbeeld gedeeld om een patroon te illustreren (zie `develop/standaardpagina.html`, gedeeld 17-06-2026 — bron voor i18next-architectuur en component-injectie). Dit is **inspiratie/referentie**, geen letterlijk te kopiëren code. Patronen worden bewust overgenomen (met motivatie in AI.md/PROJECT.md vastgelegd), niet klakkeloos geplakt — MyTrailWalks heeft een eigen scope (geen auth/analytics in MVP) en eigen vanilla-principes die alleen voor i18next bewust doorbroken worden.
 
 
 ---
 
-# ======================= WERKWIJZE CLAUDE CODE =======================
+# ======================= WERKWIJZE AI CODE =======================
 
 ## Computer workflow
 1. Open project in VS Code
-2. Claude Code voert wijzigingen direct uit
+2. AI Code voert wijzigingen direct uit
 3. Test in browser
 4. `git add .`
 5. `git commit -m "message"`
 6. `git push`
 
 ## iPad workflow
-1. Edit via claude.ai
+1. Edit via ....ai
 2. Download bestand
 3. Replace in local repo
 4. Git commit + push
@@ -218,7 +218,7 @@ Navigatie-onderdelen (topbar, navbar, footer) worden **niet** gedupliceerd in el
 5. Navbar fragment ophalen → injecteren
 6. Footer fragment ophalen → injecteren
 
-Deze volgorde is een aanpassing van CLAUDE.md's eerdere algemene script-laadvolgorde-regel; voor pagina's met componenten geldt deze specifiekere keten via Promises (`.then()`), niet losse `<script>`-tags zonder samenhang.
+Deze volgorde is een aanpassing van AI.md's eerdere algemene script-laadvolgorde-regel; voor pagina's met componenten geldt deze specifiekere keten via Promises (`.then()`), niet losse `<script>`-tags zonder samenhang.
 
 ---
 
@@ -294,4 +294,4 @@ Een taak is klaar als:
 
 ---
 
-# END OF CLAUDE.md
+# END OF AI.md
