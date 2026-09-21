@@ -1,9 +1,10 @@
 # MyTrailWalks — BACKLOG.md
-## Bijgewerkt: 04-07-2026 (sessie 08)
-> Versie: v3.4.0 · MVP backlog structure
+## Bijgewerkt: 20-09-2026 â€” documentcanonicalisatie; taakinhoud ongewijzigd
+> Versie: v3.5.0 · MVP backlog structure
 
 ---
 
+> **CANONICAL DOCUMENTROL:** BACKLOG.md is de actuele bron voor open, geplande, afgesloten en geprioriteerde werkzaamheden en technische schuld. Permanente projectarchitectuur staat in PROJECT.md; Definition of Done staat in AI.md.
 # [BACKLOG]
 
 ---
@@ -63,14 +64,10 @@ Zie vorige versie van dit document.
 
 ---
 
-## DEFINITION OF DONE
+## QUALITY GATE
 
-- [x] Werkt op desktop én mobile
-- [x] Geen console errors
-- [x] Code gedocumenteerd (inline comments)
-- [x] JSON data correct geïntegreerd
-- [x] UI consistent met route template
-- [x] Absolute paden in HTML
+Definition of Done is canonical vastgelegd in AI.md, sectie DEFINITION OF DONE.
+BACKLOG.md bevat uitsluitend taak- en statusinformatie; per taak wordt de canonical DoD uit AI.md toegepast.
 
 ---
 

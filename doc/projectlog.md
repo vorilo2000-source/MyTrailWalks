@@ -1,9 +1,10 @@
 MyTrailWalks — PROJECTLOG.md
-## Bijgewerkt: 07-07-2026 (sessie 09)
-> Versie: v1.9.0 · Projectlog — chronologisch overzicht van sessies en wijzigingen
+## Bijgewerkt: 20-09-2026 â€” canonical documentrol toegevoegd
+> Versie: v1.9.1 · Projectlog — chronologisch overzicht van sessies en wijzigingen
 
 ---
 
+> **CANONICAL DOCUMENTROL:** PROJECTLOG.md is uitsluitend de historische bron voor sessies, wijzigingen en de oorsprong van beslissingen. Gebruik PROJECT.md voor de actuele projectwaarheid en BACKLOG.md voor de actuele werkstatus.
 # ======================= ENTRIES =======================
 
 ---
