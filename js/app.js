@@ -83,12 +83,21 @@ async function initApp() {
   if (window._i18nResolve) window._i18nResolve();
 
   // 3. Componenten injecteren (sequentieel zodat vertalingen per component werken)
-  await injectComponent("topbar-placeholder", `${base}components/topbar.html`);
+await injectComponent("topbar-placeholder", `${base}components/topbar.html?v=2.3.1`);
   await injectComponent("footer-placeholder", `${base}components/footer.html`);
 
   // 4. Vertalingen toepassen op hele pagina + nav links
   i18nModule.applyTranslations();
   setActiveNavLink();
+
+  const menuButton = document.querySelector(".topbar__menu-button");
+  const dropdown = document.querySelector(".topbar__dropdown");
+
+  if (menuButton && dropdown) {
+    menuButton.addEventListener("click", () => {
+      dropdown.classList.toggle("is-open");
+    });
+  }
   setTimeout(() => i18nModule.applyTranslations(), 300);
 
   // 5. Taalwisselaar vullen
