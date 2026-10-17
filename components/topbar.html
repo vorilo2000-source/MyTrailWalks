@@ -1,16 +1,32 @@
 <header class="topbar" role="banner">
   <div class="topbar__inner">
-    <!-- Links: menu -->
-    <div class="topbar__menu">
-      <button type="button" class="topbar__menu-button" aria-label="Menu">☰</button>
-      <nav class="topbar__dropdown">
-        <a href="/MyTrailWalks/">Home</a>
-        <a href="/MyTrailWalks/wandelingen.html">Wandelingen</a>
-        <a href="/MyTrailWalks/dagtrips.html">Dagtrips</a>
-        <a href="/MyTrailWalks/adventure.html">Adventure</a>
-        <a href="/MyTrailWalks/creator.html">Creator</a>
-        <a href="/MyTrailWalks/cloudinary.html">Cloudinary</a>
-      </nav>
+
+    <!-- Links: account/auth + hamburger -->
+    <div class="topbar__left">
+      <div class="topbar__auth" id="top-auth">
+        <button type="button" class="topbar__auth-button" id="top-auth-button" aria-haspopup="true" aria-expanded="false">
+          Inloggen
+        </button>
+
+        <div class="topbar__auth-dropdown" id="top-auth-dropdown">
+          <a href="/MyTrailWalks/account.html#profile">Profiel</a>
+          <a href="/MyTrailWalks/cloudinary.html">Cloudinary configuratie</a>
+          <a href="/MyTrailWalks/account.html#password">Wachtwoord wijzigen</a>
+          <a href="/MyTrailWalks/account.html#delete-account">Account verwijderen</a>
+          <button type="button" class="topbar__auth-logout" id="top-auth-logout">Uitloggen</button>
+        </div>
+      </div>
+
+      <div class="topbar__menu">
+        <button type="button" class="topbar__menu-button" aria-label="Menu" aria-expanded="false">☰</button>
+        <nav class="topbar__dropdown">
+          <a href="/MyTrailWalks/">Home</a>
+          <a href="/MyTrailWalks/wandelingen.html">Wandelingen</a>
+          <a href="/MyTrailWalks/dagtrips.html">Dagtrips</a>
+          <a href="/MyTrailWalks/adventure.html">Adventure</a>
+          <a href="/MyTrailWalks/creator.html">Creator</a>
+        </nav>
+      </div>
     </div>
 
     <!-- Midden: logo + merknaam -->
@@ -25,3 +41,23 @@
     </div>
   </div>
 </header>
+
+<!-- Login modal -->
+<div class="auth-modal" id="auth-modal" hidden>
+  <div class="auth-modal__backdrop" data-auth-close></div>
+  <section class="auth-modal__dialog" role="dialog" aria-modal="true" aria-labelledby="auth-modal-title">
+    <button type="button" class="auth-modal__close" data-auth-close aria-label="Sluiten">×</button>
+    <h2 id="auth-modal-title">Inloggen</h2>
+
+    <form id="auth-login-form">
+      <label class="auth-modal__label" for="auth-email">E-mailadres</label>
+      <input class="auth-modal__input" id="auth-email" type="email" autocomplete="email" required>
+
+      <label class="auth-modal__label" for="auth-password">Wachtwoord</label>
+      <input class="auth-modal__input" id="auth-password" type="password" autocomplete="current-password" required>
+
+      <button class="auth-modal__submit" type="submit">Inloggen</button>
+      <p class="auth-modal__status" id="auth-login-status" role="status" aria-live="polite"></p>
+    </form>
+  </section>
+</div>
