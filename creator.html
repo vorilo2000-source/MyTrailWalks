@@ -1,4 +1,4 @@
-<!-- ======================= creator.html v2.1.1 =======================
+<!-- ======================= creator.html v2.1.2 =======================
      Route creator pagina — MyTrailWalks
 
      Gebruikt creator.js v2.4.3:
@@ -8,6 +8,7 @@
        - Vervoersmiddel "Hike / Trail" toegevoegd naast Wandelen
        - Per-segment moeilijkheidsgraad, automatisch berekend uit GPX
 
+     v2.1.2: Cloudinary uploadknop toegevoegd voor hero- en contentfoto's
      v2.1.1: #rp-elevation toegevoegd in preview kolom (T2-004)
      v2.1.0: stap 1+2 samengevoegd tot herhaalbare segmenten
      v2.0.0: visuele preview, blokken-editor, JSON upload/import
@@ -117,6 +118,11 @@
             <div class="field">
               <label class="field__label" for="input-hero-photo">Hero-foto URL</label>
               <input type="url" id="input-hero-photo" class="input" placeholder="https://res.cloudinary.com/dgzlcqdcc/image/upload/w_1200,f_auto/…">
+              <div class="field__actions">
+                <input type="file" id="input-hero-photo-file" accept="image/*" hidden>
+                <button type="button" class="btn btn--ghost btn--sm" id="btn-upload-hero-photo">Bestand kiezen en uploaden</button>
+                <span class="field__help" id="hero-photo-upload-status"></span>
+              </div>
               <span class="field__help">Gebruik w_1200,f_auto voor de hero-foto</span>
             </div>
           </div>
@@ -240,8 +246,9 @@
 <script src="/MyTrailWalks/js/creator-gpx.js?v=1.0.0"></script>
 <script src="/MyTrailWalks/js/creator-weather.js?v=1.0.0"></script>
 <script src="/MyTrailWalks/js/creator-segments.js?v=1.0.1"></script>
+<script src="/MyTrailWalks/js/cloudinary.js?v=1.0.0"></script>
 
-<script src="/MyTrailWalks/js/creator-content-blocks.js?v=1.0.7"></script>
+<script src="/MyTrailWalks/js/creator-content-blocks.js?v=1.0.8"></script>
 <script src="js/creator.js?v=3.0.9"></script>
 <script src="/MyTrailWalks/js/creator-blocks.js?v=1.0.9"></script>
 <script src="/MyTrailWalks/js/creator-export.js?v=1.0.2"></script>
