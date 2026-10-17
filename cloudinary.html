@@ -1,0 +1,87 @@
+<!-- ======================= cloudinary.html v1.0.0 =======================
+     Cloudinary-configuratie voor MyTrailWalks.
+     Bewaart alleen cloud name + unsigned upload preset lokaal in de browser.
+     Geen API key, API secret, wachtwoord of token opslaan.
+     ================================================================== -->
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cloudinary — MyTrailWalks</title>
+  <link rel="icon" type="image/x-icon" href="assets/images/favicon.ico">
+  <link rel="stylesheet" href="css/main.css">
+  <link rel="stylesheet" href="css/topbar.css">
+  <link rel="stylesheet" href="css/footer.css">
+  <style>
+    .cloudinary-page { max-width: 900px; margin: 0 auto; padding: 36px 22px 48px; }
+    .cloudinary-card { background: var(--color-cream, #fff); border: 1px solid rgba(44,74,59,.18); border-radius: 14px; padding: 26px 30px 30px; }
+    .cloudinary-card h1 { margin: 0; color: var(--color-forest-dark, #2c4a3b); }
+    .cloudinary-divider { border: 0; border-top: 2px solid var(--color-forest, #547b49); margin: 12px 0 24px; }
+    .cloudinary-intro { line-height: 1.6; margin-bottom: 20px; }
+    .cloudinary-status { display:flex; align-items:center; gap:8px; margin-bottom:20px; }
+    .cloudinary-status-dot { width:10px; height:10px; border-radius:50%; background:#9ca3af; }
+    .cloudinary-status.connected .cloudinary-status-dot { background:#4f7f44; }
+    .cloudinary-field { margin-bottom:16px; }
+    .cloudinary-field label { display:block; font-weight:700; margin-bottom:6px; }
+    .cloudinary-field input { width:100%; box-sizing:border-box; padding:10px 12px; border:1px solid #cfd6df; border-radius:6px; }
+    .cloudinary-help { margin:6px 0 0; font-size:.85rem; opacity:.75; }
+    .cloudinary-actions { display:flex; gap:10px; flex-wrap:wrap; margin-top:22px; }
+    .cloudinary-message { display:none; margin-top:16px; padding:10px 12px; border-radius:6px; }
+    .cloudinary-message.success { display:block; background:#edf7ea; color:#2f5f28; border:1px solid #b7d9ae; }
+    .cloudinary-message.error { display:block; background:#fff1f0; color:#9f1c16; border:1px solid #f2b8b5; }
+    .cloudinary-note { margin-top:20px; padding:12px 14px; border-left:4px solid #547b49; background:rgba(84,123,73,.06); }
+  </style>
+</head>
+<body>
+  <div id="topbar-placeholder" aria-hidden="true"></div>
+
+  <main id="main-content" class="cloudinary-page">
+    <section class="cloudinary-card" aria-labelledby="cloudinary-settings-heading">
+      <h1 id="cloudinary-settings-heading">☁️ Cloudinary</h1>
+      <hr class="cloudinary-divider">
+
+      <p class="cloudinary-intro">
+        Stel hier de Cloudinary-omgeving in die de MyTrailWalks Creator gebruikt voor foto-uploads.
+      </p>
+
+      <div id="cloudinary-status" class="cloudinary-status">
+        <span class="cloudinary-status-dot" aria-hidden="true"></span>
+        <span id="cloudinary-status-text">Nog niet gekoppeld</span>
+      </div>
+
+      <div class="cloudinary-field">
+        <label for="cloudinary-cloud-name">Cloud name</label>
+        <input type="text" id="cloudinary-cloud-name" autocomplete="off" spellcheck="false" placeholder="bijv. abc4efg">
+        <p class="cloudinary-help">De Cloudinary cloud name.</p>
+      </div>
+
+      <div class="cloudinary-field">
+        <label for="cloudinary-upload-preset">Unsigned upload preset</label>
+        <input type="text" id="cloudinary-upload-preset" autocomplete="off" spellcheck="false" placeholder="bijv. mytrailwalks_upload">
+        <p class="cloudinary-help">Gebruik uitsluitend een unsigned upload preset. Vul hier geen API key of API secret in.</p>
+      </div>
+
+      <div class="cloudinary-actions">
+        <button type="button" class="btn btn--primary" id="cloudinary-save">Opslaan</button>
+        <button type="button" class="btn btn--ghost" id="cloudinary-remove">Koppeling verwijderen</button>
+      </div>
+
+      <div id="cloudinary-message" class="cloudinary-message" role="status" aria-live="polite"></div>
+
+      <div class="cloudinary-note">
+        MyTrailWalks bewaart alleen <strong>cloud name</strong> en <strong>unsigned upload preset</strong> in deze browser. De Creator gebruikt deze instellingen voor hero- en contentfoto's.
+      </div>
+    </section>
+  </main>
+
+  <div id="footer-placeholder" aria-hidden="true"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/i18next@23/i18next.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/i18next-http-backend@2/i18nextHttpBackend.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/i18next-browser-languagedetector@7/i18nextBrowserLanguageDetector.min.js"></script>
+  <script src="js/i18n.js"></script>
+  <script src="js/app.js"></script>
+  <script src="js/cloudinary.js?v=1.1.0"></script>
+</body>
+</html>
