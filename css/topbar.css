@@ -25,32 +25,48 @@
   gap: var(--space-md);
 }
 
-/* --- Menu (links) --- */
-.topbar__menu-button {
+/* --- Links: account/auth + hamburger --- */
+.topbar__left {
   grid-column: 1;
   justify-self: start;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.topbar__auth,
+.topbar__menu {
+  position: relative;
+}
+
+.topbar__auth-button,
+.topbar__menu-button {
   background: transparent;
   border: 0;
-  padding: 4px 8px;
   color: var(--color-cream);
-  font-size: 24px;
-  line-height: 1;
   cursor: pointer;
 }
 
-
-.topbar__menu {
-  grid-column: 1;
-  position: relative;
-  justify-self: start;
+.topbar__auth-button {
+  padding: 6px 8px;
+  font-family: var(--font-body);
+  font-size: var(--text-xs);
 }
 
-.topbar__dropdown {
+.topbar__menu-button {
+  padding: 4px 8px;
+  font-size: 24px;
+  line-height: 1;
+}
+
+.topbar__dropdown,
+.topbar__auth-dropdown {
   display: none;
   position: absolute;
   top: 100%;
   left: 0;
-  min-width: 180px;
+  min-width: 190px;
   background: var(--color-forest-dark);
   border: 1px solid rgba(246, 241, 231, 0.25);
   border-radius: var(--radius-sm);
@@ -58,21 +74,86 @@
   z-index: 1000;
 }
 
-.topbar__dropdown.is-open {
+.topbar__dropdown.is-open,
+.topbar__auth-dropdown.is-open {
   display: block;
 }
 
-.topbar__dropdown a {
+.topbar__dropdown a,
+.topbar__auth-dropdown a,
+.topbar__auth-logout {
   display: block;
+  width: 100%;
+  box-sizing: border-box;
   padding: 8px 12px;
   color: var(--color-cream);
   text-decoration: none;
   white-space: nowrap;
+  background: transparent;
+  border: 0;
+  text-align: left;
+  font: inherit;
+  cursor: pointer;
 }
 
-.topbar__dropdown a:hover {
+.topbar__dropdown a:hover,
+.topbar__auth-dropdown a:hover,
+.topbar__auth-logout:hover {
   background: rgba(246, 241, 231, 0.1);
 }
+
+/* --- Login modal --- */
+.auth-modal[hidden] { display: none; }
+.auth-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 2000;
+  display: grid;
+  place-items: center;
+}
+.auth-modal__backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,.5);
+}
+.auth-modal__dialog {
+  position: relative;
+  width: min(420px, calc(100vw - 32px));
+  background: #fff;
+  border-radius: 10px;
+  padding: 24px;
+  box-sizing: border-box;
+  z-index: 1;
+}
+.auth-modal__close {
+  position: absolute;
+  top: 8px;
+  right: 10px;
+  border: 0;
+  background: transparent;
+  font-size: 24px;
+  cursor: pointer;
+}
+.auth-modal__label {
+  display: block;
+  margin: 12px 0 5px;
+  font-weight: 600;
+}
+.auth-modal__input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 9px 10px;
+}
+.auth-modal__submit {
+  margin-top: 16px;
+  padding: 9px 16px;
+  cursor: pointer;
+}
+.auth-modal__status {
+  min-height: 1.2em;
+  margin: 10px 0 0;
+}
+
 /* --- Logo + merknaam (midden) --- */
 .topbar__brand {
   grid-column: 2;
