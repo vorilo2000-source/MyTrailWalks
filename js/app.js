@@ -83,7 +83,7 @@ async function initApp() {
   if (window._i18nResolve) window._i18nResolve();
 
   // 3. Componenten injecteren (sequentieel zodat vertalingen per component werken)
-await injectComponent("topbar-placeholder", `${base}components/topbar.html?v=2.3.1`);
+await injectComponent("topbar-placeholder", `${base}components/topbar.html?v=3.0.0`);
   await injectComponent("footer-placeholder", `${base}components/footer.html`);
 
   // 4. Vertalingen toepassen op hele pagina + nav links
@@ -95,8 +95,14 @@ await injectComponent("topbar-placeholder", `${base}components/topbar.html?v=2.3
 
   if (menuButton && dropdown) {
     menuButton.addEventListener("click", () => {
-      dropdown.classList.toggle("is-open");
+      const open = dropdown.classList.toggle("is-open");
+      menuButton.setAttribute("aria-expanded", String(open));
     });
+  }
+
+  // Account/auth initialiseren nadat de topbar in de DOM staat.
+  if (window.initTopbarAuth) {
+    await window.initTopbarAuth();
   }
   setTimeout(() => i18nModule.applyTranslations(), 300);
 
