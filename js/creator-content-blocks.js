@@ -1,6 +1,6 @@
 // ======================= CREATOR CONTENT BLOCKS — CONFIGURATIE =======================
 
-const CREATOR_CONTENT_BLOCKS_VERSION = "1.0.6"; // Versienummer van het Content Blocks-systeem.
+const CREATOR_CONTENT_BLOCKS_VERSION = "1.0.8"; // Versienummer van het Content Blocks-systeem.
 
 const CONTENT_BLOCK_LAYOUTS = { // Bevat alle beschikbare layouts.
   TEXT_ONLY: "text-only", // Toont alleen titel en tekst.
@@ -222,6 +222,22 @@ function renderContentBlockPhotos(block) { // Bouwt de foto-URL-velden van één
           data-photo-id="${photo.id}"
           value="${escapeContentBlockHtml(photo.url)}"
           placeholder="https://res.cloudinary.com/…">
+        <div class="field__actions">
+          <input
+            type="file"
+            accept="image/*"
+            hidden
+            data-content-photo-upload-input
+            data-photo-id="${photo.id}">
+          <button
+            type="button"
+            class="btn btn--ghost btn--sm"
+            data-action="upload-content-photo"
+            data-photo-id="${photo.id}">
+            Bestand kiezen en uploaden
+          </button>
+          <span class="field__help" data-content-photo-upload-status data-photo-id="${photo.id}"></span>
+        </div>
         <label class="field__label">Alternatieve tekst</label>
         <input
           type="text"
@@ -423,6 +439,13 @@ function handleContentBlockClick(event) { // Verwerkt alle klikken binnen de Con
     return; // Stopt na het toevoegen.
   } // Sluit foto toevoegen af.
 
+  if (action === "upload-content-photo") { // Start een Cloudinary-upload voor deze foto.
+    const photoId = actionButton.dataset.photoId; // Leest het technische foto-ID.
+    const fileInput = blockElement.querySelector(`[data-content-photo-upload-input][data-photo-id="${photoId}"]`);
+    fileInput?.click();
+    return;
+  }
+
   if (action === "remove-content-photo") { // Controleert of een foto verwijderd moet worden.
     const photoId = actionButton.dataset.photoId; // Leest het technische foto-ID.
     removePhotoFromContentBlock(blockId, photoId); // Verwijdert de gekozen foto.
@@ -448,6 +471,48 @@ function handleContentBlockInput(event) { // Verwerkt invoer in titel, tekst en 
   } // Sluit fotoveldcontrole af.
 } // Sluit handleContentBlockInput af.
 
+
+async function handleContentBlockUpload(event) { // Verwerkt gekozen bestanden voor Cloudinary.
+  const fileInput = event.target.closest("[data-content-photo-upload-input]");
+  if (!fileInput) return;
+
+  const blockElement = fileInput.closest("[data-content-block-id]");
+  if (!blockElement) return;
+
+  const blockId = blockElement.dataset.contentBlockId;
+  const photoId = fileInput.dataset.photoId;
+  const file = fileInput.files?.[0];
+  if (!file) return;
+
+  const button = blockElement.querySelector(`[data-action="upload-content-photo"][data-photo-id="${photoId}"]`);
+  const status = blockElement.querySelector(`[data-content-photo-upload-status][data-photo-id="${photoId}"]`);
+
+  if (!window.CloudinaryUpload?.uploadImage) {
+    alert("Cloudinary-uploadmodule is niet beschikbaar.");
+    fileInput.value = "";
+    return;
+  }
+
+  if (button) button.disabled = true;
+  if (status) status.textContent = "Uploaden…";
+
+  try {
+    const media = await window.CloudinaryUpload.uploadImage(file);
+    updateCreatorContentPhotoField(blockId, photoId, "url", media.url);
+
+    const urlInput = blockElement.querySelector(`[data-content-photo-field="url"][data-photo-id="${photoId}"]`);
+    if (urlInput) urlInput.value = media.url;
+    if (status) status.textContent = "Geüpload";
+  } catch (error) {
+    console.error("[creator-content-blocks] Cloudinary-upload mislukt:", error);
+    if (status) status.textContent = error.message || "Upload mislukt";
+    alert(error.message || "Cloudinary-upload mislukt.");
+  } finally {
+    if (button) button.disabled = false;
+    fileInput.value = "";
+  }
+}
+
 function initializeCreatorContentBlocks() { // Start de nieuwe Content Blocks-editor.
   const addButton = document.getElementById("btn-add-content-block"); // Zoekt de knop Contentblok toevoegen.
   const container = document.getElementById("creator-content-blocks"); // Zoekt de Content Blocks-container.
@@ -458,6 +523,7 @@ function initializeCreatorContentBlocks() { // Start de nieuwe Content Blocks-ed
   container.addEventListener("click", handleContentBlockClick); // Verwerkt alle knoppen binnen de editor.
   container.addEventListener("input", handleContentBlockInput); // Verwerkt tekst- en URL-invoer.
   container.addEventListener("change", handleContentBlockInput); // Verwerkt wijzigingen in dropdowns.
+  container.addEventListener("change", handleContentBlockUpload); // Verwerkt gekozen fotobestanden voor Cloudinary.
   renderCreatorContentBlocks(); // Toont de lege beginstatus.
 } // Sluit initializeCreatorContentBlocks af.
 
